@@ -5,4 +5,4 @@ export const headers = {
 
 // export const appName = "Tawakal Restaurant"
 
- export const appName = "Haldoor Restaurant"
+ export const appName = "Dalbo Cunto"
