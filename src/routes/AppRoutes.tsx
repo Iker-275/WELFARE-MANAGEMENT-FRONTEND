@@ -29,6 +29,9 @@ import CustomerDetails from "../pages/CustomerPages/CustomerDetails";
 import CreateCustomer from "../pages/CustomerPages/CreateCustomer";
 import UpdateCustomer from "../pages/CustomerPages/UpdateCustomer";
 import { RoleRoute } from "../pages/GuardedRoutes/RoleRoutes";
+import VerifyOtp from "../pages/AuthPages/OTP";
+import ResetPassword from "../pages/AuthPages/ResetPassword";
+import ForgotPassword from "../pages/AuthPages/Forgot";
 
 
 
@@ -92,6 +95,9 @@ const AppRoutes = () => {
 
           <Route path="/signin" element={<SignIn />} />
           <Route path="/signup" element={<SignUp />} />
+          <Route path="/verify-otp" element={<VerifyOtp />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
+          <Route path="/reset-password" element={<ResetPassword />} />
 
         </Route>
 

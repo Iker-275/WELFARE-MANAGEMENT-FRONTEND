@@ -1,21 +1,35 @@
-export interface User {
-  _id: string;
-  email: string;
-  name: string | null;
-  role: string;
-  active: boolean;
-  createdAt: string;
-  updatedAt: string;
+export interface Role {
+  id: string;
+  name: string;
+  description: string;
 }
 
-export interface UserContextType {
-  users: User[];
-  loading: boolean;
-  message: string;
-  error: string;
+export interface Region {
+  id: string;
+  name: string;
+  code: string | null;
+  description: string;
+}
 
-  fetchUsers: () => Promise<void>;
-  updateUser: (id: string, data: Partial<User>) => Promise<void>;
-  deleteUser: (id: string) => Promise<void>;
-  toggleUser: (id: string) => Promise<void>;
+export interface User {
+  id: string;
+  email: string;
+
+  firstName: string | null;
+  lastName: string | null;
+  otherNames: string | null;
+
+  phone: string | null;
+
+  isEmailVerified: boolean;
+  isPhoneVerified: boolean;
+
+  signupCompleted: boolean;
+  isActive: boolean;
+
+  roleId: string;
+  regionId: string;
+
+  role?: Role;
+  region?: Region;
 }

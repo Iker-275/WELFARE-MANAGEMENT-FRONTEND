@@ -5,4 +5,15 @@ export const headers = {
 
 // export const appName = "Tawakal Restaurant"
 
- export const appName = "Dalbo Cunto"
+export const appName = "AOWAK"
+
+
+export const ENDPOINTS = {
+  AUTH: {
+    REGISTER: "/register",
+    VERIFY_EMAIL: "/verify-email",
+    LOGIN: "/login",
+    FORGOT_PASSWORD: "/forgot-password",
+    RESET_PASSWORD: "/reset-password",
+  },
+};

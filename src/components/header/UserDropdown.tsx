@@ -72,7 +72,7 @@ export default function UserDropdown() {
           </span>
 
           <span className="mt-0.5 block text-theme-xs text-gray-500">
-            Role: {user?.role || "-"}
+            Role: {user?.role?.name || "-"}
           </span>
         </div>
 
