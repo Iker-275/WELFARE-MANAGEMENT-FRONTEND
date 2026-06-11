@@ -33,6 +33,8 @@ import VerifyOtp from "../pages/AuthPages/OTP";
 import ResetPassword from "../pages/AuthPages/ResetPassword";
 import ForgotPassword from "../pages/AuthPages/Forgot";
 import NotificationsPage from "../pages/NotificationPages/NotificationsPage";
+import AnnouncementsPage from "../pages/AnnouncementPages/AnnouncementPage";
+import CreateAnnouncement from "../pages/AnnouncementPages/CreateAnnouncement";
 
 
 
@@ -84,6 +86,9 @@ const AppRoutes = () => {
 
               <Route path="/notifications/create" element={<CreateNotification />} />
               <Route path="/notifications" element={<NotificationsPage />} />
+
+              <Route path="/announcements/create" element={<CreateAnnouncement />} />
+              <Route path="/announcements" element={<AnnouncementsPage />} />
 
 
               <Route path="*" element={<NotFound />} />

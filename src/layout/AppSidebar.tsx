@@ -78,6 +78,12 @@ const navItems: NavItem[] = [
      path: "/notifications/create",
    
   },
+  {
+    icon: <MailIcon />,
+    name: "Create Announcement",
+     path: "/announcements/create",
+   
+  },
   
 ];
 

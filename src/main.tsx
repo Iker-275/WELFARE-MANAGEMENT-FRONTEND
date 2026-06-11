@@ -15,6 +15,7 @@ import { MenuProvider } from "./context/MenuContext.tsx";
 import { OrderProvider } from "./context/OrderContext.tsx";
 import { StatusProvider } from "./context/StatusContext.tsx";
 import { CustomerProvider } from "./context/CustomerContext.tsx";
+import { AnnouncementProvider } from "./context/AnnouncementContext.tsx";
 
 
 createRoot(document.getElementById("root")!).render(
@@ -23,6 +24,7 @@ createRoot(document.getElementById("root")!).render(
       <AuthProvider>
         <AppWrapper>
           <NotificationProvider>
+            <AnnouncementProvider>
             <DashboardProvider>
 
               <UserProvider>
@@ -41,6 +43,7 @@ createRoot(document.getElementById("root")!).render(
 
               </UserProvider>
             </DashboardProvider>
+            </AnnouncementProvider>
           </NotificationProvider>
         </AppWrapper>
       </AuthProvider>
