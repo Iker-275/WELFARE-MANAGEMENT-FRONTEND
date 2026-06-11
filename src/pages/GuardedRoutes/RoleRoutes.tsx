@@ -1,26 +1,27 @@
 
 
-import {  Outlet } from "react-router-dom";
-import { useAuth } from "../../hooks/useAuth";
-import NoAccess from "../OtherPage/NoAccess";
+// import {  Outlet } from "react-router-dom";
+// import { useAuth } from "../../hooks/useAuth";
+// import NoAccess from "../OtherPage/NoAccess";
 
-function RoleRoute() {
+// function RoleRoute() {
 
-  const { user} = useAuth();
+//   const { user} = useAuth();
   
   
 
   
 
-  if (user?.role!== "admin" && user?.role!== "manager") {
-    return <NoAccess/>;
-  }
+//   if (user?.role.name!== "admin" && user?.role.name!== "manager") {
+//     return <NoAccess/>;
+//   }
   
-// logout();
-  return <Outlet />;
-}
+// // logout();
+//   return <Outlet />;
+
+// }
 
 
 
 
-export{RoleRoute}
+// export{RoleRoute}

@@ -3,158 +3,180 @@ import ComponentCard from "../common/ComponentCard";
 import Button from "../ui/button/Button";
 import MultiSelect from "../form/MultiSelect";
 import TextArea from "../form/input/TextArea";
+import Input from "../form/input/InputField";
 
 import { useNotification } from "../../hooks/useNotification";
-import { useAuth } from "../../hooks/useAuth";
 import { useRoles } from "../../hooks/useRoles";
 
 export default function NotificationForm() {
+  const {
+    createNotification,
+    loading,
+    message,
+  } = useNotification();
 
-  const { user } = useAuth();
-  const { createNotification, loading } = useNotification(user?._id);
-  const { roles, loading: rolesLoading } = useRoles();
+  const {
+    roles,
+    loading: rolesLoading,
+  } = useRoles();
 
   const [form, setForm] = useState({
     title: "",
     message: "",
-    targetRoles: [] as string[]
+    type: "",
+    sendToAll: true,
+    roleIds: [] as string[],
+    regionIds: [] as string[],
   });
 
   const [errors, setErrors] = useState<any>({});
-  const [successMsg, setSuccessMsg] = useState("");
 
-  // 🧠 MAP ROLES → MULTISELECT OPTIONS
   const roleOptions =
     roles?.map((role: any) => ({
-      value: role.name || role.code, // adjust depending on your backend
-      text: role.name
+      value: role.id,
+      text: role.name,
     })) || [];
 
-  // 🔍 VALIDATION
   const validate = () => {
     const newErrors: any = {};
 
-    // if (!form.title.trim()) {
-    //   newErrors.title = "Title is required";
-    // }
+    if (!form.title.trim()) {
+      newErrors.title = "Title is required";
+    }
 
     if (!form.message.trim()) {
       newErrors.message = "Message is required";
     }
 
-    if (form.targetRoles.length === 0) {
-      newErrors.targetRoles = "Select at least one role";
-    }
-
     setErrors(newErrors);
+
     return Object.keys(newErrors).length === 0;
   };
 
-  // 🚀 SUBMIT
   const handleSubmit = async () => {
-    setSuccessMsg("");
-
     if (!validate()) return;
 
-    try {
+    const success =
       await createNotification({
-        
+        title: form.title,
         message: form.message,
-        targetRoles: form.targetRoles
+        type: form.type,
+        sendToAll: form.sendToAll,
+        roleIds: form.roleIds,
+        regionIds: form.regionIds,
       });
 
-      setSuccessMsg("Notification created successfully");
-
+    if (success) {
       setForm({
         title: "",
         message: "",
-        targetRoles: []
+        type: "",
+        sendToAll: true,
+        roleIds: [],
+        regionIds: [],
       });
 
       setErrors({});
-
-    } catch (err: any) {
-      setErrors({ api: err.message || "Something went wrong" });
     }
   };
 
   return (
     <ComponentCard title="Create Notification">
-
       <div className="space-y-5">
-
-        {/* TITLE
         <Input
           placeholder="Notification Title"
           value={form.title}
-          onChange={(e) =>
-            setForm({ ...form, title: e.target.value })
+          onChange={(e: any) =>
+            setForm({
+              ...form,
+              title: e.target.value,
+            })
           }
           error={!!errors.title}
           hint={errors.title}
-        /> */}
+        />
 
-        {/* MESSAGE */}
         <TextArea
-          placeholder="Enter notification message..."
+          placeholder="Notification Message"
           value={form.message}
           onChange={(value) =>
-            setForm({ ...form, message: value })
+            setForm({
+              ...form,
+              message: value,
+            })
           }
           error={!!errors.message}
           hint={errors.message}
         />
 
-        {/* ROLES */}
-        <div>
+        <Input
+          placeholder="Notification Type (optional)"
+          value={form.type}
+          onChange={(e: any) =>
+            setForm({
+              ...form,
+              type: e.target.value,
+            })
+          }
+        />
+
+        {!form.sendToAll && (
           <MultiSelect
-            label="Select Target Roles"
+            label="Target Roles"
             options={roleOptions}
-            value={form.targetRoles}
+            value={form.roleIds}
             onChange={(values) =>
-              setForm({ ...form, targetRoles: values })
+              setForm({
+                ...form,
+                roleIds: values,
+              })
             }
             placeholder={
-              rolesLoading ? "Loading roles..." : "Select roles"
+              rolesLoading
+                ? "Loading roles..."
+                : "Select roles"
             }
             disabled={rolesLoading}
           />
-
-          {errors.targetRoles && (
-            <p className="text-xs text-red-500 mt-1">
-              {errors.targetRoles}
-            </p>
-          )}
-        </div>
-
-        {/* API ERROR */}
-        {errors.api && (
-          <div className="text-sm text-red-600">
-            {errors.api}
-          </div>
         )}
 
-        {/* SUCCESS */}
-        {successMsg && (
-          <div className="text-sm text-green-600">
-            {successMsg}
+        <label className="flex items-center gap-3">
+          <input
+            type="checkbox"
+            checked={form.sendToAll}
+            onChange={(e) =>
+              setForm({
+                ...form,
+                sendToAll:
+                  e.target.checked,
+              })
+            }
+          />
+
+          <span>
+            Send To All Members
+          </span>
+        </label>
+
+        {message && (
+          <div className="text-sm">
+            {message}
           </div>
         )}
-
       </div>
 
-      {/* ACTIONS */}
-      <div className="flex justify-end gap-3 pt-6 border-t mt-6">
-
+      <div className="flex justify-end mt-6 pt-6 border-t">
         <Button
           onClick={handleSubmit}
-          disabled={loading || rolesLoading}
+          disabled={
+            loading || rolesLoading
+          }
         >
-          {loading ? "Creating..." : "Create Notification"}
+          {loading
+            ? "Creating..."
+            : "Create Notification"}
         </Button>
-
       </div>
-
     </ComponentCard>
   );
 }

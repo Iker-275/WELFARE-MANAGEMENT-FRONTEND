@@ -1,75 +1,74 @@
-import  api  from "./api";
+import api from "./api";
+import axios from "axios";
 
+import {
+  CreateNotificationPayload,
+  NotificationResponse,
+  MyNotificationsResponse,
+  UnreadCountResponse,
+} from "../types/NotificationType";
 
+export const getErrorMessage = (
+  error: unknown
+): string => {
+  if (axios.isAxiosError(error)) {
+    return (
+      error.response?.data?.message ||
+      error.message ||
+      "Something went wrong"
+    );
+  }
+
+  if (error instanceof Error) {
+    return error.message;
+  }
+
+  return "Something went wrong";
+};
 
 export const notificationService = {
+  async create(
+    payload: CreateNotificationPayload
+  ): Promise<NotificationResponse> {
+    const response = await api.post(
+      "/notifications",
+      payload
+    );
 
-
-async createNotification( data: {
-    message: string;
-    targetRoles: string[];
-  }){
-
-    const res = await  api.post("/notification", {
-      type: "ADMIN_NOTIFICATION",
-      ...data
-    });
-
-    return res.data;
-
-  },
-  
-  async getNotifications(filters: {
-    userId: string;
-    page?: number;
-    limit?: number;
-  }) {
-
-    const res = await api.get("/notification", { params: filters })
-
-    return res.data;
-
+    return response.data;
   },
 
-  
+  async getMyNotifications(): Promise<MyNotificationsResponse> {
+    const response = await api.get(
+      "/notifications/my"
+    );
 
-  async getNotification(id:string) {
-
-    const res = await  api.get(`/notification/${id}`);
-
-    return res.data;
-
-  },
- 
-   async getUnreadCount(userId:string) {
-
-    const res = await   api.get("/notification/unread", {
-      params: { userId }
-    });
-
-    return res.data;
-
+    return response.data;
   },
 
- 
-  async markAsRead(id: string, userId: string){
+  async getUnreadCount(): Promise<UnreadCountResponse> {
+    const response = await api.get(
+      "/notifications/unread-count"
+    );
 
-    const res = await api.patch(`/notification/${id}/read`, { userId });
-
-    return res.data;
-
+    return response.data;
   },
 
- 
-  async markAllAsRead( userId: string){
+  async markAsRead(
+    id: string
+  ): Promise<NotificationResponse> {
+    const response = await api.patch(
+      `/notifications/${id}/read`
+    );
 
-    const res = await api.patch(`/notification/all/read`, { userId });
-console.log("res data",res.data);
-
-    return res.data;
-
+    return response.data;
   },
 
-  // MARK ALL READ
- 
+  async markAllAsRead(): Promise<NotificationResponse> {
+    const response = await api.patch(
+      "/notifications/read-all"
+    );
+
+    return response.data;
+  },
 };

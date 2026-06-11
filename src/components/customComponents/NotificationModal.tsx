@@ -13,7 +13,8 @@ export default function NotificationViewModal({
   if (!notification) return null;
 
   const handleOpen = () => {
-    onRead(notification._id);
+    onRead(notification.notificationId
+    );
   };
 
   return (

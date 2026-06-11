@@ -1,41 +1,55 @@
-export type NotificationType =
-   "ADMIN_NOTIFICATION"
-   ;
-
-export interface Notification {
-  _id: string;
-  type: NotificationType;
+export interface CreateNotificationPayload {
+  title: string;
   message: string;
-
-  targetRoles?: string[];
-  targetUsers?: string[];
-
-  readBy?: string[];
-
-  createdAt: string;
-  updatedAt: string;
+  type: string;
+  sendToAll: boolean;
+  roleIds: string[];
+  regionIds: string[];
 }
 
 export interface NotificationResponse {
   success: boolean;
   message: string;
-  data: Notification | Notification[] | any;
-  pagination?: Pagination | null;
 }
 
-export interface NotificationFilters {
+export interface NotificationCreator {
+  id: string;
+  firstName: string | null;
+  lastName: string | null;
+}
+
+export interface Notification {
+  id: string;
+  title: string;
+  message: string;
+  type: string;
+  sendToAll: boolean;
+  metadata: unknown;
+  createdById: string;
+  createdAt: string;
+  updatedAt: string;
+
+  createdBy?: NotificationCreator;
+}
+
+export interface UserNotification {
+  id: string;
+  notificationId: string;
   userId: string;
-  page?: number;
-  limit?: number;
+  isRead: boolean;
+  readAt: string | null;
+  deliveredAt: string | null;
+  createdAt: string;
+
+  notification: Notification;
 }
 
-export interface UnreadCount {
-  unreadCount: number;
+export interface MyNotificationsResponse {
+  success: boolean;
+  data: UserNotification[];
 }
-export interface Pagination {
-  page: number;
-  limit: number;
-  total: number;
-  totalPages: number;
-  hasNextPage: boolean;
+
+export interface UnreadCountResponse {
+  success: boolean;
+  count: number;
 }

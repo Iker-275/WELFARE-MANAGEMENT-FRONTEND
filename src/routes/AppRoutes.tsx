@@ -28,10 +28,11 @@ import CustomersPage from "../pages/CustomerPages/Customers";
 import CustomerDetails from "../pages/CustomerPages/CustomerDetails";
 import CreateCustomer from "../pages/CustomerPages/CreateCustomer";
 import UpdateCustomer from "../pages/CustomerPages/UpdateCustomer";
-import { RoleRoute } from "../pages/GuardedRoutes/RoleRoutes";
+// import { RoleRoute } from "../pages/GuardedRoutes/RoleRoutes";
 import VerifyOtp from "../pages/AuthPages/OTP";
 import ResetPassword from "../pages/AuthPages/ResetPassword";
 import ForgotPassword from "../pages/AuthPages/Forgot";
+import NotificationsPage from "../pages/NotificationPages/NotificationsPage";
 
 
 
@@ -50,7 +51,7 @@ const AppRoutes = () => {
 
           <Route element={<AppLayout />}>
 
-            <Route element={<RoleRoute />}>
+            {/* <Route element={<RoleRoute />}> */}
               <Route path="/" element={<Home />} />
 
               <Route path="/users" element={<Users />} />
@@ -82,13 +83,15 @@ const AppRoutes = () => {
               <Route path="/customers/edit/:id" element={<UpdateCustomer />} />
 
               <Route path="/notifications/create" element={<CreateNotification />} />
+              <Route path="/notifications" element={<NotificationsPage />} />
+
 
               <Route path="*" element={<NotFound />} />
 
             </Route>
           </Route>
 
-        </Route>
+        {/* </Route> */}
 
         {/* AUTH PAGES */}
         <Route element={<AuthRoute />}>
