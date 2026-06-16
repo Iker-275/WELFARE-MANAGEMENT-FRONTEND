@@ -10,6 +10,7 @@ import { AuthProvider } from './context/AuthContext.tsx';
 import { NotificationProvider } from "./context/NotificationContext.tsx";
 import { DashboardProvider } from "./context/DashboardContext.tsx";
 import { AnnouncementProvider } from "./context/AnnouncementContext.tsx";
+import { RoleProvider } from "./context/RoleContext.tsx";
 
 
 createRoot(document.getElementById("root")!).render(
@@ -20,13 +21,13 @@ createRoot(document.getElementById("root")!).render(
           <NotificationProvider>
             <AnnouncementProvider>
             <DashboardProvider>
-
+<RoleProvider>
              
                 
                   
                         <App />
                       
-
+</RoleProvider>
               
             </DashboardProvider>
             </AnnouncementProvider>
