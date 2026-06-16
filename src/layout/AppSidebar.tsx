@@ -5,11 +5,10 @@ import { Link, useLocation, } from "react-router-dom";
 
 // Assume these icons are imported from an icon library
 import {
-  BoxCubeIcon,
+
   ChevronDownIcon,
   GridIcon,
   HorizontaLDots,
-  UserCircleIcon,
   MailIcon
 } from "../icons";
 import { useSidebar } from "../context/SidebarContext";
@@ -30,46 +29,46 @@ const navItems: NavItem[] = [
 
     // subItems: [{ name: "Ecommerce", path: "/", pro: false }],
   },
-  {
-    icon: <UserCircleIcon />,
-    name: "Users",
-     path: "/users",
+  // {
+  //   icon: <UserCircleIcon />,
+  //   name: "Users",
+  //    path: "/users",
    
-  },
-  {
-    icon: <UserCircleIcon />,
-    name: "Customers",
-     path: "/customers",
+  // },
+  // {
+  //   icon: <UserCircleIcon />,
+  //   name: "Customers",
+  //    path: "/customers",
    
-  },
+  // },
  
-   {
-    icon: <BoxCubeIcon />,
-    name: "Roles",
-     path: "/roles",
+  //  {
+  //   icon: <BoxCubeIcon />,
+  //   name: "Roles",
+  //    path: "/roles",
    
-  },
-  {
-    icon: <BoxCubeIcon />,
-    name: "Menu",
-     path: "/menu",
+  // },
+  // {
+  //   icon: <BoxCubeIcon />,
+  //   name: "Menu",
+  //    path: "/menu",
    
-  },
+  // },
  
   
   
-  {
-    icon: <BoxCubeIcon />,
-    name: "Orders",
-     path: "/orders",
+  // {
+  //   icon: <BoxCubeIcon />,
+  //   name: "Orders",
+  //    path: "/orders",
    
-  },
-   {
-    icon: <BoxCubeIcon />,
-    name: "Order Status",
-     path: "/order-status",
+  // },
+  //  {
+  //   icon: <BoxCubeIcon />,
+  //   name: "Order Status",
+  //    path: "/order-status",
    
-  },
+  // },
  
  
   {

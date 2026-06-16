@@ -18,7 +18,7 @@ export default function Home() {
     <>
       <PageMeta title="Dashboard" description="Restaurant Dashboard" />
 
-      <div className="grid grid-cols-12 gap-4 md:gap-6">
+      {/* <div className="grid grid-cols-12 gap-4 md:gap-6">
         <div className="col-span-12 space-y-6 xl:col-span-7">
           <EcommerceMetrics data={dashboard} />
           <SalesVsPaymentsChart data={dashboard} />
@@ -31,7 +31,7 @@ export default function Home() {
         <div className="col-span-12">
           <NewCustomers customers={dashboard?.newCustomers || []} />
         </div>
-      </div>
+      </div> */}
     </>
   );
 }
