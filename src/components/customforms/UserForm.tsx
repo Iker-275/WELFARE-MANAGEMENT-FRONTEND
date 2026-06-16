@@ -1,128 +1,128 @@
 
-import { useState, useEffect } from "react";
-import ComponentCard from "../common/ComponentCard";
-import Label from "../form/Label";
-import Input from "../form/input/InputField";
-import Button from "../ui/button/Button";
-import Select from "../customComponents/DropDowns";
+// import { useState, useEffect } from "react";
+// import ComponentCard from "../common/ComponentCard";
+// import Label from "../form/Label";
+// import Input from "../form/input/InputField";
+// import Button from "../ui/button/Button";
+// import Select from "../customComponents/DropDowns";
 
-import { useRoles } from "../../hooks/useRoles";
-import { useUsers } from "../../hooks/useUser";
-import Switch from "../customComponents/Switch";
+// import { useRoles } from "../../hooks/useRoles";
 
-interface UserFormProps {
-  mode: "edit";
-  userId: string;
-  initialData?: {
-    email: string;
-    role: string;
-    active: boolean;
-  };
-  onSubmit: (data: { role: string; active: boolean }) => void;
-}
+// import Switch from "../customComponents/Switch";
 
-export default function UserForm({
-  initialData,
-  onSubmit,
-}: UserFormProps) {
+// interface UserFormProps {
+//   mode: "edit";
+//   userId: string;
+//   initialData?: {
+//     email: string;
+//     role: string;
+//     active: boolean;
+//   };
+//   onSubmit: (data: { role: string; active: boolean }) => void;
+// }
 
-  const { roles } = useRoles();
-  const { loading } = useUsers();
+// export default function UserForm({
+//   initialData,
+//   onSubmit,
+// }: UserFormProps) {
 
-  const [email, setEmail] = useState("");
-  const [role, setRole] = useState("");
-  const [active, setActive] = useState(true);
+//   const { roles } = useRoles();
+//   const { loading } = useUsers();
 
-  const [errors, setErrors] = useState<any>({});
+//   const [email, setEmail] = useState("");
+//   const [role, setRole] = useState("");
+//   const [active, setActive] = useState(true);
 
-  useEffect(() => {
-    if (initialData) {
-      setEmail(initialData.email);
-      setRole(initialData.role);
-      setActive(initialData.active);
-    }
-  }, [initialData]);
+//   const [errors, setErrors] = useState<any>({});
 
-  /* Convert roles to dropdown options */
-  const roleOptions = roles.map((role: any) => ({
-    label: role.name,
-    value: role.name,
-  }));
+//   useEffect(() => {
+//     if (initialData) {
+//       setEmail(initialData.email);
+//       setRole(initialData.role);
+//       setActive(initialData.active);
+//     }
+//   }, [initialData]);
 
-  const validate = () => {
-    const newErrors: any = {};
+//   /* Convert roles to dropdown options */
+//   const roleOptions = roles.map((role: any) => ({
+//     label: role.name,
+//     value: role.name,
+//   }));
 
-    if (!role) newErrors.role = "Role is required";
+//   const validate = () => {
+//     const newErrors: any = {};
 
-    setErrors(newErrors);
+//     if (!role) newErrors.role = "Role is required";
 
-    return Object.keys(newErrors).length === 0;
-  };
+//     setErrors(newErrors);
 
-  const handleSubmit = () => {
-    if (!validate()) return;
+//     return Object.keys(newErrors).length === 0;
+//   };
 
-    onSubmit({
-      role,
-      active,
-    });
-  };
+//   const handleSubmit = () => {
+//     if (!validate()) return;
 
-  return (
-    <ComponentCard title="Edit User">
-      <div className="space-y-6">
+//     onSubmit({
+//       role,
+//       active,
+//     });
+//   };
 
-        {/* Email */}
-        <div>
-          <Label>Email</Label>
-          <Input
-            type="text"
-            value={email}
-            disabled
-          />
-        </div>
+//   return (
+//     <ComponentCard title="Edit User">
+//       <div className="space-y-6">
 
-        {/* Role */}
-        <div>
-          <Label>Select Role</Label>
+//         {/* Email */}
+//         <div>
+//           <Label>Email</Label>
+//           <Input
+//             type="text"
+//             value={email}
+//             disabled
+//           />
+//         </div>
 
-          <Select
-            options={roleOptions}
-            defaultValue={role}
-            placeholder="Select Role"
-            onChange={(value: string) => setRole(value)}
-          />
+//         {/* Role */}
+//         <div>
+//           <Label>Select Role</Label>
 
-          {errors.role && (
-            <p className="text-red-500 text-sm mt-1">
-              {errors.role}
-            </p>
-          )}
-        </div>
+//           <Select
+//             options={roleOptions}
+//             defaultValue={role}
+//             placeholder="Select Role"
+//             onChange={(value: string) => setRole(value)}
+//           />
 
-        {/* Active Switch */}
-        <Switch
-          label="Active Status"
-          checked={active}
-          onChange={(value: boolean) => setActive(value)}
-        />
+//           {errors.role && (
+//             <p className="text-red-500 text-sm mt-1">
+//               {errors.role}
+//             </p>
+//           )}
+//         </div>
 
-      </div>
+//         {/* Active Switch */}
+//         <Switch
+//           label="Active Status"
+//           checked={active}
+//           onChange={(value: boolean) => setActive(value)}
+//         />
 
-      {/* Buttons */}
-      <div className="flex justify-end gap-3 pt-4 border-t border-gray-200 dark:border-gray-700">
-        <Button variant="outline">
-          Cancel
-        </Button>
+//       </div>
 
-        <Button
-          variant="outline"
-          onClick={handleSubmit}
-          disabled={loading}
-        >
-          {loading ? "Saving..." : "Update User"}
-        </Button>
-      </div>
-    </ComponentCard>
-  );
-}
+//       {/* Buttons */}
+//       <div className="flex justify-end gap-3 pt-4 border-t border-gray-200 dark:border-gray-700">
+//         <Button variant="outline">
+//           Cancel
+//         </Button>
+
+//         <Button
+//           variant="outline"
+//           onClick={handleSubmit}
+//           disabled={loading}
+//         >
+//           {loading ? "Saving..." : "Update User"}
+//         </Button>
+//       </div>
+//     </ComponentCard>
+//   );
+// }
