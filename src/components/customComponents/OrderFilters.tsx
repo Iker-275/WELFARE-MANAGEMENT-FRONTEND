@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { OrderFilters } from "../../types/OrderTypes";
 import { useStatus } from "../../hooks/useStatus";
 import { useCustomer } from "../../hooks/useCustomers";
-import { useUsers } from "../../hooks/useUser";
+
 
 interface Props {
   filters: OrderFilters;
@@ -27,7 +27,7 @@ const MONTH_MAP: Record<string, number> = {
 export default function OrderFiltersComponent({ filters, setFilters }: Props) {
   const { statuses, loadStatuses } = useStatus();
   const { customers, loadCustomers } = useCustomer();
-  const { users, fetchUsers } = useUsers();
+  // const { users, fetchUsers } = useUsers();
 
 
   const [search, setSearch] = useState(filters.customer || "");
@@ -38,7 +38,7 @@ export default function OrderFiltersComponent({ filters, setFilters }: Props) {
   useEffect(() => {
     loadStatuses({ visible: true });
     loadCustomers();
-    fetchUsers();
+    
   }, []);
 
   // debounce search
@@ -89,24 +89,8 @@ export default function OrderFiltersComponent({ filters, setFilters }: Props) {
         </select>
 
         {/* waiter dropdown */}
-        <select
-          value={filters.user_id || ""}
-          onChange={(e) =>
-            setFilters({
-              ...filters,
-              user_id: e.target.value,
-              page: 1,
-            })
-          }
-          className="border rounded-lg px-3 py-2"
-        >
-          <option value="">All Users</option>
-          {users.map((u) => (
-            <option key={u._id} value={u._id}>
-              {u.name || u.email}
-            </option>
-          ))}
-        </select>
+       
+         
 
         {/* 📌 Status Dropdown */}
         <select

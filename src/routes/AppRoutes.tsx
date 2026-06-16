@@ -6,8 +6,8 @@ import NotFound from "../pages/OtherPage/NotFound";
 import SignIn from "../pages/AuthPages/SignIn"
 import SignUp from "../pages/AuthPages/SignUp"
 
-import Users from "../pages/UserPages/Users";
-import EditUser from "../pages/UserPages/UpdateUsers";
+
+
 
 import Roles from "../pages/RolesPages/Roles";
 import CreateRole from "../pages/RolesPages/CreateRoles";
@@ -56,8 +56,8 @@ const AppRoutes = () => {
             {/* <Route element={<RoleRoute />}> */}
               <Route path="/" element={<Home />} />
 
-              <Route path="/users" element={<Users />} />
-              <Route path="/users/edit/:id" element={<EditUser />} />
+              {/* <Route path="/users" element={<Users />} /> */}
+              
 
 
               <Route path="/roles" element={<Roles />} />

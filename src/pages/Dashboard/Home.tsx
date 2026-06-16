@@ -1,16 +1,9 @@
 import PageMeta from "../../components/common/PageMeta";
 
-import {
-  RecentOrders,
-  NewCustomers,
-} from "../../components/customComponents/Recents";
-
-import EcommerceMetrics from "../../components/ecommerce/EcommerceMetrics";
-import SalesVsPaymentsChart from "../../components/ecommerce/StatisticsChart";
 import { useDashboard } from "../../hooks/useDashboard";
 
 export default function Home() {
-  const { dashboard, loading } = useDashboard();
+  const { loading } = useDashboard();
 
   if (loading) return <div>Loading dashboard...</div>;
 

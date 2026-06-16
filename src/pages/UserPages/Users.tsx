@@ -1,6 +1,5 @@
 import PageMeta from "../../components/common/PageMeta";
 import ComponentCard from "../../components/common/ComponentCard";
-import { UsersTable,} from "../../components/tables/BasicTables/BasicTableOne";
 import PageBreadcrumb from "../../components/common/PageBreadCrumb";
 
 export default function Users() {
@@ -14,7 +13,8 @@ export default function Users() {
        <PageBreadcrumb pageTitle="Users" />
       <div className="space-y-6">
         <ComponentCard title="Users">
-          <UsersTable />
+          {/* <UsersTable /> */}
+          <div></div>
         </ComponentCard>
       </div>
       

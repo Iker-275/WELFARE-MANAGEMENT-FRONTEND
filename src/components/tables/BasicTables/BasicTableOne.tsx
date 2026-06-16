@@ -8,7 +8,6 @@ import {
 
 import Badge from "../../ui/badge/Badge";
 import { Link } from "react-router";
-import { useUsers } from "../../../hooks/useUser";
 import { useRoles } from "../../../hooks/useRoles";
 import { useMenu } from "../../../hooks/useMenu";
 import { useEffect, useState } from "react";
@@ -19,132 +18,7 @@ import { useCustomer } from "../../../hooks/useCustomers";
 
 
 
-function UsersTable() {
-  const { loading, users, deleteUser } = useUsers();
 
-  if (loading)
-    return (
-      <div className="flex justify-center py-10">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-brand-500"></div>
-      </div>
-    );
-
-  return (
-    <>
-      <div className="flex justify-end mb-4">
-        <Link
-          to="/users/create"
-          className="px-4 py-2 text-white bg-blue-600 rounded-lg"
-        >
-          + Create User
-        </Link>
-      </div>
-      <div className="overflow-hidden rounded-xl border border-gray-200 bg-white dark:border-white/[0.05] dark:bg-white/[0.03]">
-        <div className="max-w-full overflow-x-auto">
-          <Table>
-            {/* Table Header */}
-            <TableHeader className="border-b border-gray-100 dark:border-white/[0.05]">
-              <TableRow>
-                <TableCell
-                  isHeader
-                  className="px-5 py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400"
-                >
-                  User Email
-                </TableCell>
-                <TableCell
-                  isHeader
-                  className="px-5 py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400"
-                >
-                  Name
-                </TableCell>
-                
-                <TableCell
-                  isHeader
-                  className="px-5 py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400"
-                >
-                  Role
-                </TableCell>
-
-                <TableCell
-                  isHeader
-                  className="px-5 py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400"
-                >
-                  Status
-                </TableCell>
-                <TableCell
-                  isHeader
-                  className="px-5 py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400"
-                >
-                  CreatedAt
-                </TableCell>
-              </TableRow>
-            </TableHeader>
-
-            {/* Table Body */}
-
-            <TableBody className="divide-y divide-gray-100 dark:divide-white/[0.05]">
-
-              {users.map((user) => (
-                <TableRow key={user._id}>
-                  <TableCell className="px-5 py-4 text-start">
-
-                    {user.email}
-                  </TableCell>
-                  <TableCell className="px-5 py-4 text-start">
-
-                    {user.name || "-"}
-                  </TableCell>
-
-                  <TableCell className="px-5 py-4 text-start">
-
-                    {user.role}
-                  </TableCell>
-
-                  <TableCell className="px-5 py-4 text-start">
-
-                    <Badge
-                      size="sm"
-                      color={
-                        user.active === true
-                          ? "success"
-                          : user.active === false
-                            ? "warning"
-                            : "error"
-                      }
-                    >
-                      {user.active.toString() === "true" ? "Active" : "Inactive"}
-                    </Badge>
-                  </TableCell>
-                  <TableCell className="px-5 py-4 text-start">
-
-                    {user.createdAt}
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex gap-3">
-                      <Link
-                        to={`/users/edit/${user._id}`}
-                        className="text-blue-500"
-                      >
-                        Edit
-                      </Link>
-
-                      <button
-                        onClick={() => deleteUser(user._id)}
-                        className="text-red-500"
-                      >
-                        Delete
-                      </button>
-                    </div>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </div>
-      </div>
-    </>
-  );
-}
 
 
 
@@ -787,4 +661,4 @@ function RolesTable() {
 
 
 
-export { UsersTable, RolesTable,  MenuTable, StatusTable, OrdersTable,CustomersTable }
+export {  RolesTable,  MenuTable, StatusTable, OrdersTable,CustomersTable }
