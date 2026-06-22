@@ -15,6 +15,7 @@ import { useStatus } from "../../../hooks/useStatus";
 import { useOrder } from "../../../hooks/useOrder"
 import { OrderFilters } from "../../../types/OrderTypes";
 import { useCustomer } from "../../../hooks/useCustomers";
+import {usePermissions}from "../../../hooks/usePermission";
 
 
 
@@ -544,111 +545,260 @@ function MenuTable() {
 }
 
 
-function RolesTable() {
-  const { loading, roles, deleteRole } = useRoles();
+// function RolesTable() {
+//   const { loading, roles, deleteRole } = useRoles();
 
-  if (loading)
+//   if (loading)
+//     return (
+//       <div className="flex justify-center py-10">
+//         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-brand-500"></div>
+//       </div>
+//     );
+
+//   return (
+//     <>
+//       <div className="flex justify-end mb-4">
+//         <Link
+//           to="/roles/create"
+//           className="px-4 py-2 text-white bg-blue-600 rounded-lg"
+//         >
+//           + Create Role
+//         </Link>
+//       </div>
+
+//       <div className="overflow-hidden rounded-xl border border-gray-200 bg-white dark:border-white/[0.05] dark:bg-white/[0.03]">
+//         <div className="max-w-full overflow-x-auto">
+
+//           <Table>
+//             <TableHeader className="border-b border-gray-100 dark:border-white/[0.05]">
+//               <TableRow>
+
+//                 <TableCell isHeader className="px-5 py-3 text-start">
+//                   Name
+//                 </TableCell>
+
+//                 <TableCell isHeader className="px-5 py-3 text-start">
+//                   Description
+//                 </TableCell>
+
+//                 <TableCell isHeader className="px-5 py-3 text-start">
+//                   Status
+//                 </TableCell>
+
+//                 <TableCell isHeader className="px-5 py-3 text-start">
+//                   Created At
+//                 </TableCell>
+
+//                 <TableCell isHeader className="px-5 py-3 text-start">
+//                   Actions
+//                 </TableCell>
+
+//               </TableRow>
+//             </TableHeader>
+
+//             <TableBody className="divide-y divide-gray-100 dark:divide-white/[0.05]">
+
+//               {roles.map((role) => (
+//                 <TableRow key={role._id}>
+
+//                   <TableCell className="px-5 py-4 text-start">
+//                     {role.name}
+//                   </TableCell>
+
+//                   <TableCell className="px-5 py-4 text-start">
+//                     {role.description}
+//                   </TableCell>
+
+//                   <TableCell className="px-5 py-4 text-start">
+
+//                     <Badge
+//                       size="sm"
+//                       color={role.active ? "success" : "error"}
+//                     >
+//                       {role.active ? "Active" : "Inactive"}
+//                     </Badge>
+
+//                   </TableCell>
+
+//                   <TableCell className="px-5 py-4 text-start">
+//                     {new Date(role.createdAt).toLocaleDateString()}
+//                   </TableCell>
+
+//                   <TableCell>
+//                     <div className="flex gap-3">
+
+//                       <Link
+//                         to={`/roles/edit/${role._id}`}
+//                         className="text-blue-500"
+//                       >
+//                         Edit
+//                       </Link>
+
+//                       <button
+//                         onClick={() => deleteRole(role._id)}
+//                         className="text-red-500"
+//                       >
+//                         Delete
+//                       </button>
+
+//                     </div>
+//                   </TableCell>
+
+//                 </TableRow>
+//               ))}
+
+//             </TableBody>
+//           </Table>
+
+//         </div>
+//       </div>
+//     </>
+//   );
+// }
+
+
+
+
+
+ function RolesTable() {
+
+  const {
+    roles,
+    loading,
+    deleteRole,
+    message,
+  } = useRoles();
+
+
+  if (loading) {
     return (
       <div className="flex justify-center py-10">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-brand-500"></div>
+
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-brand-500"/>
+
       </div>
     );
+  }
+
 
   return (
+
     <>
+
+      {message && (
+        <div className="mb-4 text-sm">
+          {message}
+        </div>
+      )}
+
+
       <div className="flex justify-end mb-4">
         <Link
           to="/roles/create"
-          className="px-4 py-2 text-white bg-blue-600 rounded-lg"
+          className="
+          px-4 py-2
+          rounded-lg
+          bg-blue-600
+          text-white
+          "
         >
           + Create Role
         </Link>
       </div>
-
-      <div className="overflow-hidden rounded-xl border border-gray-200 bg-white dark:border-white/[0.05] dark:bg-white/[0.03]">
+      <div
+        className="
+        overflow-hidden
+        rounded-xl
+        border
+        bg-white
+        "
+      >
         <div className="max-w-full overflow-x-auto">
-
           <Table>
-            <TableHeader className="border-b border-gray-100 dark:border-white/[0.05]">
+            <TableHeader>
               <TableRow>
-
-                <TableCell isHeader className="px-5 py-3 text-start">
+                <TableCell
+                  isHeader
+                  className="px-5 py-3 text-start"
+                >
                   Name
                 </TableCell>
-
-                <TableCell isHeader className="px-5 py-3 text-start">
-                  Description
-                </TableCell>
-
-                <TableCell isHeader className="px-5 py-3 text-start">
-                  Status
-                </TableCell>
-
-                <TableCell isHeader className="px-5 py-3 text-start">
+                <TableCell
+                  isHeader
+                  className="px-5 py-3 text-start"
+                >
                   Created At
                 </TableCell>
-
-                <TableCell isHeader className="px-5 py-3 text-start">
+                <TableCell
+                  isHeader
+                  className="px-5 py-3 text-start"
+                >
                   Actions
                 </TableCell>
-
               </TableRow>
             </TableHeader>
 
-            <TableBody className="divide-y divide-gray-100 dark:divide-white/[0.05]">
 
-              {roles.map((role) => (
-                <TableRow key={role._id}>
 
-                  <TableCell className="px-5 py-4 text-start">
-                    {role.name}
-                  </TableCell>
-
-                  <TableCell className="px-5 py-4 text-start">
-                    {role.description}
-                  </TableCell>
-
-                  <TableCell className="px-5 py-4 text-start">
-
-                    <Badge
-                      size="sm"
-                      color={role.active ? "success" : "error"}
-                    >
-                      {role.active ? "Active" : "Inactive"}
-                    </Badge>
-
-                  </TableCell>
-
-                  <TableCell className="px-5 py-4 text-start">
-                    {new Date(role.createdAt).toLocaleDateString()}
-                  </TableCell>
-
-                  <TableCell>
-                    <div className="flex gap-3">
-
-                      <Link
-                        to={`/roles/edit/${role._id}`}
-                        className="text-blue-500"
-                      >
-                        Edit
-                      </Link>
-
-                      <button
-                        onClick={() => deleteRole(role._id)}
-                        className="text-red-500"
-                      >
-                        Delete
-                      </button>
-
+            <TableBody
+              className="
+              divide-y
+              divide-gray-100
+              "
+            >
+              {roles.map((role:any)=>(
+                <TableRow
+                  key={role.id}
+                >
+                  <TableCell
+                    className="px-5 py-4"
+                  >
+                    <div>
+                      <p className="font-medium">
+                        {role.name}
+                      </p>
                     </div>
                   </TableCell>
+                  <TableCell
+                    className="px-5 py-4">
+                    {new Date(role.createdAt) .toLocaleDateString()}
 
+                  </TableCell>
+                  <TableCell
+                    className="px-5 py-4"
+                  >
+                    <div
+                      className="
+                      flex
+                      gap-4
+                      "
+                    >
+                      <Link
+                        to={`/roles/${role.id}/permissions`}
+                        className="
+                        text-green-600
+                        "
+                      >
+                        Permissions
+                      </Link>
+                      <Link
+                        to={`/roles/edit/${role.id}`}
+                        className="
+                        text-blue-600
+                        " >
+                        Edit
+                      </Link>
+                      <button
+                        onClick={()=>deleteRole(role.id)}
+                        className=" text-red-600" >
+                        Delete
+                      </button>
+                    </div>
+                  </TableCell>
                 </TableRow>
               ))}
-
             </TableBody>
           </Table>
-
         </div>
       </div>
     </>
@@ -657,8 +807,322 @@ function RolesTable() {
 
 
 
+ function PermissionsTable() {
+
+
+  const {
+    permissions,
+    loading,
+    message
+  } = usePermissions();
 
 
 
 
-export {  RolesTable,  MenuTable, StatusTable, OrdersTable,CustomersTable }
+  if (loading) {
+
+    return (
+
+      <div className="flex justify-center py-10">
+
+        <div
+          className="
+          animate-spin
+          rounded-full
+          h-8 w-8
+          border-b-2
+          border-brand-500
+          "
+        />
+
+      </div>
+
+    );
+
+  }
+
+
+
+
+  return (
+
+    <>
+
+
+      {message && (
+
+        <div className="mb-4 text-sm">
+
+          {message}
+
+        </div>
+
+      )}
+
+
+
+
+
+
+      <div className="flex justify-end mb-4">
+
+        <Link
+
+          to="/permissions/create"
+
+          className="
+          px-4 py-2
+          rounded-lg
+          bg-blue-600
+          text-white
+          "
+
+        >
+
+          + Create Permission
+
+        </Link>
+
+
+      </div>
+
+
+
+
+
+      <div
+
+        className="
+        overflow-hidden
+        rounded-xl
+        border
+        bg-white
+        "
+
+      >
+
+
+        <div className="max-w-full overflow-x-auto">
+
+
+          <Table>
+
+
+            <TableHeader>
+
+
+              <TableRow>
+
+
+
+                <TableCell
+
+                  isHeader
+
+                  className="
+                  px-5
+                  py-3
+                  text-start
+                  "
+
+                >
+
+                  Name
+
+                </TableCell>
+
+
+
+
+                <TableCell
+
+                  isHeader
+
+                  className="
+                  px-5
+                  py-3
+                  text-start
+                  "
+
+                >
+
+                  Description
+
+                </TableCell>
+
+
+
+
+
+                <TableCell
+
+                  isHeader
+
+                  className="
+                  px-5
+                  py-3
+                  text-start
+                  "
+
+                >
+
+                  Created At
+
+                </TableCell>
+
+
+
+
+              </TableRow>
+
+
+            </TableHeader>
+
+
+
+
+
+
+            <TableBody
+
+              className="
+              divide-y
+              divide-gray-100
+              "
+
+            >
+
+
+
+              {
+                permissions.map(
+                  (permission:any)=>(
+
+
+                  <TableRow
+
+                    key={permission.id}
+
+                  >
+
+
+
+
+                    <TableCell
+
+                      className="
+                      px-5
+                      py-4
+                      "
+
+                    >
+
+
+                      <p className="font-medium">
+
+                        {permission.name}
+
+                      </p>
+
+
+                    </TableCell>
+
+
+
+
+
+
+
+                    <TableCell
+
+                      className="
+                      px-5
+                      py-4
+                      "
+
+                    >
+
+
+                      {
+
+                        permission.description ||
+
+                        "-"
+
+                      }
+
+
+                    </TableCell>
+
+
+
+
+
+
+
+                    <TableCell
+
+                      className="
+                      px-5
+                      py-4
+                      "
+
+                    >
+
+
+                      {
+
+                        new Date(
+                          permission.createdAt
+                        )
+                        .toLocaleDateString()
+
+                      }
+
+
+
+                    </TableCell>
+
+
+
+
+
+                  </TableRow>
+
+
+                ))
+
+              }
+
+
+
+
+
+            </TableBody>
+
+
+
+
+          </Table>
+
+
+        </div>
+
+
+
+      </div>
+
+
+
+
+    </>
+
+
+  );
+
+
+}
+
+
+
+export {  RolesTable,  MenuTable, StatusTable, OrdersTable,CustomersTable, PermissionsTable  };

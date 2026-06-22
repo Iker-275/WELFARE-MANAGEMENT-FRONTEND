@@ -1,31 +1,59 @@
 export interface Role {
-  _id: string;
+  id: string;
   name: string;
-  description: string;
-  active: boolean;
+  description: string | null;
+  isNecRole: boolean;
+  isSystem: boolean;
+  termYears: number | null;
   createdAt: string;
   updatedAt: string;
 }
 
-export interface CreateRolePayload {
+export interface Permission {
+  id: string;
   name: string;
   description: string;
+  createdAt: string;
+}
+
+export interface RolePermission {
+  id: string;
+  roleId: string;
+  permissionId: string;
+  createdAt: string;
+
+  permission: Permission;
+}
+
+export interface CreateRolePayload {
+  name: string;
 }
 
 export interface UpdateRolePayload {
-  name?: string;
-  description?: string;
-  active?: boolean;
+  name: string;
 }
 
-export interface RoleContextType {
-  roles: Role[];
-  loading: boolean;
-  message: string;
-  error: string;
+export interface SyncRolePermissionsPayload {
+  permissionIds: string[];
+}
 
-  fetchRoles: () => Promise<void>;
-  createRole: (data: CreateRolePayload) => Promise<void>;
-  updateRole: (id: string, data: UpdateRolePayload) => Promise<void>;
-  deleteRole: (id: string) => Promise<void>;
+export interface RoleResponse {
+  success: boolean;
+  message: string;
+  data: Role;
+}
+
+export interface RolesResponse {
+  success: boolean;
+  data: Role[];
+}
+
+export interface RolePermissionsResponse {
+  success: boolean;
+  permissions: RolePermission[];
+}
+
+export interface BasicRoleResponse {
+  success: boolean;
+  message: string;
 }

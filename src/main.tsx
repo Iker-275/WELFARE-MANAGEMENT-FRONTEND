@@ -11,28 +11,32 @@ import { NotificationProvider } from "./context/NotificationContext.tsx";
 import { DashboardProvider } from "./context/DashboardContext.tsx";
 import { AnnouncementProvider } from "./context/AnnouncementContext.tsx";
 import { RoleProvider } from "./context/RoleContext.tsx";
+import { PermissionProvider } from "./context/PermissionContext.tsx";
 
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
     <ThemeProvider>
       <AuthProvider>
-        <AppWrapper>
-          <NotificationProvider>
-            <AnnouncementProvider>
-            <DashboardProvider>
-<RoleProvider>
-             
-                
-                  
-                        <App />
-                      
-</RoleProvider>
-              
-            </DashboardProvider>
-            </AnnouncementProvider>
-          </NotificationProvider>
-        </AppWrapper>
+        <RoleProvider>
+ <PermissionProvider>
+          <AppWrapper>
+            <NotificationProvider>
+              <AnnouncementProvider>
+                <DashboardProvider>
+
+
+
+                  <App />
+
+
+                </DashboardProvider>
+              </AnnouncementProvider>
+            </NotificationProvider>
+          </AppWrapper>
+          </PermissionProvider>
+        </RoleProvider>
+
       </AuthProvider>
     </ThemeProvider>
   </StrictMode>,

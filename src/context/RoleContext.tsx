@@ -1,48 +1,224 @@
-import { createContext, useState, useEffect, ReactNode } from "react";
-import { roleApi } from "../api/RoleApi";
-import { Role, RoleContextType } from "../types/RoleType";
+import {
+  createContext,
+  ReactNode,
+  useEffect,
+  useState,
+} from "react";
 
+import {
+  Role,
+  RolePermission,
+  CreateRolePayload,
+  UpdateRolePayload,
+} from "../types/RoleType";
 
-export const RoleContext = createContext<RoleContextType | undefined>(undefined);
+import {
+  roleService,
+  getErrorMessage,
+} from "../api/RoleApi";
+
+interface RoleContextType {
+  roles: Role[];
+
+  permissions: RolePermission[];
+
+  loading: boolean;
+
+  message: string;
+
+  setMessage: React.Dispatch<
+    React.SetStateAction<string>
+  >;
+
+  fetchRoles: () => Promise<void>;
+
+  fetchRolePermissions: (
+    roleId: string
+  ) => Promise<void>;
+
+  createRole: (
+    payload: CreateRolePayload
+  ) => Promise<boolean>;
+
+  updateRole: (
+    id: string,
+    payload: UpdateRolePayload
+  ) => Promise<boolean>;
+
+  deleteRole: (
+    id: string
+  ) => Promise<boolean>;
+
+  syncPermissions: (
+    roleId: string,
+    permissionIds: string[]
+  ) => Promise<boolean>;
+}
+
+export const RoleContext =
+  createContext<RoleContextType | null>(
+    null
+  );
 
 interface Props {
   children: ReactNode;
 }
 
-export const RoleProvider = ({ children }: Props) => {
-  const [roles, setRoles] = useState<Role[]>([]);
-  const [loading, setLoading] = useState<boolean>(false);
-  const [message, setMessage] = useState<string>("");
-  const [error, setError] = useState<string>("");
+export const RoleProvider = ({
+  children,
+}: Props) => {
+  const [roles, setRoles] =
+    useState<Role[]>([]);
 
-  const fetchRoles = async () => {
+  const [permissions, setPermissions] =
+    useState<RolePermission[]>([]);
+
+  const [loading, setLoading] =
+    useState(false);
+
+  const [message, setMessage] =
+    useState("");
+
+  const fetchRoles =
+    async (): Promise<void> => {
+      try {
+        setLoading(true);
+
+        const response =
+          await roleService.getRoles();
+
+        setRoles(response.data);
+      } catch (error) {
+        setMessage(getErrorMessage(error));
+      } finally {
+        setLoading(false);
+      }
+    };
+
+  const fetchRolePermissions =
+    async (
+      roleId: string
+    ): Promise<void> => {
+      try {
+        setLoading(true);
+
+        const response =
+          await roleService.getRolePermissions(
+            roleId
+          );
+
+        setPermissions(
+          response.permissions
+        );
+      } catch (error) {
+        setMessage(getErrorMessage(error));
+      } finally {
+        setLoading(false);
+      }
+    };
+
+  const createRole = async (
+    payload: CreateRolePayload
+  ): Promise<boolean> => {
     try {
       setLoading(true);
-      const res = await roleApi.getRoles();
-      setRoles(res.data);
-    } catch (err) {
-      setError("Failed to fetch roles");
+
+      const response =
+        await roleService.create(
+          payload
+        );
+
+      setMessage(response.message);
+
+      await fetchRoles();
+
+      return response.success;
+    } catch (error) {
+      setMessage(getErrorMessage(error));
+
+      return false;
     } finally {
       setLoading(false);
     }
   };
 
-  const createRole = async (data: any) => {
-    const res = await roleApi.createRole(data);
-    setMessage(res.message);
-    fetchRoles();
+  const updateRole = async (
+    id: string,
+    payload: UpdateRolePayload
+  ): Promise<boolean> => {
+    try {
+      setLoading(true);
+
+      const response =
+        await roleService.update(
+          id,
+          payload
+        );
+
+      setMessage(response.message);
+
+      await fetchRoles();
+
+      return response.success;
+    } catch (error) {
+      setMessage(getErrorMessage(error));
+
+      return false;
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const updateRole = async (id: string, data: any) => {
-    const res = await roleApi.updateRole(id, data);
-    setMessage(res.message);
-    fetchRoles();
+  const deleteRole = async (
+    id: string
+  ): Promise<boolean> => {
+    try {
+      setLoading(true);
+
+      const response =
+        await roleService.delete(id);
+
+      setMessage(response.message);
+
+      await fetchRoles();
+
+      return response.success;
+    } catch (error) {
+      setMessage(getErrorMessage(error));
+
+      return false;
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const deleteRole = async (id: string) => {
-    const res = await roleApi.deleteRole(id);
-    setMessage(res.message);
-    fetchRoles();
+  const syncPermissions = async (
+    roleId: string,
+    permissionIds: string[]
+  ): Promise<boolean> => {
+    try {
+      setLoading(true);
+
+      const response =
+        await roleService.syncPermissions(
+          roleId,
+          { permissionIds }
+        );
+
+      setMessage(response.message);
+
+      await fetchRolePermissions(
+        roleId
+      );
+
+      return response.success;
+    } catch (error) {
+      setMessage(getErrorMessage(error));
+
+      return false;
+    } finally {
+      setLoading(false);
+    }
   };
 
   useEffect(() => {
@@ -53,13 +229,16 @@ export const RoleProvider = ({ children }: Props) => {
     <RoleContext.Provider
       value={{
         roles,
+        permissions,
         loading,
         message,
-        error,
+        setMessage,
         fetchRoles,
+        fetchRolePermissions,
         createRole,
         updateRole,
         deleteRole,
+        syncPermissions,
       }}
     >
       {children}

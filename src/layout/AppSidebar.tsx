@@ -9,7 +9,8 @@ import {
   ChevronDownIcon,
   GridIcon,
   HorizontaLDots,
-  MailIcon
+  MailIcon,
+  BoxCubeIcon,
 } from "../icons";
 import { useSidebar } from "../context/SidebarContext";
 import SidebarWidget from "./SidebarWidget";
@@ -42,12 +43,19 @@ const navItems: NavItem[] = [
    
   // },
  
-  //  {
-  //   icon: <BoxCubeIcon />,
-  //   name: "Roles",
-  //    path: "/roles",
+   {
+    icon: <BoxCubeIcon />,
+    name: "Roles",
+     path: "/roles",
    
-  // },
+  },
+  
+   {
+    icon: <BoxCubeIcon />,
+    name: "Permissions",
+     path: "/permissions",
+   
+  },
   // {
   //   icon: <BoxCubeIcon />,
   //   name: "Menu",

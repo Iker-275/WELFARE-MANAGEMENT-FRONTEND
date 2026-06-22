@@ -35,6 +35,9 @@ import ForgotPassword from "../pages/AuthPages/Forgot";
 import NotificationsPage from "../pages/NotificationPages/NotificationsPage";
 import AnnouncementsPage from "../pages/AnnouncementPages/AnnouncementPage";
 import CreateAnnouncement from "../pages/AnnouncementPages/CreateAnnouncement";
+import CreatePermission from "../pages/PermissionPages/CreatePermission";
+import PermissionsPage from "../pages/PermissionPages/PermissionsPage";
+import RolePermissionsPage from "../pages/RolesPages/RolePermissionsPage";
 
 
 
@@ -63,6 +66,12 @@ const AppRoutes = () => {
               <Route path="/roles" element={<Roles />} />
               <Route path="/roles/create" element={<CreateRole />} />
               <Route path="/roles/edit/:id" element={<UpdateRole />} />
+   
+
+              <Route path="/roles/:id/permissions" element={<RolePermissionsPage />}/>
+
+              <Route path="/permissions" element={<PermissionsPage />} />
+              <Route path="/permissions/create" element={<CreatePermission />} />
 
               <Route path="/menu" element={<Menu />} />
               <Route path="/menu/create" element={<CreateMenu />} />
