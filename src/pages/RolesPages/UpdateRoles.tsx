@@ -32,19 +32,11 @@ message
 
 }=useRoles();
 
-
-
-
-
 const role =
 roles.find(
 (r:any)=>
 r.id===id
 );
-
-
-
-
 
 if(!role){
 
@@ -59,12 +51,6 @@ Loading...
 )
 
 }
-
-
-
-
-
-
 
 const handleUpdate =
 async(data:{
@@ -83,80 +69,33 @@ data
 
 );
 
-
-
-
-
 if(success){
 
 navigate("/roles");
-
 }
-
-
-
 };
 
 
-
-
-
-
-
 return(
-
-
 <>
-
-
 <RoleForm
-
-
 mode="edit"
-
-
-
 initialData={{
 
 name:
 role.name
-
 }}
 
-
-
 onSubmit={handleUpdate}
-
-
-
 />
-
-
-
 
 
 {
 message &&
-
-<div className="
-text-sm
-mt-4
-">
-
+<div className=" text-sm mt-4">
 {message}
-
 </div>
-
 }
-
-
-
 </>
-
-
-
 );
-
-
-
 }

@@ -56,12 +56,12 @@ const navItems: NavItem[] = [
      path: "/permissions",
    
   },
-  // {
-  //   icon: <BoxCubeIcon />,
-  //   name: "Menu",
-  //    path: "/menu",
+  {
+    icon: <BoxCubeIcon />,
+    name: "Regions",
+     path: "/regions",
    
-  // },
+  },
  
   
   

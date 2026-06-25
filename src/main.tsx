@@ -12,6 +12,7 @@ import { DashboardProvider } from "./context/DashboardContext.tsx";
 import { AnnouncementProvider } from "./context/AnnouncementContext.tsx";
 import { RoleProvider } from "./context/RoleContext.tsx";
 import { PermissionProvider } from "./context/PermissionContext.tsx";
+import { RegionProvider } from "./context/RegionContext.tsx";
 
 
 createRoot(document.getElementById("root")!).render(
@@ -19,21 +20,23 @@ createRoot(document.getElementById("root")!).render(
     <ThemeProvider>
       <AuthProvider>
         <RoleProvider>
- <PermissionProvider>
-          <AppWrapper>
-            <NotificationProvider>
-              <AnnouncementProvider>
-                <DashboardProvider>
+          <PermissionProvider>
+            <RegionProvider>
+              <AppWrapper>
+                <NotificationProvider>
+                  <AnnouncementProvider>
+                    <DashboardProvider>
 
 
 
-                  <App />
+                      <App />
 
 
-                </DashboardProvider>
-              </AnnouncementProvider>
-            </NotificationProvider>
-          </AppWrapper>
+                    </DashboardProvider>
+                  </AnnouncementProvider>
+                </NotificationProvider>
+              </AppWrapper>
+            </RegionProvider>
           </PermissionProvider>
         </RoleProvider>
 

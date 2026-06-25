@@ -16,10 +16,7 @@ import { useOrder } from "../../../hooks/useOrder"
 import { OrderFilters } from "../../../types/OrderTypes";
 import { useCustomer } from "../../../hooks/useCustomers";
 import {usePermissions}from "../../../hooks/usePermission";
-
-
-
-
+import { useRegion } from "../../../hooks/useRegion";
 
 
 
@@ -446,7 +443,6 @@ function StatusTable() {
   );
 }
 
-
 function MenuTable() {
   const { loading, menu, deleteMenu, fetchMenu } = useMenu();
   useEffect(() => {
@@ -543,122 +539,6 @@ function MenuTable() {
     </>
   );
 }
-
-
-// function RolesTable() {
-//   const { loading, roles, deleteRole } = useRoles();
-
-//   if (loading)
-//     return (
-//       <div className="flex justify-center py-10">
-//         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-brand-500"></div>
-//       </div>
-//     );
-
-//   return (
-//     <>
-//       <div className="flex justify-end mb-4">
-//         <Link
-//           to="/roles/create"
-//           className="px-4 py-2 text-white bg-blue-600 rounded-lg"
-//         >
-//           + Create Role
-//         </Link>
-//       </div>
-
-//       <div className="overflow-hidden rounded-xl border border-gray-200 bg-white dark:border-white/[0.05] dark:bg-white/[0.03]">
-//         <div className="max-w-full overflow-x-auto">
-
-//           <Table>
-//             <TableHeader className="border-b border-gray-100 dark:border-white/[0.05]">
-//               <TableRow>
-
-//                 <TableCell isHeader className="px-5 py-3 text-start">
-//                   Name
-//                 </TableCell>
-
-//                 <TableCell isHeader className="px-5 py-3 text-start">
-//                   Description
-//                 </TableCell>
-
-//                 <TableCell isHeader className="px-5 py-3 text-start">
-//                   Status
-//                 </TableCell>
-
-//                 <TableCell isHeader className="px-5 py-3 text-start">
-//                   Created At
-//                 </TableCell>
-
-//                 <TableCell isHeader className="px-5 py-3 text-start">
-//                   Actions
-//                 </TableCell>
-
-//               </TableRow>
-//             </TableHeader>
-
-//             <TableBody className="divide-y divide-gray-100 dark:divide-white/[0.05]">
-
-//               {roles.map((role) => (
-//                 <TableRow key={role._id}>
-
-//                   <TableCell className="px-5 py-4 text-start">
-//                     {role.name}
-//                   </TableCell>
-
-//                   <TableCell className="px-5 py-4 text-start">
-//                     {role.description}
-//                   </TableCell>
-
-//                   <TableCell className="px-5 py-4 text-start">
-
-//                     <Badge
-//                       size="sm"
-//                       color={role.active ? "success" : "error"}
-//                     >
-//                       {role.active ? "Active" : "Inactive"}
-//                     </Badge>
-
-//                   </TableCell>
-
-//                   <TableCell className="px-5 py-4 text-start">
-//                     {new Date(role.createdAt).toLocaleDateString()}
-//                   </TableCell>
-
-//                   <TableCell>
-//                     <div className="flex gap-3">
-
-//                       <Link
-//                         to={`/roles/edit/${role._id}`}
-//                         className="text-blue-500"
-//                       >
-//                         Edit
-//                       </Link>
-
-//                       <button
-//                         onClick={() => deleteRole(role._id)}
-//                         className="text-red-500"
-//                       >
-//                         Delete
-//                       </button>
-
-//                     </div>
-//                   </TableCell>
-
-//                 </TableRow>
-//               ))}
-
-//             </TableBody>
-//           </Table>
-
-//         </div>
-//       </div>
-//     </>
-//   );
-// }
-
-
-
-
 
  function RolesTable() {
 
@@ -805,65 +685,16 @@ function MenuTable() {
   );
 }
 
-
-
  function PermissionsTable() {
-
-
-  const {
-    permissions,
-    loading,
-    message
-  } = usePermissions();
-
-
-
-
+  const { permissions, loading, message} = usePermissions();
   if (loading) {
-
     return (
-
       <div className="flex justify-center py-10">
-
-        <div
-          className="
-          animate-spin
-          rounded-full
-          h-8 w-8
-          border-b-2
-          border-brand-500
-          "
-        />
-
-      </div>
-
-    );
-
+        <div className="  animate-spin  rounded-full  h-8 w-8 border-b-2 border-brand-500 " /></div>);
   }
-
-
-
-
   return (
-
     <>
-
-
-      {message && (
-
-        <div className="mb-4 text-sm">
-
-          {message}
-
-        </div>
-
-      )}
-
-
-
-
-
-
+      {message && ( <div className="mb-4 text-sm"> {message} </div>)}
       <div className="flex justify-end mb-4">
 
         <Link
@@ -1125,4 +956,422 @@ function MenuTable() {
 
 
 
-export {  RolesTable,  MenuTable, StatusTable, OrdersTable,CustomersTable, PermissionsTable  };
+
+interface RegionFilters {
+  search?: string;
+  page?: number;
+  limit?: number;
+}
+
+interface Props {
+  filters: RegionFilters;
+}
+
+ function RegionsTable({
+  filters,
+}: Props) {
+  const {
+    regions,
+    loading,
+    fetchRegions,
+    deleteRegionHandler,
+  } = useRegion();
+
+  useEffect(() => {
+    fetchRegions(filters);
+  }, [filters]);
+
+  const handleDelete = async (
+    regionId: string
+  ) => {
+    const confirmed =
+      window.confirm(
+        "Are you sure you want to delete this region?"
+      );
+
+    if (!confirmed) {
+      return;
+    }
+
+    await deleteRegionHandler(
+      regionId
+    );
+  };
+
+  if (loading) {
+    return (
+      <div className="flex justify-center py-10">
+        <div className="animate-spin h-8 w-8 border-b-2 border-brand-500 rounded-full"></div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="overflow-hidden rounded-xl border bg-white">
+      <div className="overflow-x-auto">
+        <table className="min-w-full text-sm">
+
+          <thead className="border-b">
+            <tr>
+              <th className="p-3 text-left">
+                Name
+              </th>
+
+              <th className="p-3 text-left">
+                Code
+              </th>
+
+              <th className="p-3 text-left">
+                Description
+              </th>
+
+              <th className="p-3 text-left">
+                Members
+              </th>
+
+              <th className="p-3 text-left">
+                Created
+              </th>
+
+              <th className="p-3 text-left">
+                Actions
+              </th>
+            </tr>
+          </thead>
+
+          <tbody>
+            {regions.length === 0 && (
+              <tr>
+                <td
+                  colSpan={6}
+                  className="text-center p-6 text-gray-500"
+                >
+                  No regions found
+                </td>
+              </tr>
+            )}
+
+            {regions.map(
+              (region: any) => (
+                <tr
+                  key={region.id}
+                  className="border-b"
+                >
+                  <td className="p-3 capitalize">
+                    {region.name}
+                  </td>
+
+                  <td className="p-3">
+                    {region.code || "-"}
+                  </td>
+
+                  <td className="p-3">
+                    {region.description ||
+                      "-"}
+                  </td>
+
+                  <td className="p-3">
+                    {region._count
+                      ?.users || 0}
+                  </td>
+
+                  <td className="p-3">
+                    {new Date(
+                      region.createdAt
+                    ).toLocaleDateString()}
+                  </td>
+
+                  <td className="p-3">
+                    <div className="flex gap-3">
+
+                      <Link
+                        to={`/regions/${region.id}/users`}
+                        className="text-green-600"
+                      >
+                        Users
+                      </Link>
+
+                      <Link
+                        to={`/regions/edit/${region.id}`}
+                        className="text-blue-600"
+                      >
+                        Edit
+                      </Link>
+
+                      <button
+                        onClick={() =>
+                          handleDelete(
+                            region.id
+                          )
+                        }
+                        className="text-red-600"
+                      >
+                        Delete
+                      </button>
+
+                    </div>
+                  </td>
+                </tr>
+              )
+            )}
+          </tbody>
+
+        </table>
+      </div>
+    </div>
+  );
+}
+
+
+interface RegionUserFilters {
+  search?: string;
+  membershipStatus?: string;
+  employmentStatus?: string;
+  roleId?: string;
+  isActive?: boolean;
+  page?: number;
+  limit?: number;
+}
+
+interface Props2 {
+  regionId: string;
+  filters: RegionUserFilters;
+  setFilters: (
+    filters: RegionUserFilters
+  ) => void;
+}
+
+ function RegionUsersTable({
+  regionId,
+  filters,
+  setFilters,
+}: Props2) {
+  const {
+    regionUsers,
+pagination,
+    loading,
+    fetchRegionUsers,
+  } = useRegion();
+
+  useEffect(() => {
+    if (!regionId) return;
+
+    fetchRegionUsers(
+      regionId,
+      filters
+    );
+  }, [regionId, filters]);
+
+  const handlePageChange = (
+    page: number
+  ) => {
+    setFilters({
+      ...filters,
+      page,
+    });
+  };
+
+  if (!regionId) {
+    return (
+      <div className="bg-white border rounded-xl p-10 text-center text-gray-500">
+        Select a region to view members
+      </div>
+    );
+  }
+
+  if (loading) {
+    return (
+      <div className="flex justify-center py-10">
+        <div className="animate-spin h-8 w-8 border-b-2 border-brand-500 rounded-full"></div>
+      </div>
+    );
+  }
+
+  return (
+    <>
+      <div className="overflow-hidden rounded-xl border bg-white">
+        <div className="overflow-x-auto">
+
+          <table className="min-w-full text-sm">
+
+            <thead className="border-b">
+              <tr>
+                <th className="p-3 text-left">
+                  Membership No
+                </th>
+
+                <th className="p-3 text-left">
+                  Name
+                </th>
+
+                <th className="p-3 text-left">
+                  Email
+                </th>
+
+                <th className="p-3 text-left">
+                  Phone
+                </th>
+
+                <th className="p-3 text-left">
+                  Role
+                </th>
+
+                <th className="p-3 text-left">
+                  Membership Status
+                </th>
+
+                <th className="p-3 text-left">
+                  Employment Status
+                </th>
+
+                <th className="p-3 text-left">
+                  NEC
+                </th>
+
+                <th className="p-3 text-left">
+                  Active
+                </th>
+              </tr>
+            </thead>
+
+            <tbody>
+              {regionUsers.length === 0 && (
+                <tr>
+                  <td
+                    colSpan={9}
+                    className="text-center p-6 text-gray-500"
+                  >
+                    No users found
+                  </td>
+                </tr>
+              )}
+
+              {regionUsers.map(
+                (user: any) => (
+                  <tr
+                    key={user.id}
+                    className="border-b"
+                  >
+                    <td className="p-3">
+                      {user.membershipNumber ||
+                        "-"}
+                    </td>
+
+                    <td className="p-3">
+                      {[
+                        user.firstName,
+                        user.lastName,
+                      ]
+                        .filter(Boolean)
+                        .join(" ") || "-"}
+                    </td>
+
+                    <td className="p-3">
+                      {user.email ||
+                        "-"}
+                    </td>
+
+                    <td className="p-3">
+                      {user.phone ||
+                        "-"}
+                    </td>
+
+                    <td className="p-3">
+                      {user.role
+                        ?.name || "-"}
+                    </td>
+
+                    <td className="p-3">
+                      <span className="px-2 py-1 rounded text-xs bg-blue-100 text-blue-700">
+                        {
+                          user.membershipStatus
+                        }
+                      </span>
+                    </td>
+
+                    <td className="p-3">
+                      {
+                        user.employmentStatus
+                      }
+                    </td>
+
+                    <td className="p-3">
+                      {user.isNecMember
+                        ? "Yes"
+                        : "No"}
+                    </td>
+
+                    <td className="p-3">
+                      <span
+                        className={`px-2 py-1 rounded text-xs ${
+                          user.isActive
+                            ? "bg-green-100 text-green-700"
+                            : "bg-red-100 text-red-700"
+                        }`}
+                      >
+                        {user.isActive
+                          ? "Active"
+                          : "Inactive"}
+                      </span>
+                    </td>
+                  </tr>
+                )
+              )}
+            </tbody>
+
+          </table>
+        </div>
+      </div>
+
+      {pagination &&
+        pagination.totalPages >
+          0 && (
+          <div className="flex justify-between items-center mt-4">
+
+            <button
+              disabled={
+                !pagination.hasPreviousPage
+              }
+              onClick={() =>
+                handlePageChange(
+                  filters.page! - 1
+                )
+              }
+              className="px-3 py-1 border rounded disabled:opacity-50"
+            >
+              Prev
+            </button>
+
+            <span>
+              Page{" "}
+              {
+                pagination.page
+              }{" "}
+              of{" "}
+              {
+                pagination.totalPages
+              }
+            </span>
+
+            <button
+              disabled={
+                !pagination.hasNextPage
+              }
+              onClick={() =>
+                handlePageChange(
+                  filters.page! + 1
+                )
+              }
+              className="px-3 py-1 border rounded disabled:opacity-50"
+            >
+              Next
+            </button>
+
+          </div>
+        )}
+    </>
+  );
+}
+
+
+export {  RolesTable,  MenuTable, StatusTable, OrdersTable,CustomersTable, PermissionsTable,RegionsTable ,RegionUsersTable}; 
