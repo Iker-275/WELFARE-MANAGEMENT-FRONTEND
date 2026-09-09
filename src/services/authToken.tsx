@@ -1,41 +1,73 @@
-// services/authToken.ts
 
 import { jwtDecode } from "jwt-decode";
 
-interface JwtPayload {
+export interface AccessTokenPayload {
   id: string;
-  email: string;
+  sessionId: string;
   roleId: string;
-  exp: number;
+  email: string;
+  jti: string;
   iat: number;
+  exp: number;
 }
 
-export const authToken = {
-  decode(token: string): JwtPayload | null {
-    try {
-      return jwtDecode<JwtPayload>(token);
-    } catch {
-      return null;
-    }
-  },
+export const decodeAccessToken = (
+  token: string
+): AccessTokenPayload | null => {
 
-  isExpired(token: string): boolean {
-    try {
-      const decoded = jwtDecode<JwtPayload>(token);
+  try {
 
-      return decoded.exp * 1000 < Date.now();
-    } catch {
-      return true;
-    }
-  },
+    return jwtDecode<AccessTokenPayload>(
+      token
+    );
 
-  getExpiryTime(token: string): number | null {
-    try {
-      const decoded = jwtDecode<JwtPayload>(token);
+  } catch {
 
-      return decoded.exp * 1000;
-    } catch {
-      return null;
-    }
-  },
+    return null;
+  }
 };
+
+
+export const isTokenExpired = (
+  token: string
+): boolean => {
+
+  const payload =
+    decodeAccessToken(token);
+
+  if (!payload?.exp) {
+    return true;
+  }
+
+  return (
+    payload.exp * 1000 <= Date.now()
+  );
+};
+
+
+export const getTokenExpiry = (
+  token: string
+): number | null => {
+
+  const payload =
+    decodeAccessToken(token);
+
+  if (!payload?.exp) {
+    return null;
+  }
+
+  return payload.exp * 1000;
+};
+
+
+export const authToken = {
+
+  decode: decodeAccessToken,
+
+  isExpired: isTokenExpired,
+
+  getExpiry: getTokenExpiry,
+};
+
+
+export default authToken;

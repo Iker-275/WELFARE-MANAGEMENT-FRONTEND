@@ -1,6 +1,7 @@
 import {
   createContext,
   ReactNode,
+  useCallback,
   useEffect,
   useState,
 } from "react";
@@ -12,12 +13,13 @@ import {
   UpdateRolePayload,
 } from "../types/RoleType";
 
-import {
-  roleService,
-  getErrorMessage,
-} from "../api/RoleApi";
+import roleService from "../api/RoleApi";
+
+import { getApiError } from "../utils/apiError";
+
 
 interface RoleContextType {
+
   roles: Role[];
 
   permissions: RolePermission[];
@@ -30,11 +32,15 @@ interface RoleContextType {
     React.SetStateAction<string>
   >;
 
-  fetchRoles: () => Promise<void>;
+  fetchRoles: () => Promise<boolean>;
+
+  fetchRole: (
+    id: string
+  ) => Promise<Role | null>;
 
   fetchRolePermissions: (
     roleId: string
-  ) => Promise<void>;
+  ) => Promise<boolean>;
 
   createRole: (
     payload: CreateRolePayload
@@ -53,20 +59,36 @@ interface RoleContextType {
     roleId: string,
     permissionIds: string[]
   ) => Promise<boolean>;
+
+  addPermissions: (
+    roleId: string,
+    permissionIds: string[]
+  ) => Promise<boolean>;
+
+  removePermissions: (
+    roleId: string,
+    permissionIds: string[]
+  ) => Promise<boolean>;
+
+  clearMessage: () => void;
 }
+
 
 export const RoleContext =
   createContext<RoleContextType | null>(
     null
   );
 
+
 interface Props {
   children: ReactNode;
 }
 
+
 export const RoleProvider = ({
   children,
 }: Props) => {
+
   const [roles, setRoles] =
     useState<Role[]>([]);
 
@@ -79,27 +101,111 @@ export const RoleProvider = ({
   const [message, setMessage] =
     useState("");
 
+
+  /**
+   * Fetch all roles
+   */
   const fetchRoles =
-    async (): Promise<void> => {
+    useCallback(async (): Promise<boolean> => {
+
       try {
+
         setLoading(true);
 
         const response =
           await roleService.getRoles();
 
-        setRoles(response.data);
+        if (!response.success) {
+
+          setMessage(
+            response.message
+          );
+
+          return false;
+        }
+
+        setRoles(
+          response.data
+        );
+
+        setMessage(
+          response.message
+        );
+
+        return true;
+
       } catch (error) {
-        setMessage(getErrorMessage(error));
+
+        setMessage(
+          getApiError(error).message
+        );
+
+        return false;
+
       } finally {
+
         setLoading(false);
       }
-    };
 
-  const fetchRolePermissions =
-    async (
-      roleId: string
-    ): Promise<void> => {
+    }, []);
+
+
+  /**
+   * Fetch single role
+   */
+  const fetchRole =
+    useCallback(async (
+      id: string
+    ): Promise<Role | null> => {
+
       try {
+
+        setLoading(true);
+
+        const response =
+          await roleService.getRole(id);
+
+        if (!response.success) {
+
+          setMessage(
+            response.message
+          );
+
+          return null;
+        }
+
+        setMessage(
+          response.message
+        );
+
+        return response.data;
+
+      } catch (error) {
+
+        setMessage(
+          getApiError(error).message
+        );
+
+        return null;
+
+      } finally {
+
+        setLoading(false);
+      }
+
+    }, []);
+
+
+  /**
+   * Fetch permissions assigned to role
+   */
+  const fetchRolePermissions =
+    useCallback(async (
+      roleId: string
+    ): Promise<boolean> => {
+
+      try {
+
         setLoading(true);
 
         const response =
@@ -107,138 +213,376 @@ export const RoleProvider = ({
             roleId
           );
 
+        if (!response.success) {
+
+          setMessage(
+            response.message
+          );
+
+          return false;
+        }
+
         setPermissions(
-          response.permissions
+          response.data
         );
+
+        setMessage(
+          response.message
+        );
+
+        return true;
+
       } catch (error) {
-        setMessage(getErrorMessage(error));
+
+        setMessage(
+          getApiError(error).message
+        );
+
+        return false;
+
       } finally {
+
         setLoading(false);
       }
-    };
 
-  const createRole = async (
-    payload: CreateRolePayload
-  ): Promise<boolean> => {
-    try {
-      setLoading(true);
+    }, []);
 
-      const response =
-        await roleService.create(
-          payload
+
+  /**
+   * Create role
+   */
+  const createRole =
+    useCallback(async (
+      payload: CreateRolePayload
+    ): Promise<boolean> => {
+
+      try {
+
+        setLoading(true);
+
+        const response =
+          await roleService.create(
+            payload
+          );
+
+        setMessage(
+          response.message
         );
 
-      setMessage(response.message);
+        if (!response.success) {
+          return false;
+        }
 
-      await fetchRoles();
+        await fetchRoles();
 
-      return response.success;
-    } catch (error) {
-      setMessage(getErrorMessage(error));
+        return true;
 
-      return false;
-    } finally {
-      setLoading(false);
-    }
-  };
+      } catch (error) {
 
-  const updateRole = async (
-    id: string,
-    payload: UpdateRolePayload
-  ): Promise<boolean> => {
-    try {
-      setLoading(true);
-
-      const response =
-        await roleService.update(
-          id,
-          payload
+        setMessage(
+          getApiError(error).message
         );
 
-      setMessage(response.message);
+        return false;
 
-      await fetchRoles();
+      } finally {
 
-      return response.success;
-    } catch (error) {
-      setMessage(getErrorMessage(error));
+        setLoading(false);
+      }
 
-      return false;
-    } finally {
-      setLoading(false);
-    }
-  };
+    }, [fetchRoles]);
 
-  const deleteRole = async (
-    id: string
-  ): Promise<boolean> => {
-    try {
-      setLoading(true);
 
-      const response =
-        await roleService.delete(id);
+  /**
+   * Update role
+   */
+  const updateRole =
+    useCallback(async (
+      id: string,
+      payload: UpdateRolePayload
+    ): Promise<boolean> => {
 
-      setMessage(response.message);
+      try {
 
-      await fetchRoles();
+        setLoading(true);
 
-      return response.success;
-    } catch (error) {
-      setMessage(getErrorMessage(error));
+        const response =
+          await roleService.update(
+            id,
+            payload
+          );
 
-      return false;
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const syncPermissions = async (
-    roleId: string,
-    permissionIds: string[]
-  ): Promise<boolean> => {
-    try {
-      setLoading(true);
-
-      const response =
-        await roleService.syncPermissions(
-          roleId,
-          { permissionIds }
+        setMessage(
+          response.message
         );
 
-      setMessage(response.message);
+        if (!response.success) {
+          return false;
+        }
 
-      await fetchRolePermissions(
-        roleId
-      );
+        await fetchRoles();
 
-      return response.success;
-    } catch (error) {
-      setMessage(getErrorMessage(error));
+        return true;
 
-      return false;
-    } finally {
-      setLoading(false);
-    }
-  };
+      } catch (error) {
 
+        setMessage(
+          getApiError(error).message
+        );
+
+        return false;
+
+      } finally {
+
+        setLoading(false);
+      }
+
+    }, [fetchRoles]);
+
+
+  /**
+   * Delete role
+   */
+  const deleteRole =
+    useCallback(async (
+      id: string
+    ): Promise<boolean> => {
+
+      try {
+
+        setLoading(true);
+
+        const response =
+          await roleService.delete(
+            id
+          );
+
+        setMessage(
+          response.message
+        );
+
+        if (!response.success) {
+          return false;
+        }
+
+        await fetchRoles();
+
+        return true;
+
+      } catch (error) {
+
+        setMessage(
+          getApiError(error).message
+        );
+
+        return false;
+
+      } finally {
+
+        setLoading(false);
+      }
+
+    }, [fetchRoles]);
+
+
+  /**
+   * Synchronize permissions
+   */
+  const syncPermissions =
+    useCallback(async (
+      roleId: string,
+      permissionIds: string[]
+    ): Promise<boolean> => {
+
+      try {
+
+        setLoading(true);
+
+        const response =
+          await roleService.syncPermissions(
+            roleId,
+            {
+              permissionIds,
+            }
+          );
+
+        setMessage(
+          response.message
+        );
+
+        if (!response.success) {
+          return false;
+        }
+
+        await fetchRolePermissions(
+          roleId
+        );
+
+        return true;
+
+      } catch (error) {
+
+        setMessage(
+          getApiError(error).message
+        );
+
+        return false;
+
+      } finally {
+
+        setLoading(false);
+      }
+
+    }, [fetchRolePermissions]);
+
+
+  /**
+   * Add permissions
+   */
+  const addPermissions =
+    useCallback(async (
+      roleId: string,
+      permissionIds: string[]
+    ): Promise<boolean> => {
+
+      try {
+
+        setLoading(true);
+
+        const response =
+          await roleService.addPermissions(
+            roleId,
+            {
+              permissionIds,
+            }
+          );
+
+        setMessage(
+          response.message
+        );
+
+        if (!response.success) {
+          return false;
+        }
+
+        await fetchRolePermissions(
+          roleId
+        );
+
+        return true;
+
+      } catch (error) {
+
+        setMessage(
+          getApiError(error).message
+        );
+
+        return false;
+
+      } finally {
+
+        setLoading(false);
+      }
+
+    }, [fetchRolePermissions]);
+
+
+  /**
+   * Remove permissions
+   */
+  const removePermissions =
+    useCallback(async (
+      roleId: string,
+      permissionIds: string[]
+    ): Promise<boolean> => {
+
+      try {
+
+        setLoading(true);
+
+        const response =
+          await roleService.removePermissions(
+            roleId,
+            {
+              permissionIds,
+            }
+          );
+
+        setMessage(
+          response.message
+        );
+
+        if (!response.success) {
+          return false;
+        }
+
+        await fetchRolePermissions(
+          roleId
+        );
+
+        return true;
+
+      } catch (error) {
+
+        setMessage(
+          getApiError(error).message
+        );
+
+        return false;
+
+      } finally {
+
+        setLoading(false);
+      }
+
+    }, [fetchRolePermissions]);
+
+
+  /**
+   * Clear message
+   */
+  const clearMessage =
+    useCallback(() => {
+
+      setMessage("");
+
+    }, []);
+
+
+  /**
+   * Initial role loading
+   */
   useEffect(() => {
+
     fetchRoles();
-  }, []);
+
+  }, [fetchRoles]);
+
 
   return (
     <RoleContext.Provider
       value={{
         roles,
         permissions,
+
         loading,
+
         message,
         setMessage,
+
         fetchRoles,
+        fetchRole,
         fetchRolePermissions,
+
         createRole,
         updateRole,
         deleteRole,
+
         syncPermissions,
+        addPermissions,
+        removePermissions,
+
+        clearMessage,
       }}
     >
       {children}

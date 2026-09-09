@@ -1,188 +1,325 @@
 import {
   createContext,
   ReactNode,
-  useEffect,
+  useCallback,
   useState,
 } from "react";
 
+import notificationApi from "../api/NotificationApi";
+
 import {
-  CreateNotificationPayload,
-  UserNotification,
+  NotificationMetadata,
 } from "../types/NotificationType";
 
 import {
-  notificationService,
-  getErrorMessage,
-} from "../api/NotificationApi";
+  getApiError,
+} from "../utils/apiError";
 
 interface NotificationContextType {
-  notifications: UserNotification[];
 
-  unreadCount: number;
+  channels: NotificationMetadata[];
+
+  types: NotificationMetadata[];
+
+  priorities: NotificationMetadata[];
 
   loading: boolean;
 
   message: string;
 
-  setMessage: React.Dispatch<
-    React.SetStateAction<string>
-  >;
+  loadChannels(): Promise<boolean>;
 
-  fetchNotifications: () => Promise<void>;
+  loadTypes(): Promise<boolean>;
 
-  fetchUnreadCount: () => Promise<void>;
+  loadPriorities(): Promise<boolean>;
 
-  createNotification: (
-    payload: CreateNotificationPayload
-  ) => Promise<boolean>;
+  loadAll(): Promise<boolean>;
 
-  markAsRead: (
-    id: string
-  ) => Promise<boolean>;
-
-  markAllAsRead: () => Promise<boolean>;
+  clearMessage(): void;
 }
 
-export const NotificationContext =
-  createContext<NotificationContextType | null>(
-    null
-  );
-
-interface Props {
+interface NotificationProviderProps {
   children: ReactNode;
 }
 
+export const NotificationContext =
+  createContext<
+    NotificationContextType | null
+  >(null);
+
 export const NotificationProvider = ({
   children,
-}: Props) => {
-  const [notifications, setNotifications] =
-    useState<UserNotification[]>([]);
+}: NotificationProviderProps) => {
 
-  const [unreadCount, setUnreadCount] =
-    useState(0);
+  const [
+    channels,
+    setChannels,
+  ] = useState<NotificationMetadata[]>([]);
 
-  const [loading, setLoading] =
-    useState(false);
+  const [
+    types,
+    setTypes,
+  ] = useState<NotificationMetadata[]>([]);
 
-  const [message, setMessage] =
-    useState("");
+  const [
+    priorities,
+    setPriorities,
+  ] = useState<NotificationMetadata[]>([]);
 
-  const fetchNotifications =
-    async (): Promise<void> => {
-      try {
-        setLoading(true);
+  const [
+    loading,
+    setLoading,
+  ] = useState(false);
 
-        const response =
-          await notificationService.getMyNotifications();
+  const [
+    message,
+    setMessage,
+  ] = useState("");
 
-        setNotifications(response.data);
-      } catch (error) {
-        setMessage(getErrorMessage(error));
-      } finally {
-        setLoading(false);
-      }
-    };
-
-  const fetchUnreadCount =
-    async (): Promise<void> => {
-      try {
-        const response =
-          await notificationService.getUnreadCount();
-
-        setUnreadCount(response.count);
-      } catch (error) {
-        setMessage(getErrorMessage(error));
-      }
-    };
-
-  const createNotification = async (
-    payload: CreateNotificationPayload
-  ): Promise<boolean> => {
-    try {
-      setLoading(true);
-
-      const response =
-        await notificationService.create(
-          payload
-        );
-
-      setMessage(response.message);
-
-      return response.success;
-    } catch (error) {
-      setMessage(getErrorMessage(error));
-      return false;
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const markAsRead = async (
-    id: string
-  ): Promise<boolean> => {
-    try {
-      setLoading(true);
-
-      const response =
-        await notificationService.markAsRead(
-          id
-        );
-
-      setMessage(response.message);
-
-      await fetchNotifications();
-      await fetchUnreadCount();
-
-      return response.success;
-    } catch (error) {
-      setMessage(getErrorMessage(error));
-      return false;
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const markAllAsRead =
+  const loadChannels = useCallback(
     async (): Promise<boolean> => {
+
       try {
+
         setLoading(true);
+        setMessage("");
 
         const response =
-          await notificationService.markAllAsRead();
+          await notificationApi
+            .getChannels();
 
-        setMessage(response.message);
+        setMessage(
+          response.message
+        );
 
-        await fetchNotifications();
-        await fetchUnreadCount();
+        if (response.success) {
+          setChannels(
+            response.data
+          );
+        }
 
         return response.success;
+
       } catch (error) {
-        setMessage(getErrorMessage(error));
+
+        const apiError =
+          getApiError(error);
+
+        setMessage(
+          apiError.message
+        );
+
         return false;
+
       } finally {
+
         setLoading(false);
       }
-    };
+    },
+    []
+  );
 
-  useEffect(() => {
-    fetchNotifications();
-    fetchUnreadCount();
-  }, []);
+  const loadTypes = useCallback(
+    async (): Promise<boolean> => {
+
+      try {
+
+        setLoading(true);
+        setMessage("");
+
+        const response =
+          await notificationApi
+            .getTypes();
+
+        setMessage(
+          response.message
+        );
+
+        if (response.success) {
+          setTypes(
+            response.data
+          );
+        }
+
+        return response.success;
+
+      } catch (error) {
+
+        const apiError =
+          getApiError(error);
+
+        setMessage(
+          apiError.message
+        );
+
+        return false;
+
+      } finally {
+
+        setLoading(false);
+      }
+    },
+    []
+  );
+
+  const loadPriorities = useCallback(
+    async (): Promise<boolean> => {
+
+      try {
+
+        setLoading(true);
+        setMessage("");
+
+        const response =
+          await notificationApi
+            .getPriorities();
+
+        setMessage(
+          response.message
+        );
+
+        if (response.success) {
+          setPriorities(
+            response.data
+          );
+        }
+
+        return response.success;
+
+      } catch (error) {
+
+        const apiError =
+          getApiError(error);
+
+        setMessage(
+          apiError.message
+        );
+
+        return false;
+
+      } finally {
+
+        setLoading(false);
+      }
+    },
+    []
+  );
+
+  const loadAll = useCallback(
+    async (): Promise<boolean> => {
+
+      try {
+
+        setLoading(true);
+        setMessage("");
+
+        const [
+          channelsResponse,
+          typesResponse,
+          prioritiesResponse,
+        ] = await Promise.all([
+          notificationApi.getChannels(),
+          notificationApi.getTypes(),
+          notificationApi.getPriorities(),
+        ]);
+
+        if (
+          channelsResponse.success
+        ) {
+          setChannels(
+            channelsResponse.data
+          );
+        }
+
+        if (
+          typesResponse.success
+        ) {
+          setTypes(
+            typesResponse.data
+          );
+        }
+
+        if (
+          prioritiesResponse.success
+        ) {
+          setPriorities(
+            prioritiesResponse.data
+          );
+        }
+
+        /*
+         * Display the backend message.
+         *
+         * Since multiple endpoints are
+         * involved, use the first failure
+         * message if any request failed.
+         */
+        const failedResponse =
+          [
+            channelsResponse,
+            typesResponse,
+            prioritiesResponse,
+          ].find(
+            (response) =>
+              !response.success
+          );
+
+        setMessage(
+          failedResponse?.message ??
+          channelsResponse.message
+        );
+
+        return !failedResponse;
+
+      } catch (error) {
+
+        const apiError =
+          getApiError(error);
+
+        setMessage(
+          apiError.message
+        );
+
+        return false;
+
+      } finally {
+
+        setLoading(false);
+      }
+    },
+    []
+  );
+
+  const clearMessage = () => {
+    setMessage("");
+  };
+
+  const value: NotificationContextType = {
+
+    channels,
+
+    types,
+
+    priorities,
+
+    loading,
+
+    message,
+
+    loadChannels,
+
+    loadTypes,
+
+    loadPriorities,
+
+    loadAll,
+
+    clearMessage,
+  };
 
   return (
     <NotificationContext.Provider
-      value={{
-        notifications,
-        unreadCount,
-        loading,
-        message,
-        setMessage,
-        fetchNotifications,
-        fetchUnreadCount,
-        createNotification,
-        markAsRead,
-        markAllAsRead,
-      }}
+      value={value}
     >
       {children}
     </NotificationContext.Provider>

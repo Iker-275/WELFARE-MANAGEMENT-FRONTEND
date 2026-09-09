@@ -1,35 +1,105 @@
-export interface Role {
+export interface UserRole {
   id: string;
   name: string;
-  description: string;
 }
 
-export interface Region {
+export interface UserRegion {
   id: string;
   name: string;
   code: string | null;
-  description: string;
+  description: string | null;
 }
 
 export interface User {
   id: string;
+
   email: string;
+
+  phoneNumber: string | null;
 
   firstName: string | null;
   lastName: string | null;
-  otherNames: string | null;
 
-  phone: string | null;
+  gender: string | null;
 
-  isEmailVerified: boolean;
-  isPhoneVerified: boolean;
+  userType: string;
+  accountStatus: string;
 
-  signupCompleted: boolean;
-  isActive: boolean;
+  emailVerified: boolean;
+  phoneVerified: boolean;
 
-  roleId: string;
-  regionId: string;
+  roleId: string | null;
 
-  role?: Role;
-  region?: Region;
+  createdAt: string;
+  updatedAt: string;
+
+  role?: UserRole | null;
+  region?: UserRegion | null;
+}
+
+export interface UserFilters {
+  accountStatus?: string;
+  userType?: string;
+  roleId?: string;
+
+  page?: number;
+  limit?: number;
+}
+
+export interface ProfileCompletion {
+  isComplete: boolean;
+}
+
+export interface UserStatistics {
+  total: number;
+  active: number;
+  pending: number;
+  suspended: number;
+  deactivated: number;
+}
+
+export interface UpdateUserStatusDto {
+  accountStatus: string;
+}
+
+export interface UsersPagination {
+  page: number;
+  limit: number;
+  total: number;
+  totalPages: number;
+}
+
+export interface UsersData {
+  users: User[];
+  pagination: UsersPagination;
+}
+
+export interface UserResponse {
+  success: boolean;
+  message: string;
+  data: User;
+}
+
+export interface UsersResponse {
+  success: boolean;
+  message: string;
+  data: UsersData;
+}
+
+export interface ProfileCompletionResponse {
+  success: boolean;
+  message: string;
+  data: ProfileCompletion;
+}
+
+export interface UserStatisticsResponse {
+  success: boolean;
+  message: string;
+  data: UserStatistics;
+}
+
+export interface UserActionResponse {
+  success: boolean;
+  message: string;
+  data?: boolean | null;
 }

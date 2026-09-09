@@ -1,184 +1,291 @@
-// import { useLocation, useNavigate } from "react-router-dom";
-// import { useEffect, useState } from "react";
-// import OtpInput from "../../components/customforms/OTPForm";
-// import Button from "../../components/ui/button/Button";
-// import { useAuth } from "../../hooks/useAuth";
+import {
+  useEffect,
+  useState,
+} from "react";
 
-// export default function VerifyOtp() {
-//   const nav = useNavigate();
-//   const location = useLocation();
+import {
+  useLocation,
+  useNavigate,
+} from "react-router-dom";
 
-//   const email = location.state?.email;
-
-//   const { verifyEmail, loading, message, setMessage } =
-//     useAuth();
-
-//   const [otp, setOtp] = useState("");
-
-//   // Clear message when user types again
-//   useEffect(() => {
-//     if (otp.length > 0) {
-//       setMessage("");
-//     }
-//   }, [otp]);
-
-//   const handleVerify = async () => {
-//     if (!email) {
-//       setMessage("Email not found. Please register again.");
-//       return;
-//     }
-
-//     if (otp.length !== 6) {
-//       setMessage("Please enter the 6-digit OTP code.");
-//       return;
-//     }
-
-//     const success = await verifyEmail({
-//       email,
-//       otp,
-//     });
-
-//     if (success) {
-//       setMessage("OTP verified successfully. Redirecting...");
-
-//       setTimeout(() => {
-//         nav("/");
-//       }, 1200);
-//     } else {
-//       setMessage("Invalid OTP. Please try again.");
-//       setOtp("");
-//     }
-//   };
-
-//   if (!email) {
-//     return (
-//       <div className="text-center mt-10 text-red-500">
-//         Email not found. Please register again.
-//       </div>
-//     );
-//   }
-
-//   return (
-//     <div className="flex flex-col items-center justify-center min-h-screen gap-6 px-4">
-//       <h2 className="text-xl font-semibold">
-//         Verify your email
-//       </h2>
-
-//       <p className="text-sm text-gray-500 text-center">
-//         Enter the 6-digit code sent to <b>{email}</b>
-//       </p>
-
-//       {/* MESSAGE AREA (simple + clear) */}
-//       {message && (
-//         <div className="text-sm text-center text-gray-700">
-//           {message}
-//         </div>
-//       )}
-
-//       <OtpInput onChange={setOtp} />
-
-//       <Button
-//         onClick={handleVerify}
-//         disabled={loading || otp.length !== 6}
-//         className="w-64"
-//       >
-//         {loading ? "Verifying..." : "Verify OTP"}
-//       </Button>
-//     </div>
-//   );
-// }
-
-import { useLocation, useNavigate } from "react-router-dom";
-import { useEffect, useState } from "react";
 import OtpInput from "../../components/customforms/OTPForm";
 import Button from "../../components/ui/button/Button";
+
 import { useAuth } from "../../hooks/useAuth";
+
+import {
+  OtpChannel,
+} from "../../types/AuthTypes";
+
+interface VerifyOtpLocationState {
+  flow: "signup" | "signin";
+
+  email?: string;
+
+  identifier?: string;
+
+  otpChannel?: OtpChannel;
+}
 
 export default function VerifyOtp() {
   const nav = useNavigate();
   const location = useLocation();
 
-  const email = location.state?.email;
+  const {
+    verifyEmail,
+    verifyLogin,
+    loading,
+    message,
+    setMessage,
+  } = useAuth();
 
-  const { verifyEmail, loading, message, setMessage } =
-    useAuth();
+  const state =
+    location.state as
+      | VerifyOtpLocationState
+      | null;
 
-  const [otp, setOtp] = useState("");
-  const [resetKey, setResetKey] = useState(0); // 👈 NEW
+  const flow = state?.flow;
+
+  const email =
+    state?.email;
+
+  const identifier =
+    state?.identifier;
+
+  const otpChannel =
+    state?.otpChannel;
+
+  const [otp, setOtp] =
+    useState("");
+
+  const [resetKey, setResetKey] =
+    useState(0);
+
+  /*
+   * ======================================================
+   * CLEAR MESSAGE WHEN USER STARTS TYPING
+   * ======================================================
+   */
 
   useEffect(() => {
     if (otp.length > 0) {
       setMessage("");
     }
-  }, [otp]);
+  }, [
+    otp,
+    setMessage,
+  ]);
+
+  /*
+   * ======================================================
+   * VALIDATE ROUTE STATE
+   * ======================================================
+   */
+
+  useEffect(() => {
+    if (!flow) {
+      setMessage(
+        "Authentication session not found. Please try again."
+      );
+    }
+  }, [
+    flow,
+    setMessage,
+  ]);
+
+  /*
+   * ======================================================
+   * VERIFY
+   * ======================================================
+   */
 
   const handleVerify = async () => {
-    if (!email) {
-      setMessage("Email not found. Please register again.");
-      return;
-    }
+    /*
+     * SIGN UP
+     */
 
-    if (otp.length !== 6) {
-      setMessage("Please enter the 6-digit OTP code.");
-      return;
-    }
+    if (flow === "signup") {
+      if (!email) {
+        setMessage(
+          "Email not found. Please register again."
+        );
+        return;
+      }
 
-    const success = await verifyEmail({
-      email,
-      otp,
-    });
+      if (otp.length !== 6) {
+        setMessage(
+          "Please enter the 6-digit OTP code."
+        );
+        return;
+      }
 
-    if (success) {
-      setMessage("OTP verified successfully. Redirecting...");
+      const success =
+        await verifyEmail({
+          email,
+          otp,
+        });
 
-      setTimeout(() => {
+      if (success) {
         nav("/");
-      }, 1200);
-    } else {
-      setMessage("Invalid OTP. Please try again.");
+      } else {
+        resetOtp();
+      }
 
-      // 👇 RESET OTP FIELDS
-      setResetKey((prev) => prev + 1);
-      setOtp("");
+      return;
     }
+
+    /*
+     * SIGN IN
+     */
+
+    if (flow === "signin") {
+      if (!identifier) {
+        setMessage(
+          "Login identifier not found. Please sign in again."
+        );
+        return;
+      }
+
+      if (otp.length !== 6) {
+        setMessage(
+          "Please enter the 6-digit OTP code."
+        );
+        return;
+      }
+
+      const success =
+        await verifyLogin({
+          identifier,
+          otp,
+        });
+
+      if (success) {
+        nav("/");
+      } else {
+        resetOtp();
+      }
+
+      return;
+    }
+
+    setMessage(
+      "Invalid authentication flow. Please try again."
+    );
   };
 
-  if (!email) {
+  /*
+   * ======================================================
+   * RESET OTP
+   * ======================================================
+   */
+
+  const resetOtp = () => {
+    setOtp("");
+    setResetKey(
+      (previous) =>
+        previous + 1
+    );
+  };
+
+  /*
+   * ======================================================
+   * INVALID SESSION
+   * ======================================================
+   */
+
+  if (!flow) {
     return (
-      <div className="text-center mt-10 text-red-500">
-        Email not found. Please register again.
+      <div className="flex min-h-screen items-center justify-center px-4">
+        <div className="text-center">
+          <p className="mb-4 text-red-500">
+            Authentication session not found.
+          </p>
+
+          <Button
+            onClick={() =>
+              nav("/signin")
+            }
+          >
+            Return to Sign In
+          </Button>
+        </div>
       </div>
     );
   }
 
-  return (
-    <div className="flex flex-col items-center justify-center min-h-screen gap-6 px-4">
-      <h2 className="text-xl font-semibold">
-        Verify your email
-      </h2>
+  /*
+   * ======================================================
+   * DISPLAY TARGET
+   * ======================================================
+   */
 
-      <p className="text-sm text-gray-500 text-center">
-        Enter the 6-digit code sent to <b>{email}</b>
-      </p>
+  const verificationTarget =
+    flow === "signup"
+      ? email
+      : identifier;
+
+  const channelLabel =
+    otpChannel === "SMS"
+      ? "SMS"
+      : otpChannel === "WHATSAPP"
+      ? "WhatsApp"
+      : "email";
+
+  /*
+   * ======================================================
+   * UI
+   * ======================================================
+   */
+
+  return (
+    <div className="flex min-h-screen flex-col items-center justify-center gap-6 px-4">
+
+      <div className="w-full max-w-md text-center">
+
+        <h2 className="mb-2 text-xl font-semibold">
+          Verify your account
+        </h2>
+
+        <p className="text-sm text-gray-500">
+          Enter the 6-digit verification code
+          sent via{" "}
+          <b>{channelLabel}</b>{" "}
+          to{" "}
+          <b>{verificationTarget}</b>
+        </p>
+
+      </div>
+
+      {/* MESSAGE */}
 
       {message && (
-        <div className="text-sm text-center text-gray-700">
+        <div className="w-full max-w-md rounded bg-gray-50 p-3 text-center text-sm text-gray-700">
           {message}
         </div>
       )}
 
+      {/* OTP */}
+
       <OtpInput
         onChange={setOtp}
-        resetKey={resetKey} // 👈 IMPORTANT
+        resetKey={resetKey}
       />
+
+      {/* VERIFY */}
 
       <Button
         onClick={handleVerify}
-        disabled={loading || otp.length !== 6}
+        disabled={
+          loading ||
+          otp.length !== 6
+        }
         className="w-64"
       >
-        {loading ? "Verifying..." : "Verify OTP"}
+        {loading
+          ? "Verifying..."
+          : "Verify OTP"}
       </Button>
+
     </div>
   );
 }

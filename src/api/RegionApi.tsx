@@ -1,87 +1,99 @@
 import api from "./api";
-import {
-  ApiResponse,
-  PaginatedResponse,
-} from "../types/SharedTypes";
 
 import {
-  Region,
-  RegionUser,
+  RegionResponse,
+  RegionsResponse,
+  RegionUsersResponse,
+  RegionActionResponse,
   CreateRegionDto,
   UpdateRegionDto,
   RegionFilters,
   RegionUserFilters,
 } from "../types/RegionType";
 
+export const regionService = {
 
-export const createRegion = async (
-  payload: CreateRegionDto
-) => {
-  const response =
-    await api.post<ApiResponse<Region>>(
-      "/regions",
-      payload
-    );
+  create: async (
+    payload: CreateRegionDto
+  ): Promise<RegionResponse> => {
 
-  return response.data;
+    const { data } =
+      await api.post<RegionResponse>(
+        "/regions",
+        payload
+      );
+
+    return data;
+  },
+
+  getAll: async (
+    filters?: RegionFilters
+  ): Promise<RegionsResponse> => {
+
+    const { data } =
+      await api.get<RegionsResponse>(
+        "/regions",
+        {
+          params: filters,
+        }
+      );
+
+    return data;
+  },
+
+  getById: async (
+    regionId: string
+  ): Promise<RegionResponse> => {
+
+    const { data } =
+      await api.get<RegionResponse>(
+        `/regions/${regionId}`
+      );
+
+    return data;
+  },
+
+  update: async (
+    regionId: string,
+    payload: UpdateRegionDto
+  ): Promise<RegionResponse> => {
+
+    const { data } =
+      await api.patch<RegionResponse>(
+        `/regions/${regionId}`,
+        payload
+      );
+
+    return data;
+  },
+
+  delete: async (
+    regionId: string
+  ): Promise<RegionActionResponse> => {
+
+    const { data } =
+      await api.delete<RegionActionResponse>(
+        `/regions/${regionId}`
+      );
+
+    return data;
+  },
+
+  getUsers: async (
+    regionId: string,
+    filters?: RegionUserFilters
+  ): Promise<RegionUsersResponse> => {
+
+    const { data } =
+      await api.get<RegionUsersResponse>(
+        `/regions/${regionId}/users`,
+        {
+          params: filters,
+        }
+      );
+
+    return data;
+  },
 };
 
-export const getRegions = async (
-  filters?: RegionFilters
-) => {
-
-  const response =
-    await api.get<ApiResponse<Region[]>>(
-      "/regions",
-      {
-        params: filters,
-      }
-    );
-
-  return response.data;
-};
-
-export const getRegionUsers = async (
-  regionId: string,
-  filters?: RegionUserFilters
-) => {
-
-  const response =
-    await api.get<
-      PaginatedResponse<RegionUser>
-    >(
-      `/regions/${regionId}/users`,
-      {
-        params: filters,
-      }
-    );
-
-  return response.data;
-};
-
-export const updateRegion = async (
-  regionId: string,
-  payload: UpdateRegionDto
-) => {
-
-  const response =
-    await api.patch<ApiResponse<Region>>(
-      `/regions/${regionId}`,
-      payload
-    );
-
-  return response.data;
-};
-export const deleteRegion = async (
-  regionId: string
-) => {
-
-  const response =
-    await api.delete<
-      ApiResponse<null>
-    >(
-      `/regions/${regionId}`
-    );
-
-  return response.data;
-};
+export default regionService;

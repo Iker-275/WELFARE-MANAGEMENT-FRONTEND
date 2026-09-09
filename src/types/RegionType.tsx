@@ -37,9 +37,10 @@ export interface RegionUser {
 
 export interface CreateRegionDto {
   name: string;
-  code?: string;
+  code: string;
   description?: string;
 }
+
 export interface UpdateRegionDto {
   name?: string;
   code?: string;
@@ -62,4 +63,34 @@ export interface RegionUserFilters {
   roleId?: string;
 
   isActive?: boolean;
+}
+
+export interface RegionResponse {
+  success: boolean;
+  message: string;
+  data: Region;
+}
+
+export interface RegionsResponse {
+  success: boolean;
+  message: string;
+  data: Region[];
+}
+
+export interface RegionUsersResponse {
+  success: boolean;
+  message: string;
+  data: RegionUser[];
+  pagination: {
+    page: number;
+    limit: number;
+    total: number;
+    totalPages: number;
+  };
+}
+
+export interface RegionActionResponse {
+  success: boolean;
+  message: string;
+  data: boolean | null;
 }

@@ -3,14 +3,18 @@ import api from "./api";
 import {
   CreateRolePayload,
   UpdateRolePayload,
-  SyncRolePermissionsPayload,
+  RolePermissionsPayload,
   RoleResponse,
   RolesResponse,
   RolePermissionsResponse,
-  BasicRoleResponse,
+  RoleActionResponse,
 } from "../types/RoleType";
 
 export const roleService = {
+
+  /**
+   * Create role
+   */
   create: async (
     payload: CreateRolePayload
   ): Promise<RoleResponse> => {
@@ -22,13 +26,33 @@ export const roleService = {
     return data;
   },
 
+  /**
+   * Get all roles
+   */
   getRoles: async (): Promise<RolesResponse> => {
-    const { data } =
-      await api.get("/roles");
+    const { data } = await api.get(
+      "/roles"
+    );
 
     return data;
   },
 
+  /**
+   * Get single role
+   */
+  getRole: async (
+    id: string
+  ): Promise<RoleResponse> => {
+    const { data } = await api.get(
+      `/roles/${id}`
+    );
+
+    return data;
+  },
+
+  /**
+   * Update role
+   */
   update: async (
     id: string,
     payload: UpdateRolePayload
@@ -41,9 +65,12 @@ export const roleService = {
     return data;
   },
 
+  /**
+   * Delete role
+   */
   delete: async (
     id: string
-  ): Promise<BasicRoleResponse> => {
+  ): Promise<RoleActionResponse> => {
     const { data } = await api.delete(
       `/roles/${id}`
     );
@@ -51,35 +78,68 @@ export const roleService = {
     return data;
   },
 
-  syncPermissions: async (
-    roleId: string,
-    payload: SyncRolePermissionsPayload
-  ): Promise<BasicRoleResponse> => {
-    const { data } = await api.put(
-      `/roles/${roleId}/sync`,
-      payload
-    );
-console.log("syncPermissions data:", data);
-    return data;
-  },
-
+  /**
+   * Get permissions assigned to role
+   */
   getRolePermissions: async (
     roleId: string
   ): Promise<RolePermissionsResponse> => {
     const { data } = await api.get(
-      `/permissions/${roleId}`
+      `/roles/${roleId}/permissions`
+    );
+
+    return data;
+  },
+
+  /**
+   * Synchronize role permissions
+   *
+   * Replaces the role's current permissions
+   * with the supplied permission IDs.
+   */
+  syncPermissions: async (
+    roleId: string,
+    payload: RolePermissionsPayload
+  ): Promise<RoleActionResponse> => {
+    const { data } = await api.put(
+      `/roles/${roleId}/permissions`,
+      payload
+    );
+
+    return data;
+  },
+
+  /**
+   * Add permissions to role
+   */
+  addPermissions: async (
+    roleId: string,
+    payload: RolePermissionsPayload
+  ): Promise<RoleActionResponse> => {
+    const { data } = await api.post(
+      `/roles/${roleId}/permissions`,
+      payload
+    );
+
+    return data;
+  },
+
+  /**
+   * Remove permissions from role
+   */
+  removePermissions: async (
+    roleId: string,
+    payload: RolePermissionsPayload
+  ): Promise<RoleActionResponse> => {
+    const { data } = await api.delete(
+      `/roles/${roleId}/permissions`,
+      {
+        data: payload,
+      }
     );
 
     return data;
   },
 };
 
-export const getErrorMessage = (
-  error: any
-): string => {
-  return (
-    error?.response?.data?.message ||
-    error?.message ||
-    "Something went wrong"
-  );
-};
+export default roleService;

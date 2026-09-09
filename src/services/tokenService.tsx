@@ -1,22 +1,74 @@
-const ACCESS_TOKEN = "accessToken";
-const REFRESH_TOKEN = "refreshToken";
+
+const ACCESS_TOKEN_KEY = "accessToken";
+const REFRESH_TOKEN_KEY = "refreshToken";
 
 export const tokenService = {
-  setTokens(accessToken: string | null, refreshToken: string | null) {
-    localStorage.setItem(ACCESS_TOKEN, accessToken || "");
-    localStorage.setItem(REFRESH_TOKEN, refreshToken || "");
+
+  getAccessToken(): string | null {
+    return localStorage.getItem(
+      ACCESS_TOKEN_KEY
+    );
   },
 
-  getAccessToken() {
-    return localStorage.getItem(ACCESS_TOKEN);
+  getRefreshToken(): string | null {
+    return localStorage.getItem(
+      REFRESH_TOKEN_KEY
+    );
   },
 
-  getRefreshToken() {
-    return localStorage.getItem(REFRESH_TOKEN);
+  setTokens(
+    accessToken: string,
+    refreshToken: string
+  ): void {
+
+    localStorage.setItem(
+      ACCESS_TOKEN_KEY,
+      accessToken
+    );
+
+    localStorage.setItem(
+      REFRESH_TOKEN_KEY,
+      refreshToken
+    );
   },
 
-  clearTokens() {
-    localStorage.removeItem(ACCESS_TOKEN);
-    localStorage.removeItem(REFRESH_TOKEN);
+  setAccessToken(
+    accessToken: string
+  ): void {
+
+    localStorage.setItem(
+      ACCESS_TOKEN_KEY,
+      accessToken
+    );
+  },
+
+  setRefreshToken(
+    refreshToken: string
+  ): void {
+
+    localStorage.setItem(
+      REFRESH_TOKEN_KEY,
+      refreshToken
+    );
+  },
+
+  clearTokens(): void {
+
+    localStorage.removeItem(
+      ACCESS_TOKEN_KEY
+    );
+
+    localStorage.removeItem(
+      REFRESH_TOKEN_KEY
+    );
+  },
+
+  hasTokens(): boolean {
+    return Boolean(
+      this.getAccessToken() &&
+      this.getRefreshToken()
+    );
   },
 };
+
+export default tokenService;

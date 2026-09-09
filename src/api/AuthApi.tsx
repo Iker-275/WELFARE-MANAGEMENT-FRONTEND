@@ -1,122 +1,32 @@
-// import axios from "axios";
-// import  api  from "./api";
-
-// import {
-//   RegisterPayload,
-//   VerifyEmailPayload,
-//   LoginPayload,
-//   ForgotPasswordPayload,
-//   ResetPasswordPayload,
-//   AuthResponse,
-// } from "../types/AuthTypes";
-
-
-
-// export const getErrorMessage = (error: unknown): string => {
-//   if (axios.isAxiosError(error)) {
-//     return (
-//       error.response?.data?.message ||
-//       error.message ||
-//       "Something went wrong"
-//     );
-//   }
-
-//   if (error instanceof Error) {
-//     return error.message;
-//   }
-
-//   return "Something went wrong";
-// };
-
-// export const registerApi = async (
-//   payload: RegisterPayload
-// ) => {
-//   const response = await api.post(
-//     "/register",
-//     payload
-//   );
-
-//   return response.data;
-// };
-
-// export const verifyEmailApi = async (
-//   payload: VerifyEmailPayload
-// ): Promise<AuthResponse> => {
-//   const response = await api.post(
-//     "/verify-email",
-//     payload
-//   );
-
-//   return response.data;
-// };
-// export const loginApi = async (
-//   payload: LoginPayload
-// ): Promise<AuthResponse> => {
-//   const response = await api.post(
-//     "/login",
-//     payload
-//   );
-
-//   return response.data;
-// };
-// export const forgotPasswordApi = async (
-//   payload: ForgotPasswordPayload
-// ) => {
-//   const response = await api.post(
-//     "/forgot-password",
-//     payload
-//   );
-
-//   return response.data;
-// };
-
-// export const resetPasswordApi = async (
-//   payload: ResetPasswordPayload
-// ) => {
-//   const response = await api.post(
-//     "/reset-password",
-//     payload
-//   );
-
-//   return response.data;
-// };
-
-import axios from "axios";
 import api from "./api";
 
 import {
   RegisterPayload,
+  RegisterResponse,
   VerifyEmailPayload,
+  VerifyEmailResponse,
   LoginPayload,
+  LoginResponse,
+  VerifyLoginPayload,
+  VerifyLoginResponse,
+  RefreshTokenPayload,
+  RefreshTokenResponse,
+  LogoutPayload,
+  LogoutResponse,
   ForgotPasswordPayload,
+  ForgotPasswordResponse,
   ResetPasswordPayload,
-  AuthResponse,
+  ResetPasswordResponse,
 } from "../types/AuthTypes";
 
-export const getErrorMessage = (
-  error: unknown
-): string => {
-  if (axios.isAxiosError(error)) {
-    return (
-      error.response?.data?.message ||
-      error.message ||
-      "Something went wrong"
-    );
-  }
+export const authApi = {
 
-  if (error instanceof Error) {
-    return error.message;
-  }
-
-  return "Something went wrong";
-};
-
-export const authService = {
   async register(
     payload: RegisterPayload
-  ) {
+  ): Promise<RegisterResponse> {
+
     const response = await api.post(
-      "/register",
+      "/auth/register",
       payload
     );
 
@@ -125,9 +35,10 @@ export const authService = {
 
   async verifyEmail(
     payload: VerifyEmailPayload
-  ): Promise<AuthResponse> {
+  ): Promise<VerifyEmailResponse> {
+
     const response = await api.post(
-      "/verify-email",
+      "/auth/verify-email",
       payload
     );
 
@@ -136,9 +47,46 @@ export const authService = {
 
   async login(
     payload: LoginPayload
-  ): Promise<AuthResponse> {
+  ): Promise<LoginResponse> {
+
     const response = await api.post(
-      "/login",
+      "/auth/login",
+      payload
+    );
+
+    return response.data;
+  },
+
+  async verifyLogin(
+    payload: VerifyLoginPayload
+  ): Promise<VerifyLoginResponse> {
+
+    const response = await api.post(
+      "/auth/verify-login",
+      payload
+    );
+
+    return response.data;
+  },
+
+  async refreshToken(
+    payload: RefreshTokenPayload
+  ): Promise<RefreshTokenResponse> {
+
+    const response = await api.post(
+      "/auth/refresh-token",
+      payload
+    );
+
+    return response.data;
+  },
+
+  async logout(
+    payload: LogoutPayload
+  ): Promise<LogoutResponse> {
+
+    const response = await api.post(
+      "/auth/logout",
       payload
     );
 
@@ -147,9 +95,10 @@ export const authService = {
 
   async forgotPassword(
     payload: ForgotPasswordPayload
-  ) {
+  ): Promise<ForgotPasswordResponse> {
+
     const response = await api.post(
-      "/forgot-password",
+      "/auth/forgot-password",
       payload
     );
 
@@ -158,9 +107,10 @@ export const authService = {
 
   async resetPassword(
     payload: ResetPasswordPayload
-  ) {
+  ): Promise<ResetPasswordResponse> {
+
     const response = await api.post(
-      "/reset-password",
+      "/auth/reset-password",
       payload
     );
 
@@ -168,5 +118,4 @@ export const authService = {
   },
 };
 
-export default authService;
-
+export default authApi;

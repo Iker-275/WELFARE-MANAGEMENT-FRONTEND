@@ -1,3 +1,42 @@
+
+export interface NotificationMetadata {
+  code: string;
+  name: string;
+  description: string;
+}
+
+export type NotificationChannel =
+  | "EMAIL"
+  | "SMS"
+  | "WHATSAPP"
+  | "PUSH"
+  | "SYSTEM";
+
+export type NotificationType =
+  | "SYSTEM"
+  | "ANNOUNCEMENT"
+  | "OTP"
+  | "SECURITY_ALERT"
+  | "PAYMENT"
+  | "CONTRIBUTION"
+  | "CLAIM"
+  | "MEETING"
+  | "ELECTION"
+  | "REMINDER";
+
+export type NotificationPriority =
+  | "LOW"
+  | "NORMAL"
+  | "HIGH"
+  | "URGENT";
+
+export interface NotificationMetadataResponse {
+  success: boolean;
+  message: string;
+  data: NotificationMetadata[];
+}
+
+
 export interface CreateNotificationPayload {
   title: string;
   message: string;

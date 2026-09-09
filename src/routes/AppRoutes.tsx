@@ -14,8 +14,8 @@ import CreateRole from "../pages/RolesPages/CreateRoles";
 import UpdateRole from "../pages/RolesPages/UpdateRoles";
 
 
-import { ProtectedRoute, AuthRoute } from "../pages/ProtectedRoute";
-import CreateNotification from "../pages/NotificationPages/CreateNotification";
+// import { ProtectedRoute, AuthRoute } from "../pages/ProtectedRoute";
+// import CreateNotification from "../pages/NotificationPages/CreateNotification";
 import Menu from "../pages/MenuPages/Menu";
 import CreateMenu from "../pages/MenuPages/CreateMenu";
 import UpdateMenu from "../pages/MenuPages/UpdateMenu";
@@ -32,7 +32,7 @@ import UpdateCustomer from "../pages/CustomerPages/UpdateCustomer";
 import VerifyOtp from "../pages/AuthPages/OTP";
 import ResetPassword from "../pages/AuthPages/ResetPassword";
 import ForgotPassword from "../pages/AuthPages/Forgot";
-import NotificationsPage from "../pages/NotificationPages/NotificationsPage";
+
 import AnnouncementsPage from "../pages/AnnouncementPages/AnnouncementPage";
 import CreateAnnouncement from "../pages/AnnouncementPages/CreateAnnouncement";
 import CreatePermission from "../pages/PermissionPages/CreatePermission";
@@ -42,6 +42,7 @@ import CreateRegion from "../pages/RegionPages/CreateRegion";
 import RegionsPage from "../pages/RegionPages/RegionPages";
 import UpdateRegion from "../pages/RegionPages/UpdateRegion";
 import RegionUsersPage from "../pages/RegionPages/RegionUserPage";
+import ProtectedRoute from "../pages/ProtectedRoute";
 
 
 
@@ -105,8 +106,8 @@ const AppRoutes = () => {
 
             <Route path="/customers/edit/:id" element={<UpdateCustomer />} />
 
-            <Route path="/notifications/create" element={<CreateNotification />} />
-            <Route path="/notifications" element={<NotificationsPage />} />
+            {/* <Route path="/notifications/create" element={<CreateNotification />} />
+            <Route path="/notifications" element={<NotificationsPage />} /> */}
 
             <Route path="/announcements/create" element={<CreateAnnouncement />} />
             <Route path="/announcements" element={<AnnouncementsPage />} />
@@ -120,7 +121,7 @@ const AppRoutes = () => {
         {/* </Route> */}
 
         {/* AUTH PAGES */}
-        <Route element={<AuthRoute />}>
+        {/* <Route element={<AuthRoute />}> */}
 
           <Route path="/signin" element={<SignIn />} />
           <Route path="/signup" element={<SignUp />} />
@@ -128,7 +129,7 @@ const AppRoutes = () => {
           <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="/reset-password" element={<ResetPassword />} />
 
-        </Route>
+        {/* </Route> */}
 
         {/* NOT FOUND */}
 
