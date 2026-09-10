@@ -1,74 +1,4 @@
-// import { useState } from "react";
-
-// import { Link } from "react-router-dom";
-
-// import PageMeta from "../../components/common/PageMeta";
-// import PageBreadcrumb from "../../components/common/PageBreadCrumb";
-// import ComponentCard from "../../components/common/ComponentCard";
-
-// import RegionFilters from "../../components/customComponents/RegionFilters";
-
-// import {RegionsTable} from "../../components/tables/BasicTables/BasicTableOne";
-
-// interface RegionFiltersType {
-//   search?: string;
-//   page?: number;
-//   limit?: number;
-// }
-
-// export default function RegionsPage() {
-//   const [filters, setFilters] =
-//     useState<RegionFiltersType>({
-//       page: 1,
-//       limit: 10,
-//     });
-
-//   return (
-//     <>
-//       <PageMeta
-//         title="Regions"
-//         description="Manage Regions"
-//       />
-
-//       <PageBreadcrumb
-//         pageTitle="Regions"
-//       />
-
-//       <div className="space-y-6">
-
-//         <ComponentCard title="Filters">
-//           <RegionFilters
-//             filters={filters}
-//             setFilters={setFilters}
-//           />
-//         </ComponentCard>
-
-//         <ComponentCard title="Regions">
-
-//           <div className="flex justify-end mb-4">
-
-//             <Link
-//               to="/regions/create"
-//               className="px-4 py-2 bg-brand-500 text-white rounded-lg"
-//             >
-//               Create Region
-//             </Link>
-
-//           </div>
-
-//           <RegionsTable
-//             filters={filters}
-//           />
-
-//         </ComponentCard>
-
-//       </div>
-//     </>
-//   );
-// }
-
-import { useState } from "react";
-
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 
 import PageMeta from "../../components/common/PageMeta";
@@ -76,25 +6,31 @@ import PageBreadcrumb from "../../components/common/PageBreadCrumb";
 import ComponentCard from "../../components/common/ComponentCard";
 
 import RegionFilters from "../../components/customComponents/RegionFilters";
-
 import { RegionsTable } from "../../components/tables/BasicTables/BasicTableOne";
 
 import { useRegion } from "../../hooks/useRegion";
 
-interface RegionFiltersType {
-  search?: string;
-  page?: number;
-  limit?: number;
-}
+import {
+  RegionFilters as RegionFiltersType,
+} from "../../types/RegionType";
 
 export default function RegionsPage() {
   const [filters, setFilters] =
-    useState<RegionFiltersType>({
-      page: 1,
-      limit: 10,
-    });
+    useState<RegionFiltersType>({});
 
-  const { message } = useRegion();
+  const {
+    message,
+    loading,
+    fetchRegions,
+    clearMessage,
+  } = useRegion();
+
+  useEffect(() => {
+    fetchRegions(filters);
+  }, [
+    fetchRegions,
+    filters,
+  ]);
 
   return (
     <>
@@ -119,15 +55,15 @@ export default function RegionsPage() {
           <RegionFilters
             filters={filters}
             setFilters={setFilters}
+            onReset={clearMessage}
           />
         </ComponentCard>
 
         <ComponentCard title="Regions">
-
-          <div className="flex justify-end mb-4">
+          <div className="mb-4 flex justify-end">
             <Link
               to="/regions/create"
-              className="px-4 py-2 bg-brand-500 text-white rounded-lg"
+              className="rounded-lg bg-brand-500 px-4 py-2 text-white"
             >
               Create Region
             </Link>
@@ -135,8 +71,8 @@ export default function RegionsPage() {
 
           <RegionsTable
             filters={filters}
+            // loading={loading}
           />
-
         </ComponentCard>
 
       </div>

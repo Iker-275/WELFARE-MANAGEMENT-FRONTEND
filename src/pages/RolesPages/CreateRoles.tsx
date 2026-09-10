@@ -1,31 +1,25 @@
 import { useNavigate } from "react-router-dom";
+
 import RoleForm from "../../components/customforms/RolesForm";
 import { useRoles } from "../../hooks/useRoles";
 
-
 export default function CreateRole() {
+  const navigate = useNavigate();
 
-  const navigate =
-    useNavigate();
+  const { createRole } = useRoles();
 
-  const {
-    createRole
-  } = useRoles();
+  const handleCreate = async (
+    data: { name: string }
+  ) => {
+    const success = await createRole({
+      name: data.name,
+      isSystem: false,
+    });
 
-
-  const handleCreate =
-    async (data: {
-      name: string;
-
-    }) => {
-
-      const success =
-        await createRole(data);
-
-      if (success) {
-        navigate("/roles");
-      }
-    };
+    if (success) {
+      navigate("/roles");
+    }
+  };
 
   return (
     <RoleForm

@@ -1,113 +1,101 @@
 
-interface Props {
+import { Permission } from "../../types/RoleType";
 
-    permissions: any[];
+interface RolePermissionGridProps {
+  permissions: Permission[];
 
-    selectedPermissions: string[];
+  selectedPermissions: string[];
 
-    onChange:
-    (
-        ids: string[]
-    ) =>
-        void;
-
+  onChange: (
+    permissionIds: string[]
+  ) => void;
 }
 
-
-
 export default function RolePermissionGrid({
+  permissions,
+  selectedPermissions,
+  onChange,
+}: RolePermissionGridProps) {
+  const togglePermission = (
+    permissionId: string
+  ) => {
+    if (
+      selectedPermissions.includes(
+        permissionId
+      )
+    ) {
+      onChange(
+        selectedPermissions.filter(
+          (id) =>
+            id !== permissionId
+        )
+      );
 
-    permissions,
+      return;
+    }
 
-    selectedPermissions,
+    onChange([
+      ...selectedPermissions,
+      permissionId,
+    ]);
+  };
 
-    onChange
-
-
-}: Props) {
-
-
-
-
-
-
-    const togglePermission = (
-        id: string
-    ) => {
-
-
-        let updated = [
-
-            ...selectedPermissions
-
-        ];
-
-
-
-        if (updated.includes(id)) {
-
-
-            updated =
-                updated.filter(
-                    item =>
-                        item !== id
-                );
-
-
-        }
-        else {
-
-
-            updated.push(id);
-
-
-        }
-
-
-
-        onChange(updated);
-
-
-
-    };
-
-
-
-
-
-
-
-
-
+  if (permissions.length === 0) {
     return (
-
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-
-
-            {
-                permissions.map(permission => (
-                    <div
-                        key={permission.id}
-                        className="border rounded-xl p-4 flex items-start gap-3 bg-white">
-                        <input
-                            type="checkbox"
-                            checked={selectedPermissions.includes(permission.id)}
-                            onChange={() => togglePermission(permission.id)} />
-                        <div>
-
-
-                            <p className="font-medium">
-                                {permission.name}
-                            </p>
-
-
-                            <p className="text-sm text-gray-500">
-                                {permission.description}
-                            </p>
-                        </div>
-                    </div>
-                ))
-            }
-        </div>
+      <div className="rounded-xl border p-6 text-center text-sm text-gray-500">
+        No permissions available.
+      </div>
     );
+  }
+
+  return (
+    <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+      {permissions.map(
+        (permission) => {
+          const isSelected =
+            selectedPermissions.includes(
+              permission.id
+            );
+
+          return (
+            <label
+              key={permission.id}
+              className={`flex cursor-pointer items-start gap-3 rounded-xl border p-4 transition ${
+                isSelected
+                  ? "border-brand-500 bg-brand-50"
+                  : "bg-white"
+              }`}
+            >
+              <input
+                type="checkbox"
+                checked={isSelected}
+                onChange={() =>
+                  togglePermission(
+                    permission.id
+                  )
+                }
+                className="mt-1"
+              />
+
+              <div className="min-w-0">
+                <p className="font-medium text-gray-900">
+                  {permission.name}
+                </p>
+
+                {permission.description && (
+                  <p className="mt-1 text-sm text-gray-500">
+                    {permission.description}
+                  </p>
+                )}
+
+                <p className="mt-2 text-xs text-gray-400">
+                  {permission.slug}
+                </p>
+              </div>
+            </label>
+          );
+        }
+      )}
+    </div>
+  );
 }

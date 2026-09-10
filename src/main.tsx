@@ -20,6 +20,8 @@ import DependantProvider from "./context/DependantContext.tsx";
 import { EmploymentProvider } from "./context/EmploymentContext.tsx";
 import { NotificationProvider } from "./context/NotificationContext.tsx";
 import { DashboardProvider } from "./context/DashboardContext.tsx";
+import { MembershipMetadataProvider } from "./context/MembershipMetadataContext.tsx";
+import { MemberProvider } from "./context/MemberContext.tsx";
 
 
 createRoot(document.getElementById("root")!).render(
@@ -32,29 +34,33 @@ createRoot(document.getElementById("root")!).render(
               <UserProvider>
                 <AppWrapper>
                   <NotificationProvider>
-                  <GenderProvider>
-                    <NextOfKinProvider>
-                      <DependantProvider>
-                        <EmploymentProvider>
-                          <ImportTypeProvider>
-                            <ImportProvider>
-                              <AnnouncementProvider>
-                                <DashboardProvider>
+                    <GenderProvider>
+                      <NextOfKinProvider>
+                        <DependantProvider>
+                          <EmploymentProvider>
+                            <ImportTypeProvider>
+                              <ImportProvider>
+                                <MembershipMetadataProvider>
+                                  <MemberProvider>
+                                    <AnnouncementProvider>
+                                      <DashboardProvider>
 
 
 
-                                <App />
+                                        <App />
 
 
-                                </DashboardProvider>
-                              </AnnouncementProvider>
-                            </ImportProvider>
+                                      </DashboardProvider>
+                                    </AnnouncementProvider>
+                                  </MemberProvider>
+                                </MembershipMetadataProvider>
+                              </ImportProvider>
 
-                          </ImportTypeProvider>
-                        </EmploymentProvider>
-                      </DependantProvider>
-                    </NextOfKinProvider>
-                  </GenderProvider>
+                            </ImportTypeProvider>
+                          </EmploymentProvider>
+                        </DependantProvider>
+                      </NextOfKinProvider>
+                    </GenderProvider>
                   </NotificationProvider>
                 </AppWrapper>
               </UserProvider>

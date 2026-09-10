@@ -1,8 +1,9 @@
+
+
 import {
   createContext,
   ReactNode,
   useCallback,
-  useEffect,
   useState,
 } from "react";
 
@@ -11,42 +12,28 @@ import memberService from "../api/MemberApi";
 import {
   Member,
   MemberDetails,
-  MemberProfile,
   MemberFilters,
-
+  MemberPagination,
+  MemberProfile,
   CreateMemberDto,
   UpdateMemberProfileDto,
   MemberActionReasonDto,
-
-  MemberPagination,
 } from "../types/MemberType";
 
 import { getApiError } from "../utils/apiError";
 
 interface MemberContextType {
-
   members: Member[];
-
-  selectedMember:
-    Member | MemberDetails | null;
-
-  memberProfile:
-    MemberProfile | null;
-
-  pagination:
-    MemberPagination | null;
+  selectedMember: Member | MemberDetails | null;
+  memberProfile: MemberProfile | null;
+  pagination: MemberPagination | null;
 
   loading: boolean;
-
   message: string;
 
-  setMessage: React.Dispatch<
-    React.SetStateAction<string>
-  >;
+  setMessage: React.Dispatch<React.SetStateAction<string>>;
 
-  fetchMembers: (
-    filters?: MemberFilters
-  ) => Promise<boolean>;
+  fetchMembers: (filters?: MemberFilters) => Promise<boolean>;
 
   fetchMember: (
     memberId: string
@@ -96,10 +83,9 @@ interface MemberContextType {
   clearMessage: () => void;
 }
 
-export const MemberContext =
-  createContext<MemberContextType | null>(
-    null
-  );
+export const MemberContext = createContext<
+  MemberContextType | undefined
+>(undefined);
 
 interface MemberProviderProps {
   children: ReactNode;
@@ -108,84 +94,43 @@ interface MemberProviderProps {
 export const MemberProvider = ({
   children,
 }: MemberProviderProps) => {
+  const [members, setMembers] = useState<Member[]>([]);
 
-  const [members, setMembers] =
-    useState<Member[]>([]);
-
-  const [selectedMember, setSelectedMember] =
-    useState<
-      Member | MemberDetails | null
-    >(null);
+  const [selectedMember, setSelectedMember] = useState<
+    Member | MemberDetails | null
+  >(null);
 
   const [memberProfile, setMemberProfile] =
-    useState<MemberProfile | null>(
-      null
-    );
+    useState<MemberProfile | null>(null);
 
   const [pagination, setPagination] =
-    useState<MemberPagination | null>(
-      null
-    );
+    useState<MemberPagination | null>(null);
 
-  const [loading, setLoading] =
-    useState(false);
+  const [loading, setLoading] = useState(false);
 
-  const [message, setMessage] =
-    useState("");
+  const [message, setMessage] = useState("");
 
   /**
-   * Get all members
+   * Fetch members
+   *
+   * Collection fetching is intentionally controlled by the page.
    */
   const fetchMembers = useCallback(
-    async (
-      filters?: MemberFilters
-    ): Promise<boolean> => {
-
+    async (filters?: MemberFilters): Promise<boolean> => {
       setLoading(true);
+      setMessage("");
 
       try {
+        const response = await memberService.getAll(filters);
 
-        const response =
-          await memberService.getAll(
-            filters
-          );
-
-        if (!response.success) {
-
-          setMessage(
-            response.message ?? ""
-          );
-
-          return false;
-        }
-
-        setMembers(
-          response.data
-        );
-
-        setPagination(
-          response.pagination
-        );
-
-        setMessage(
-          response.message ?? ""
-        );
+        setMembers(response.data);
+        setPagination(response.pagination);
 
         return true;
-
       } catch (error) {
-
-        const apiError =
-          getApiError(error);
-
-        setMessage(
-          apiError.message
-        );
-
+        setMessage(getApiError(error).message);
         return false;
-
       } finally {
-
         setLoading(false);
       }
     },
@@ -193,56 +138,29 @@ export const MemberProvider = ({
   );
 
   /**
-   * Get member by ID
+   * Fetch a single member.
+   *
+   * This is used primarily by the member profile/details page.
    */
   const fetchMember = useCallback(
     async (
       memberId: string
-    ): Promise<
-      Member | MemberDetails | null
-    > => {
-
+    ): Promise<Member | MemberDetails | null> => {
       setLoading(true);
+      setMessage("");
 
       try {
+        const response = await memberService.getById(memberId);
 
-        const response =
-          await memberService.getById(
-            memberId
-          );
-
-        if (!response.success) {
-
-          setMessage(
-            response.message ?? ""
-          );
-
-          return null;
-        }
-
-        setSelectedMember(
-          response.data
-        );
-
-        setMessage(
-          response.message ?? ""
-        );
+        setSelectedMember(response.data);
 
         return response.data;
-
       } catch (error) {
-
-        const apiError =
-          getApiError(error);
-
-        setMessage(
-          apiError.message
-        );
+        setMessage(getApiError(error).message);
+        setSelectedMember(null);
 
         return null;
-
       } finally {
-
         setLoading(false);
       }
     },
@@ -250,161 +168,130 @@ export const MemberProvider = ({
   );
 
   /**
-   * Get member profile
+   * Fetch member profile information.
    */
-  const fetchMemberProfile =
-    useCallback(
-      async (
-        memberId: string
-      ): Promise<MemberProfile | null> => {
+  const fetchMemberProfile = useCallback(
+    async (
+      memberId: string
+    ): Promise<MemberProfile | null> => {
+      setLoading(true);
+      setMessage("");
 
-        setLoading(true);
+      try {
+        const response =
+          await memberService.getProfile(memberId);
 
-        try {
+        setMemberProfile(response.data);
 
-          const response =
-            await memberService.getProfile(
-              memberId
-            );
+        return response.data;
+      } catch (error) {
+        setMessage(getApiError(error).message);
+        setMemberProfile(null);
 
-          if (!response.success) {
-
-            setMessage(
-              response.message ?? ""
-            );
-
-            return null;
-          }
-
-          setMemberProfile(
-            response.data
-          );
-
-          setMessage(
-            response.message ?? ""
-          );
-
-          return response.data;
-
-        } catch (error) {
-
-          const apiError =
-            getApiError(error);
-
-          setMessage(
-            apiError.message
-          );
-
-          return null;
-
-        } finally {
-
-          setLoading(false);
-        }
-      },
-      []
-    );
+        return null;
+      } finally {
+        setLoading(false);
+      }
+    },
+    []
+  );
 
   /**
-   * Get member using user ID
+   * Fetch member using the associated user ID.
    */
-  const fetchMemberByUserId =
-    useCallback(
-      async (
-        userId: string
-      ): Promise<
-        Member | MemberDetails | null
-      > => {
+  const fetchMemberByUserId = useCallback(
+    async (
+      userId: string
+    ): Promise<Member | MemberDetails | null> => {
+      setLoading(true);
+      setMessage("");
 
-        setLoading(true);
+      try {
+        const response =
+          await memberService.getByUserId(userId);
 
-        try {
+        setSelectedMember(response.data);
 
-          const response =
-            await memberService.getByUserId(
-              userId
-            );
+        return response.data;
+      } catch (error) {
+        setMessage(getApiError(error).message);
+        setSelectedMember(null);
 
-          if (!response.success) {
-
-            setMessage(
-              response.message ?? ""
-            );
-
-            return null;
-          }
-
-          setSelectedMember(
-            response.data
-          );
-
-          setMessage(
-            response.message ?? ""
-          );
-
-          return response.data;
-
-        } catch (error) {
-
-          const apiError =
-            getApiError(error);
-
-          setMessage(
-            apiError.message
-          );
-
-          return null;
-
-        } finally {
-
-          setLoading(false);
-        }
-      },
-      []
-    );
+        return null;
+      } finally {
+        setLoading(false);
+      }
+    },
+    []
+  );
 
   /**
-   * Create member
+   * Create a member.
    */
   const createMember = useCallback(
     async (
       payload: CreateMemberDto
     ): Promise<boolean> => {
-
       setLoading(true);
+      setMessage("");
 
       try {
-
         const response =
-          await memberService.create(
+          await memberService.create(payload);
+
+        setMessage(response.message);
+
+        await fetchMembers();
+
+        return true;
+      } catch (error) {
+        setMessage(getApiError(error).message);
+        return false;
+      } finally {
+        setLoading(false);
+      }
+    },
+    [fetchMembers]
+  );
+
+  /**
+   * Update member profile.
+   */
+  const updateMemberProfile = useCallback(
+    async (
+      memberId: string,
+      payload: UpdateMemberProfileDto
+    ): Promise<boolean> => {
+      setLoading(true);
+      setMessage("");
+
+      try {
+        const response =
+          await memberService.updateProfile(
+            memberId,
             payload
           );
 
-        setMessage(
-          response.message ?? ""
-        );
+        setMessage(response.message);
 
-        if (!response.success) {
-          return false;
-        }
+        /**
+         * Refresh the currently selected member so
+         * the profile page immediately reflects changes.
+         */
+        const updatedMember =
+          await memberService.getById(memberId);
+
+        setSelectedMember(updatedMember.data);
+
+        setMemberProfile(updatedMember.data.profile);
 
         await fetchMembers();
 
         return true;
-
       } catch (error) {
-
-        const apiError =
-          getApiError(error);
-
-        setMessage(
-          apiError.message
-        );
-
+        setMessage(getApiError(error).message);
         return false;
-
       } finally {
-
         setLoading(false);
       }
     },
@@ -412,106 +299,31 @@ export const MemberProvider = ({
   );
 
   /**
-   * Update member profile
-   */
-  const updateMemberProfile =
-    useCallback(
-      async (
-        memberId: string,
-        payload: UpdateMemberProfileDto
-      ): Promise<boolean> => {
-
-        setLoading(true);
-
-        try {
-
-          const response =
-            await memberService.updateProfile(
-              memberId,
-              payload
-            );
-
-          setMessage(
-            response.message ?? ""
-          );
-
-          if (!response.success) {
-            return false;
-          }
-
-          setSelectedMember(
-            response.data
-          );
-
-          await fetchMembers();
-
-          return true;
-
-        } catch (error) {
-
-          const apiError =
-            getApiError(error);
-
-          setMessage(
-            apiError.message
-          );
-
-          return false;
-
-        } finally {
-
-          setLoading(false);
-        }
-      },
-      [fetchMembers]
-    );
-
-  /**
-   * Activate member
+   * Activate member.
    */
   const activateMember = useCallback(
-    async (
-      memberId: string
-    ): Promise<boolean> => {
-
+    async (memberId: string): Promise<boolean> => {
       setLoading(true);
+      setMessage("");
 
       try {
-
         const response =
-          await memberService.activate(
-            memberId
-          );
+          await memberService.activate(memberId);
 
-        setMessage(
-          response.message ?? ""
-        );
+        setMessage(response.message);
 
-        if (!response.success) {
-          return false;
-        }
+        const updatedMember =
+          await memberService.getById(memberId);
 
-        setSelectedMember(
-          response.data
-        );
+        setSelectedMember(updatedMember.data);
 
         await fetchMembers();
 
         return true;
-
       } catch (error) {
-
-        const apiError =
-          getApiError(error);
-
-        setMessage(
-          apiError.message
-        );
-
+        setMessage(getApiError(error).message);
         return false;
-
       } finally {
-
         setLoading(false);
       }
     },
@@ -519,53 +331,37 @@ export const MemberProvider = ({
   );
 
   /**
-   * Suspend member
+   * Suspend member.
    */
   const suspendMember = useCallback(
     async (
       memberId: string,
       payload: MemberActionReasonDto
     ): Promise<boolean> => {
-
       setLoading(true);
+      setMessage("");
 
       try {
-
         const response =
           await memberService.suspend(
             memberId,
             payload
           );
 
-        setMessage(
-          response.message ?? ""
-        );
+        setMessage(response.message);
 
-        if (!response.success) {
-          return false;
-        }
+        const updatedMember =
+          await memberService.getById(memberId);
 
-        setSelectedMember(
-          response.data
-        );
+        setSelectedMember(updatedMember.data);
 
         await fetchMembers();
 
         return true;
-
       } catch (error) {
-
-        const apiError =
-          getApiError(error);
-
-        setMessage(
-          apiError.message
-        );
-
+        setMessage(getApiError(error).message);
         return false;
-
       } finally {
-
         setLoading(false);
       }
     },
@@ -573,108 +369,75 @@ export const MemberProvider = ({
   );
 
   /**
-   * Reinstate member
+   * Reinstate member.
    */
-  const reinstateMember =
-    useCallback(
-      async (
-        memberId: string,
-        payload: MemberActionReasonDto
-      ): Promise<boolean> => {
+  const reinstateMember = useCallback(
+    async (
+      memberId: string,
+      payload: MemberActionReasonDto
+    ): Promise<boolean> => {
+      setLoading(true);
+      setMessage("");
 
-        setLoading(true);
-
-        try {
-
-          const response =
-            await memberService.reinstate(
-              memberId,
-              payload
-            );
-
-          setMessage(
-            response.message ?? ""
+      try {
+        const response =
+          await memberService.reinstate(
+            memberId,
+            payload
           );
 
-          if (!response.success) {
-            return false;
-          }
+        setMessage(response.message);
 
-          setSelectedMember(
-            response.data
-          );
+        const updatedMember =
+          await memberService.getById(memberId);
 
-          await fetchMembers();
+        setSelectedMember(updatedMember.data);
 
-          return true;
+        await fetchMembers();
 
-        } catch (error) {
-
-          const apiError =
-            getApiError(error);
-
-          setMessage(
-            apiError.message
-          );
-
-          return false;
-
-        } finally {
-
-          setLoading(false);
-        }
-      },
-      [fetchMembers]
-    );
+        return true;
+      } catch (error) {
+        setMessage(getApiError(error).message);
+        return false;
+      } finally {
+        setLoading(false);
+      }
+    },
+    [fetchMembers]
+  );
 
   /**
-   * Retire member
+   * Retire member.
    */
   const retireMember = useCallback(
     async (
       memberId: string,
       payload: MemberActionReasonDto
     ): Promise<boolean> => {
-
       setLoading(true);
+      setMessage("");
 
       try {
-
         const response =
           await memberService.retire(
             memberId,
             payload
           );
 
-        setMessage(
-          response.message ?? ""
-        );
+        setMessage(response.message);
 
-        if (!response.success) {
-          return false;
-        }
+        const updatedMember =
+          await memberService.getById(memberId);
 
-        setSelectedMember(
-          response.data
-        );
+        setSelectedMember(updatedMember.data);
 
         await fetchMembers();
 
         return true;
-
       } catch (error) {
-
-        const apiError =
-          getApiError(error);
-
-        setMessage(
-          apiError.message
-        );
-
+        setMessage(getApiError(error).message);
         return false;
-
       } finally {
-
         setLoading(false);
       }
     },
@@ -682,53 +445,37 @@ export const MemberProvider = ({
   );
 
   /**
-   * Resign member
+   * Resign member.
    */
   const resignMember = useCallback(
     async (
       memberId: string,
       payload: MemberActionReasonDto
     ): Promise<boolean> => {
-
       setLoading(true);
+      setMessage("");
 
       try {
-
         const response =
           await memberService.resign(
             memberId,
             payload
           );
 
-        setMessage(
-          response.message ?? ""
-        );
+        setMessage(response.message);
 
-        if (!response.success) {
-          return false;
-        }
+        const updatedMember =
+          await memberService.getById(memberId);
 
-        setSelectedMember(
-          response.data
-        );
+        setSelectedMember(updatedMember.data);
 
         await fetchMembers();
 
         return true;
-
       } catch (error) {
-
-        const apiError =
-          getApiError(error);
-
-        setMessage(
-          apiError.message
-        );
-
+        setMessage(getApiError(error).message);
         return false;
-
       } finally {
-
         setLoading(false);
       }
     },
@@ -736,59 +483,37 @@ export const MemberProvider = ({
   );
 
   /**
-   * Clear message
+   * Clear context message.
    */
   const clearMessage = useCallback(() => {
     setMessage("");
   }, []);
 
-  /**
-   * Load members on provider initialization.
-   */
-  useEffect(() => {
-
-    fetchMembers();
-
-  }, [fetchMembers]);
-
   return (
     <MemberContext.Provider
       value={{
-
         members,
-
         selectedMember,
-
         memberProfile,
-
         pagination,
 
         loading,
-
         message,
 
         setMessage,
 
         fetchMembers,
-
         fetchMember,
-
         fetchMemberProfile,
-
         fetchMemberByUserId,
 
         createMember,
-
         updateMemberProfile,
 
         activateMember,
-
         suspendMember,
-
         reinstateMember,
-
         retireMember,
-
         resignMember,
 
         clearMessage,

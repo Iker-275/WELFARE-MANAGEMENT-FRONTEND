@@ -11,6 +11,7 @@ import {
   HorizontaLDots,
   MailIcon,
   BoxCubeIcon,
+  UserCircleIcon,
 } from "../icons";
 import { useSidebar } from "../context/SidebarContext";
 import SidebarWidget from "./SidebarWidget";
@@ -30,12 +31,12 @@ const navItems: NavItem[] = [
 
     // subItems: [{ name: "Ecommerce", path: "/", pro: false }],
   },
-  // {
-  //   icon: <UserCircleIcon />,
-  //   name: "Users",
-  //    path: "/users",
+  {
+    icon: <UserCircleIcon />,
+    name: "Members",
+     path: "/members",
    
-  // },
+  },
   // {
   //   icon: <UserCircleIcon />,
   //   name: "Customers",
@@ -62,6 +63,7 @@ const navItems: NavItem[] = [
      path: "/regions",
    
   },
+
  
   
   

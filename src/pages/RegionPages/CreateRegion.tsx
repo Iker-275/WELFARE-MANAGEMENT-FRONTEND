@@ -4,11 +4,19 @@ import RegionForm from "../../components/customforms/RegionForm";
 
 import { useRegion } from "../../hooks/useRegion";
 
+import {
+  CreateRegionDto,
+} from "../../types/RegionType";
+
 export default function CreateRegion() {
-  const navigate = useNavigate();
+  const navigate =
+    useNavigate();
 
   const {
-    createRegionHandler,message
+    createRegion,
+    loading,
+    message,
+    clearMessage,
   } = useRegion();
 
   const handleCreate = async (
@@ -18,27 +26,92 @@ export default function CreateRegion() {
       description?: string;
     }
   ) => {
-    const response =
-      await createRegionHandler(data);
+    clearMessage();
 
-    if (response?.success) {
-      navigate("/regions");
+    const payload: CreateRegionDto = {
+      name: data.name,
+      code: data.code ?? "",
+      description:
+        data.description,
+    };
+
+    const success =
+      await createRegion(
+        payload
+      );
+
+    if (success) {
+      navigate(
+        "/regions"
+      );
     }
   };
 
   return (
     <>
-    
-    <RegionForm
-      mode="create"
-      onSubmit={handleCreate}
-    />
+      <RegionForm
+        mode="create"
+        loading={loading}
+        onSubmit={handleCreate}
+      />
 
-     {message && (
-    <div className="text-sm mt-4">
-      {message}
-    </div>
-  )}
-  </>
+      {message && (
+        <div className="mt-4 text-sm">
+          {message}
+        </div>
+      )}
+    </>
   );
 }
+
+
+// import { useNavigate } from "react-router-dom";
+
+// import RegionForm from "../../components/customforms/RegionForm";
+
+// import { useRegion } from "../../hooks/useRegion";
+
+// import {
+//   CreateRegionDto,
+// } from "../../types/RegionType";
+
+// export default function CreateRegion() {
+//   const navigate =
+//     useNavigate();
+
+//   const {
+//     createRegion,
+//     loading,
+//     message,
+//     clearMessage,
+//   } = useRegion();
+
+//   const handleCreate = async (
+//     data: CreateRegionDto
+//   ) => {
+//     clearMessage();
+
+//     const success =
+//       await createRegion(data);
+
+//     if (success) {
+//       navigate("/regions");
+//     }
+//   };
+
+//   return (
+//     <>
+//       <RegionForm
+//         mode="create"
+//         loading={loading}
+//         onSubmit={handleCreate}
+//       />
+
+//       {message && (
+//         <div className="mt-4 text-sm">
+//           {message}
+//         </div>
+//       )}
+//     </>
+//   );
+// }

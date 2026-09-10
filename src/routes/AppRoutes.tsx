@@ -43,6 +43,17 @@ import RegionsPage from "../pages/RegionPages/RegionPages";
 import UpdateRegion from "../pages/RegionPages/UpdateRegion";
 import RegionUsersPage from "../pages/RegionPages/RegionUserPage";
 import ProtectedRoute from "../pages/ProtectedRoute";
+import UpdatePermission from "../pages/PermissionPages/UpdatePermission";
+import Members from "../pages/MemberPages/Members";
+import CreateMember from "../pages/MemberPages/CreateMember";
+import UpdateMember from "../pages/MemberPages/UpdateMember";
+import MemberProfile from "../pages/MemberPages/MemberProfile";
+import CreateEmployment from "../pages/MemberPages/CreateEmployment";
+import UpdateEmployment from "../pages/MemberPages/UpdateEmployment";
+import CreateNextOfKin from "../pages/MemberPages/CreateNextOfKin";
+import UpdateNextOfKin from "../pages/MemberPages/UpdateNextOfKin";
+import CreateDependant from "../pages/MemberPages/CreateDependant";
+import UpdateDependant from "../pages/MemberPages/UpdateDependant";
 
 
 
@@ -77,6 +88,7 @@ const AppRoutes = () => {
 
             <Route path="/permissions" element={<PermissionsPage />} />
             <Route path="/permissions/create" element={<CreatePermission />} />
+            <Route path="/permissions/edit/:id" element={<UpdatePermission />} />
 
             <Route path="/regions" element={<RegionsPage />} />
 
@@ -85,6 +97,41 @@ const AppRoutes = () => {
             <Route path="/regions/:id/users" element={<RegionUsersPage />} />
 
             <Route path="/region-users" element={<RegionUsersPage />} />
+
+            // Membership
+            <Route path="/members" element={<Members />} />
+            <Route path="/members/create" element={<CreateMember />} />
+            <Route path="/members/:memberId" element={<MemberProfile />} />
+            <Route
+              path="/members/:memberId/employment/create"
+              element={<CreateEmployment />}/>
+
+            <Route
+              path="/members/:memberId/employment/edit/:employmentId"
+              element={<UpdateEmployment />}
+            />
+
+            <Route
+              path="/members/:memberId/next-of-kin/create"
+              element={<CreateNextOfKin />}
+            />
+
+            <Route
+              path="/members/:memberId/next-of-kin/edit/:nextOfKinId"
+              element={<UpdateNextOfKin />}
+            />
+
+            <Route
+              path="/members/:memberId/dependants/create"
+              element={<CreateDependant />}
+            />
+
+            <Route
+              path="/members/:memberId/dependants/edit/:dependantId"
+              element={<UpdateDependant />}
+            />
+            <Route path="/members/edit/:memberId" element={<UpdateMember />} />
+
 
             <Route path="/menu" element={<Menu />} />
             <Route path="/menu/create" element={<CreateMenu />} />
@@ -123,11 +170,11 @@ const AppRoutes = () => {
         {/* AUTH PAGES */}
         {/* <Route element={<AuthRoute />}> */}
 
-          <Route path="/signin" element={<SignIn />} />
-          <Route path="/signup" element={<SignUp />} />
-          <Route path="/verify-otp" element={<VerifyOtp />} />
-          <Route path="/forgot-password" element={<ForgotPassword />} />
-          <Route path="/reset-password" element={<ResetPassword />} />
+        <Route path="/signin" element={<SignIn />} />
+        <Route path="/signup" element={<SignUp />} />
+        <Route path="/verify-otp" element={<VerifyOtp />} />
+        <Route path="/forgot-password" element={<ForgotPassword />} />
+        <Route path="/reset-password" element={<ResetPassword />} />
 
         {/* </Route> */}
 

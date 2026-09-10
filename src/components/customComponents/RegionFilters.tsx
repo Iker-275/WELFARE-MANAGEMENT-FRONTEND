@@ -1,68 +1,79 @@
-import { useEffect, useState } from "react";
 
-interface RegionFilters {
-  search?: string;
-  page?: number;
-  limit?: number;
-}
+import {
+  useEffect,
+  useState,
+} from "react";
+
+import {
+  RegionFilters as RegionFiltersType,
+} from "../../types/RegionType";
 
 interface Props {
-  filters: RegionFilters;
-  setFilters: (filters: RegionFilters) => void;
+  filters: RegionFiltersType;
+
+  setFilters: (
+    filters: RegionFiltersType
+  ) => void;
+
+  onReset?: () => void;
 }
 
 export default function RegionFilters({
   filters,
   setFilters,
+  onReset,
 }: Props) {
   const [search, setSearch] =
-    useState(filters.search || "");
+    useState(
+      filters.search ?? ""
+    );
 
   useEffect(() => {
-    const timer = setTimeout(() => {
-      setFilters({
-        ...filters,
-        search,
-        page: 1,
-      });
-    }, 500);
+    const timer =
+      setTimeout(() => {
+        setFilters({
+          search:
+            search.trim() || undefined,
+        });
+      }, 500);
 
     return () =>
       clearTimeout(timer);
-  }, [search]);
+  }, [
+    search,
+    setFilters,
+  ]);
 
   const handleReset = () => {
     setSearch("");
 
-    setFilters({
-      page: 1,
-      limit: 10,
-    });
+    setFilters({});
+
+    onReset?.();
   };
 
   return (
-    <div className="flex flex-wrap gap-4 items-center justify-between">
-      <div className="flex gap-3 flex-wrap">
-
+    <div className="flex flex-wrap items-center justify-between gap-4">
+      <div className="flex flex-wrap gap-3">
         <input
           type="text"
           placeholder="Search region..."
           value={search}
-          onChange={(e) =>
+          onChange={(event) =>
             setSearch(
-              e.target.value
+              event.target.value
             )
           }
-          className="border rounded-lg px-3 py-2 w-64"
+          className="w-64 rounded-lg border px-3 py-2"
         />
 
         <button
+          type="button"
           onClick={handleReset}
-          className="px-4 py-2 bg-gray-200 rounded-lg"
+          className="rounded-lg bg-gray-200 px-4 py-2"
         >
           Reset
         </button>
-
       </div>
     </div>
   );

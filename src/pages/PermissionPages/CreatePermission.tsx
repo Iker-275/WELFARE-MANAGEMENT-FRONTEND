@@ -1,10 +1,7 @@
-import PermissionForm
-from "../../components/customforms/PermissionForm";
+import PermissionForm from "../../components/customforms/PermissionForm";
 
-
-export default function CreatePermission(){
-return (
-<PermissionForm/>
-);
-
+export default function CreatePermission() {
+  return (
+    <PermissionForm mode="create" />
+  );
 }

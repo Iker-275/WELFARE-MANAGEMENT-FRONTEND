@@ -1,67 +1,123 @@
-import { useNavigate, useParams } from "react-router-dom";
+import {
+  useEffect,
+  useState,
+} from "react";
+
+import {
+  useNavigate,
+  useParams,
+} from "react-router-dom";
 
 import RegionForm from "../../components/customforms/RegionForm";
 
 import { useRegion } from "../../hooks/useRegion";
 
-export default function UpdateRegion() {
-  const { id } = useParams();
+import {
+  Region,
+  UpdateRegionDto,
+} from "../../types/RegionType";
 
-  const navigate = useNavigate();
+export default function UpdateRegion() {
+  const { id } =
+    useParams<{ id: string }>();
+
+  const navigate =
+    useNavigate();
 
   const {
-    regions,
-    updateRegionHandler,message
+    fetchRegion,
+    updateRegion,
+    loading,
+    message,
+    clearMessage,
   } = useRegion();
 
-  const region =
-    regions.find(
-      (r: any) => r.id === id
-    );
+  const [region, setRegion] =
+    useState<Region | null>(null);
 
-  if (!region) {
-    return (
-      <div>
-        Loading...
-      </div>
-    );
-  }
+  const [loadingRegion, setLoadingRegion] =
+    useState(true);
+
+  useEffect(() => {
+    if (!id) {
+      return;
+    }
+
+    let mounted = true;
+
+    const loadRegion =
+      async () => {
+        setLoadingRegion(true);
+
+        const result =
+          await fetchRegion(id);
+
+        if (mounted) {
+          setRegion(result);
+          setLoadingRegion(false);
+        }
+      };
+
+    loadRegion();
+
+    return () => {
+      mounted = false;
+    };
+  }, [
+    id,
+    fetchRegion,
+  ]);
 
   const handleUpdate = async (
-    data: {
-      name: string;
-      code?: string;
-      description?: string;
-    }
+    data: UpdateRegionDto
   ) => {
-    const response =
-      await updateRegionHandler(
-        id!,
+    if (!id) {
+      return;
+    }
+
+    clearMessage();
+
+    const success =
+      await updateRegion(
+        id,
         data
       );
 
-    if (response?.success) {
+    if (success) {
       navigate("/regions");
     }
   };
 
+  if (
+    loadingRegion ||
+    !region
+  ) {
+    return (
+      <div className="p-6">
+        Loading region...
+      </div>
+    );
+  }
+
   return (
     <>
-    <RegionForm
-      mode="edit"
-      initialData={{
-        name: region.name,
-        code: region.code || "",
-        description:
-          region.description || "",
-      }}
-      onSubmit={handleUpdate}
-    />
-     {message && (
-    <div className="text-sm mt-4">
-      {message}
-    </div>
-  )}
-  </>
+      <RegionForm
+        mode="edit"
+        loading={loading}
+        initialData={{
+          name: region.name,
+          code: region.code ?? "",
+          description:
+            region.description ?? "",
+        }}
+        onSubmit={handleUpdate}
+      />
+
+      {message && (
+        <div className="mt-4 text-sm">
+          {message}
+        </div>
+      )}
+    </>
   );
 }

@@ -1,8 +1,8 @@
+
 import {
   createContext,
   ReactNode,
   useCallback,
-  useEffect,
   useState,
 } from "react";
 
@@ -18,7 +18,6 @@ import {
 } from "../types/RegionType";
 
 import { Pagination } from "../types/SharedTypes";
-
 import { getApiError } from "../utils/apiError";
 
 interface RegionContextType {
@@ -60,14 +59,13 @@ interface RegionContextType {
   deleteRegion: (
     regionId: string
   ) => Promise<boolean>;
+  ensureRegionsLoaded: () => Promise<boolean>;
 
   clearMessage: () => void;
 }
 
 export const RegionContext =
-  createContext<RegionContextType | null>(
-    null
-  );
+  createContext<RegionContextType | null>(null);
 
 interface RegionProviderProps {
   children: ReactNode;
@@ -76,7 +74,6 @@ interface RegionProviderProps {
 export const RegionProvider = ({
   children,
 }: RegionProviderProps) => {
-
   const [regions, setRegions] =
     useState<Region[]>([]);
 
@@ -91,30 +88,31 @@ export const RegionProvider = ({
 
   const [message, setMessage] =
     useState("");
+    
 
-  /**
-   * Get all regions
+  /*
+   * ============================================================
+   * FETCH REGIONS
+   * ============================================================
    */
+
   const fetchRegions = useCallback(
     async (
       filters?: RegionFilters
     ): Promise<boolean> => {
-
-      setLoading(true);
-
       try {
+        setLoading(true);
 
         const response =
           await regionService.getAll(
             filters
           );
 
+        setMessage(
+          response.message
+        );
+
         if (!response.success) {
-
-          setMessage(
-            response.message
-          );
-
           return false;
         }
 
@@ -122,14 +120,9 @@ export const RegionProvider = ({
           response.data
         );
 
-        setMessage(
-          response.message
-        );
-
         return true;
 
       } catch (error) {
-
         const apiError =
           getApiError(error);
 
@@ -140,47 +133,52 @@ export const RegionProvider = ({
         return false;
 
       } finally {
-
         setLoading(false);
       }
     },
     []
   );
 
-  /**
-   * Get a single region
+  const ensureRegionsLoaded = useCallback(
+  async (): Promise<boolean> => {
+    if (regions.length > 0) {
+      return true;
+    }
+
+    return fetchRegions();
+  },
+  [regions.length, fetchRegions]
+);
+
+  /*
+   * ============================================================
+   * FETCH SINGLE REGION
+   * ============================================================
    */
+
   const fetchRegion = useCallback(
     async (
       regionId: string
     ): Promise<Region | null> => {
-
-      setLoading(true);
-
       try {
+        setLoading(true);
 
         const response =
           await regionService.getById(
             regionId
           );
 
-        if (!response.success) {
-
-          setMessage(
-            response.message
-          );
-
-          return null;
-        }
-
         setMessage(
           response.message
         );
 
+        if (!response.success) {
+          return null;
+        }
+
         return response.data;
 
       } catch (error) {
-
         const apiError =
           getApiError(error);
 
@@ -191,25 +189,25 @@ export const RegionProvider = ({
         return null;
 
       } finally {
-
         setLoading(false);
       }
     },
     []
   );
 
-  /**
-   * Get users belonging to a region
+  /*
+   * ============================================================
+   * FETCH REGION USERS
+   * ============================================================
    */
+
   const fetchRegionUsers = useCallback(
     async (
       regionId: string,
       filters?: RegionUserFilters
     ): Promise<boolean> => {
-
-      setLoading(true);
-
       try {
+        setLoading(true);
 
         const response =
           await regionService.getUsers(
@@ -217,12 +215,11 @@ export const RegionProvider = ({
             filters
           );
 
+        setMessage(
+          response.message
+        );
+
         if (!response.success) {
-
-          setMessage(
-            response.message
-          );
-
           return false;
         }
 
@@ -230,9 +227,9 @@ export const RegionProvider = ({
           response.data
         );
 
-
         setPagination({
           ...response.pagination,
+
           hasNextPage:
             response.pagination.page <
             response.pagination.totalPages,
@@ -240,14 +237,10 @@ export const RegionProvider = ({
           hasPreviousPage:
             response.pagination.page > 1,
         });
-        setMessage(
-          response.message
-        );
 
         return true;
 
       } catch (error) {
-
         const apiError =
           getApiError(error);
 
@@ -258,24 +251,24 @@ export const RegionProvider = ({
         return false;
 
       } finally {
-
         setLoading(false);
       }
     },
     []
   );
 
-  /**
-   * Create region
+  /*
+   * ============================================================
+   * CREATE REGION
+   * ============================================================
    */
+
   const createRegion = useCallback(
     async (
       payload: CreateRegionDto
     ): Promise<boolean> => {
-
-      setLoading(true);
-
       try {
+        setLoading(true);
 
         const response =
           await regionService.create(
@@ -290,12 +283,15 @@ export const RegionProvider = ({
           return false;
         }
 
+        /*
+         * Refresh region collection after
+         * successful creation.
+         */
         await fetchRegions();
 
         return true;
 
       } catch (error) {
-
         const apiError =
           getApiError(error);
 
@@ -306,25 +302,25 @@ export const RegionProvider = ({
         return false;
 
       } finally {
-
         setLoading(false);
       }
     },
     [fetchRegions]
   );
 
-  /**
-   * Update region
+  /*
+   * ============================================================
+   * UPDATE REGION
+   * ============================================================
    */
+
   const updateRegion = useCallback(
     async (
       regionId: string,
       payload: UpdateRegionDto
     ): Promise<boolean> => {
-
-      setLoading(true);
-
       try {
+        setLoading(true);
 
         const response =
           await regionService.update(
@@ -345,7 +341,6 @@ export const RegionProvider = ({
         return true;
 
       } catch (error) {
-
         const apiError =
           getApiError(error);
 
@@ -356,24 +351,24 @@ export const RegionProvider = ({
         return false;
 
       } finally {
-
         setLoading(false);
       }
     },
     [fetchRegions]
   );
 
-  /**
-   * Delete region
+  /*
+   * ============================================================
+   * DELETE REGION
+   * ============================================================
    */
+
   const deleteRegion = useCallback(
     async (
       regionId: string
     ): Promise<boolean> => {
-
-      setLoading(true);
-
       try {
+        setLoading(true);
 
         const response =
           await regionService.delete(
@@ -388,12 +383,17 @@ export const RegionProvider = ({
           return false;
         }
 
-        await fetchRegions();
+        setRegions(
+          (current) =>
+            current.filter(
+              (region) =>
+                region.id !== regionId
+            )
+        );
 
         return true;
 
       } catch (error) {
-
         const apiError =
           getApiError(error);
 
@@ -404,32 +404,29 @@ export const RegionProvider = ({
         return false;
 
       } finally {
-
         setLoading(false);
       }
     },
-    [fetchRegions]
+    []
   );
 
-  /**
-   * Clear backend feedback message
+  /*
+   * ============================================================
+   * CLEAR MESSAGE
+   * ============================================================
    */
-  const clearMessage = useCallback(() => {
-    setMessage("");
-  }, []);
 
-  /**
-   * Initial region loading
-   */
-  useEffect(() => {
-    fetchRegions();
-  }, [fetchRegions]);
+  const clearMessage =
+    useCallback(() => {
+      setMessage("");
+    }, []);
 
   return (
     <RegionContext.Provider
       value={{
         regions,
         regionUsers,
+
         pagination,
 
         loading,
@@ -439,6 +436,7 @@ export const RegionProvider = ({
         fetchRegions,
         fetchRegion,
         fetchRegionUsers,
+        ensureRegionsLoaded,
 
         createRegion,
         updateRegion,

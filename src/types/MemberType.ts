@@ -1,3 +1,9 @@
+import type { Gender } from "./GenderType";
+
+/* =====================================================
+ * ENUM TYPES
+ * ===================================================== */
+
 export type MembershipStatus =
   | "PENDING"
   | "ACTIVE"
@@ -5,10 +11,9 @@ export type MembershipStatus =
   | "RETIRED"
   | "RESIGNED";
 
-export type Gender =
-  | "MALE"
-  | "FEMALE"
-  | "OTHER";
+/* =====================================================
+ * MEMBER PROFILE
+ * ===================================================== */
 
 export interface MemberProfile {
   id: string;
@@ -17,7 +22,6 @@ export interface MemberProfile {
 
   firstName: string;
   lastName: string;
-
   otherNames: string | null;
 
   gender: Gender | null;
@@ -33,6 +37,10 @@ export interface MemberProfile {
   createdAt: string;
   updatedAt: string;
 }
+
+/* =====================================================
+ * MEMBER
+ * ===================================================== */
 
 export interface Member {
   id: string;
@@ -62,74 +70,52 @@ export interface Member {
   profile: MemberProfile;
 }
 
-export interface MemberEmployment {
-  id: string;
-  memberId: string;
-
-  employeeId?: string | null;
-  employer?: string | null;
-  position?: string | null;
-
-  employmentStatus?: string | null;
-
-  createdAt?: string;
-  updatedAt?: string;
-}
-
-export interface MemberNextOfKin {
-  id: string;
-  memberId: string;
-
-  firstName?: string | null;
-  lastName?: string | null;
-
-  relationship?: string | null;
-
-  phoneNumber?: string | null;
-  email?: string | null;
-
-  createdAt?: string;
-  updatedAt?: string;
-}
-
-export interface MemberDependant {
-  id: string;
-  memberId: string;
-
-  firstName?: string | null;
-  lastName?: string | null;
-
-  relationship?: string | null;
-
-  dateOfBirth?: string | null;
-
-  createdAt?: string;
-  updatedAt?: string;
-}
+/* =====================================================
+ * LOCATION
+ * ===================================================== */
 
 export interface MemberLocation {
   id: string;
-  name: string;
-  code?: string | null;
-  description?: string | null;
 
-  createdAt?: string;
-  updatedAt?: string;
+  name: string;
+
+  code: string | null;
+
+  description: string | null;
+
+  createdAt: string;
+  updatedAt: string;
 }
+
+/* =====================================================
+ * MEMBER DETAILS
+ * ===================================================== */
+
+import type { Employment } from "./EmploymentType";
+import type { NextOfKin } from "./NextOfKinType";
+import type { Dependant } from "./DependantType";
 
 export interface MemberDetails extends Member {
-  employment: MemberEmployment[];
+  employment: Employment | null;
 
-  nextOfKin: MemberNextOfKin | null;
+  nextOfKin: NextOfKin | null;
 
-  dependants: MemberDependant[];
+  dependants: Dependant[];
 
   region: MemberLocation | null;
+
   branch: MemberLocation | null;
+
   chapter: MemberLocation | null;
+
   county: MemberLocation | null;
+
   group: MemberLocation | null;
 }
+
+/* =====================================================
+ * CREATE MEMBER PROFILE
+ * ===================================================== */
 
 export interface CreateMemberProfileDto {
   firstName: string;
@@ -148,6 +134,10 @@ export interface CreateMemberProfileDto {
   profilePhotoId?: string | null;
 }
 
+/* =====================================================
+ * CREATE MEMBER
+ * ===================================================== */
+
 export interface CreateMemberDto {
   userId: string;
 
@@ -156,29 +146,39 @@ export interface CreateMemberDto {
   regionId: string;
 }
 
+/* =====================================================
+ * UPDATE MEMBER PROFILE
+ * ===================================================== */
+
 export interface UpdateMemberProfileDto {
   firstName?: string;
-
   lastName?: string;
 
   otherNames?: string | null;
 
   gender?: Gender | null;
 
-  dateOfBirth?: string;
+  dateOfBirth?: string | null;
 
   nationalId?: string | null;
 
   address?: string | null;
 
   profilePhotoId?: string | null;
-
-  regionId?: string | null;
+  regionId: string | null;
 }
+
+/* =====================================================
+ * MEMBER ACTIONS
+ * ===================================================== */
 
 export interface MemberActionReasonDto {
   reason: string;
 }
+
+/* =====================================================
+ * MEMBER FILTERS
+ * ===================================================== */
 
 export interface MemberFilters {
   page?: number;
@@ -199,18 +199,29 @@ export interface MemberFilters {
   groupId?: string;
 }
 
+/* =====================================================
+ * PAGINATION
+ * ===================================================== */
+
 export interface MemberPagination {
   page: number;
   limit: number;
+
   total: number;
   totalPages: number;
+
   hasNextPage: boolean;
   hasPreviousPage: boolean;
 }
 
+/* =====================================================
+ * RESPONSES
+ * ===================================================== */
+
 export interface MembersResponse {
   success: boolean;
-  message?: string;
+
+  message: string;
 
   data: Member[];
 
@@ -221,21 +232,43 @@ export interface MembersResponse {
 
 export interface MemberResponse {
   success: boolean;
-  message?: string;
+
+  message: string;
 
   data: Member | MemberDetails;
 }
 
 export interface MemberProfileResponse {
   success: boolean;
-  message?: string;
+
+  message: string;
 
   data: MemberProfile;
 }
 
 export interface MemberActionResponse {
   success: boolean;
-  message?: string;
+
+  message: string;
 
   data: Member | MemberDetails;
+}
+
+export interface MemberDetailsResponse {
+  success: boolean;
+
+  message: string;
+
+  data: MemberDetails;
+}
+
+export interface MemberProfileFormData {
+  firstName: string;
+  lastName: string;
+  otherNames: string | null;
+  gender: Gender | null;
+  dateOfBirth: string | null;
+  nationalId: string | null;
+  address: string | null;
+  profilePhotoId: string | null;
 }

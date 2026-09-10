@@ -1,24 +1,8 @@
-import {
-  useEffect,
-  useState,
-} from "react";
-
-import {
-  Dropdown,
-
-} from "../ui/dropdown/Dropdown";
-import {
- 
-  DropdownItem,
-} from "../ui/dropdown/DropdownItem";
-import {
-  useNotifications,
-} from "../../hooks/useNotification";
-
-
-import {
-  OtpChannel,
-} from "../../types/AuthTypes";
+import { useEffect, useState,} from "react";
+import { Dropdown,} from "../ui/dropdown/Dropdown";
+import { DropdownItem,} from "../ui/dropdown/DropdownItem";
+import { useNotifications,} from "../../hooks/useNotification";
+import { OtpChannel,} from "../../types/AuthTypes";
 
 interface NotificationChannelDropdownProps {
   value: OtpChannel;

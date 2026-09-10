@@ -5,6 +5,7 @@ import {
   TableHeader,
   TableRow,
 } from "../../ui/table";
+import { RegionFilters } from "../../../types/RegionType";
 
 import Badge from "../../ui/badge/Badge";
 import { Link } from "react-router";
@@ -17,6 +18,13 @@ import { OrderFilters } from "../../../types/OrderTypes";
 import { useCustomer } from "../../../hooks/useCustomers";
 import {usePermissions}from "../../../hooks/usePermission";
 import { useRegion } from "../../../hooks/useRegion";
+import {
+  useMember,
+} from "../../../hooks/useMember";
+
+import {
+  Member,
+} from "../../../types/MemberType";
 
 
 
@@ -541,7 +549,6 @@ function MenuTable() {
 }
 
  function RolesTable() {
-
   const {
     roles,
     loading,
@@ -549,50 +556,47 @@ function MenuTable() {
     message,
   } = useRoles();
 
+  const handleDelete = async (
+    roleId: string,
+    roleName: string
+  ) => {
+    const confirmed = window.confirm(
+      `Are you sure you want to delete the role "${roleName}"?`
+    );
+
+    if (!confirmed) {
+      return;
+    }
+
+    await deleteRole(roleId);
+  };
 
   if (loading) {
     return (
       <div className="flex justify-center py-10">
-
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-brand-500"/>
-
+        <div className="h-8 w-8 animate-spin rounded-full border-b-2 border-brand-500" />
       </div>
     );
   }
 
-
   return (
-
     <>
-
       {message && (
-        <div className="mb-4 text-sm">
+        <div className="mb-4 text-sm text-gray-600">
           {message}
         </div>
       )}
 
-
-      <div className="flex justify-end mb-4">
+      <div className="mb-4 flex justify-end">
         <Link
           to="/roles/create"
-          className="
-          px-4 py-2
-          rounded-lg
-          bg-blue-600
-          text-white
-          "
+          className="rounded-lg bg-blue-600 px-4 py-2 text-white hover:bg-blue-700"
         >
           + Create Role
         </Link>
       </div>
-      <div
-        className="
-        overflow-hidden
-        rounded-xl
-        border
-        bg-white
-        "
-      >
+
+      <div className="overflow-hidden rounded-xl border bg-white">
         <div className="max-w-full overflow-x-auto">
           <Table>
             <TableHeader>
@@ -603,12 +607,21 @@ function MenuTable() {
                 >
                   Name
                 </TableCell>
+
+                <TableCell
+                  isHeader
+                  className="px-5 py-3 text-start"
+                >
+                  Type
+                </TableCell>
+
                 <TableCell
                   isHeader
                   className="px-5 py-3 text-start"
                 >
                   Created At
                 </TableCell>
+
                 <TableCell
                   isHeader
                   className="px-5 py-3 text-start"
@@ -618,399 +631,841 @@ function MenuTable() {
               </TableRow>
             </TableHeader>
 
-
-
-            <TableBody
-              className="
-              divide-y
-              divide-gray-100
-              "
-            >
-              {roles.map((role:any)=>(
-                <TableRow
-                  key={role.id}
-                >
+            <TableBody className="divide-y divide-gray-100">
+              {roles.length === 0 ? (
+                <TableRow>
                   <TableCell
-                    className="px-5 py-4"
+                    
+                    className="px-5 py-10 text-center text-sm text-gray-500"
                   >
-                    <div>
-                      <p className="font-medium">
-                        {role.name}
-                      </p>
-                    </div>
-                  </TableCell>
-                  <TableCell
-                    className="px-5 py-4">
-                    {new Date(role.createdAt) .toLocaleDateString()}
-
-                  </TableCell>
-                  <TableCell
-                    className="px-5 py-4"
-                  >
-                    <div
-                      className="
-                      flex
-                      gap-4
-                      "
-                    >
-                      <Link
-                        to={`/roles/${role.id}/permissions`}
-                        className="
-                        text-green-600
-                        "
-                      >
-                        Permissions
-                      </Link>
-                      <Link
-                        to={`/roles/edit/${role.id}`}
-                        className="
-                        text-blue-600
-                        " >
-                        Edit
-                      </Link>
-                      <button
-                        onClick={()=>deleteRole(role.id)}
-                        className=" text-red-600" >
-                        Delete
-                      </button>
-                    </div>
+                    No roles found.
                   </TableCell>
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </div>
-      </div>
-    </>
-  );
-}
-
- function PermissionsTable() {
-  const { permissions, loading, message} = usePermissions();
-  if (loading) {
-    return (
-      <div className="flex justify-center py-10">
-        <div className="  animate-spin  rounded-full  h-8 w-8 border-b-2 border-brand-500 " /></div>);
-  }
-  return (
-    <>
-      {message && ( <div className="mb-4 text-sm"> {message} </div>)}
-      <div className="flex justify-end mb-4">
-
-        <Link
-
-          to="/permissions/create"
-
-          className="
-          px-4 py-2
-          rounded-lg
-          bg-blue-600
-          text-white
-          "
-
-        >
-
-          + Create Permission
-
-        </Link>
-
-
-      </div>
-
-
-
-
-
-      <div
-
-        className="
-        overflow-hidden
-        rounded-xl
-        border
-        bg-white
-        "
-
-      >
-
-
-        <div className="max-w-full overflow-x-auto">
-
-
-          <Table>
-
-
-            <TableHeader>
-
-
-              <TableRow>
-
-
-
-                <TableCell
-
-                  isHeader
-
-                  className="
-                  px-5
-                  py-3
-                  text-start
-                  "
-
-                >
-
-                  Name
-
-                </TableCell>
-
-
-
-
-                <TableCell
-
-                  isHeader
-
-                  className="
-                  px-5
-                  py-3
-                  text-start
-                  "
-
-                >
-
-                  Description
-
-                </TableCell>
-
-
-
-
-
-                <TableCell
-
-                  isHeader
-
-                  className="
-                  px-5
-                  py-3
-                  text-start
-                  "
-
-                >
-
-                  Created At
-
-                </TableCell>
-
-
-
-
-              </TableRow>
-
-
-            </TableHeader>
-
-
-
-
-
-
-            <TableBody
-
-              className="
-              divide-y
-              divide-gray-100
-              "
-
-            >
-
-
-
-              {
-                permissions.map(
-                  (permission:any)=>(
-
-
-                  <TableRow
-
-                    key={permission.id}
-
-                  >
-
-
-
-
-                    <TableCell
-
-                      className="
-                      px-5
-                      py-4
-                      "
-
-                    >
-
-
-                      <p className="font-medium">
-
-                        {permission.name}
-
-                      </p>
-
-
+              ) : (
+                roles.map((role) => (
+                  <TableRow key={role.id}>
+                    <TableCell className="px-5 py-4">
+                      <div>
+                        <p className="font-medium text-gray-900">
+                          {role.name}
+                        </p>
+
+                        <p className="text-sm text-gray-500">
+                          {role.slug}
+                        </p>
+                      </div>
                     </TableCell>
 
-
-
-
-
-
-
-                    <TableCell
-
-                      className="
-                      px-5
-                      py-4
-                      "
-
-                    >
-
-
-                      {
-
-                        permission.description ||
-
-                        "-"
-
-                      }
-
-
+                    <TableCell className="px-5 py-4">
+                      {role.isSystem ? (
+                        <span className="rounded-full bg-gray-100 px-3 py-1 text-xs font-medium text-gray-700">
+                          System
+                        </span>
+                      ) : (
+                        <span className="rounded-full bg-green-100 px-3 py-1 text-xs font-medium text-green-700">
+                          Custom
+                        </span>
+                      )}
                     </TableCell>
 
-
-
-
-
-
-
-                    <TableCell
-
-                      className="
-                      px-5
-                      py-4
-                      "
-
-                    >
-
-
-                      {
-
-                        new Date(
-                          permission.createdAt
-                        )
-                        .toLocaleDateString()
-
-                      }
-
-
-
+                    <TableCell className="px-5 py-4">
+                      {new Date(
+                        role.createdAt
+                      ).toLocaleDateString()}
                     </TableCell>
 
+                    <TableCell className="px-5 py-4">
+                      <div className="flex items-center gap-4">
+                        <Link
+                          to={`/roles/${role.id}/permissions`}
+                          className="text-green-600 hover:text-green-700"
+                        >
+                          Permissions
+                        </Link>
 
+                        <Link
+                          to={`/roles/edit/${role.id}`}
+                          className="text-blue-600 hover:text-blue-700"
+                        >
+                          Edit
+                        </Link>
 
-
-
+                        {!role.isSystem && (
+                          <button
+                            type="button"
+                            onClick={() =>
+                              handleDelete(
+                                role.id,
+                                role.name
+                              )
+                            }
+                            className="text-red-600 hover:text-red-700"
+                          >
+                            Delete
+                          </button>
+                        )}
+                      </div>
+                    </TableCell>
                   </TableRow>
-
-
                 ))
-
-              }
-
-
-
-
-
+              )}
             </TableBody>
-
-
-
-
           </Table>
-
-
         </div>
-
-
-
       </div>
-
-
-
-
     </>
-
-
   );
-
-
 }
 
 
-
-
-interface RegionFilters {
-  search?: string;
-  page?: number;
-  limit?: number;
+interface MembersTableProps {
+  onRefresh?: () => void;
 }
 
-interface Props {
-  filters: RegionFilters;
-}
+const MembersTable = ({
+  onRefresh,
+}: MembersTableProps) => {
 
- function RegionsTable({
-  filters,
-}: Props) {
   const {
-    regions,
+    members,
     loading,
-    fetchRegions,
-    deleteRegionHandler,
-  } = useRegion();
+    message,
+    activateMember,
+    suspendMember,
+    reinstateMember,
+    retireMember,
+    resignMember,
+  } = useMember();
 
-  useEffect(() => {
-    fetchRegions(filters);
-  }, [filters]);
+  const [
+    expandedMemberId,
+    setExpandedMemberId,
+  ] = useState<string | null>(null);
 
-  const handleDelete = async (
-    regionId: string
+  const [
+    actionLoading,
+    setActionLoading,
+  ] = useState(false);
+
+  const handleRowClick = (
+    memberId: string
   ) => {
+
+    setExpandedMemberId(
+      current =>
+        current === memberId
+          ? null
+          : memberId
+    );
+  };
+
+  const handleActivate = async (
+    member: Member
+  ) => {
+
     const confirmed =
       window.confirm(
-        "Are you sure you want to delete this region?"
+        `Are you sure you want to activate member "${member.membershipNumber}"?`
       );
 
     if (!confirmed) {
       return;
     }
 
-    await deleteRegionHandler(
-      regionId
-    );
+    setActionLoading(true);
+
+    try {
+      await activateMember(member.id);
+      onRefresh?.();
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  const handleSuspend = async (
+    member: Member
+  ) => {
+
+    const confirmed =
+      window.confirm(
+        `Are you sure you want to suspend member "${member.membershipNumber}"?`
+      );
+
+    if (!confirmed) {
+      return;
+    }
+
+    setActionLoading(true);
+
+    try {
+      await suspendMember(
+        member.id,
+        {
+          reason:
+            "Member suspended from membership management.",
+        }
+      );
+
+      onRefresh?.();
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  const handleReinstate = async (
+    member: Member
+  ) => {
+
+    const confirmed =
+      window.confirm(
+        `Are you sure you want to reinstate member "${member.membershipNumber}"?`
+      );
+
+    if (!confirmed) {
+      return;
+    }
+
+    setActionLoading(true);
+
+    try {
+      await reinstateMember(
+        member.id,
+        {
+          reason:
+            "Member reinstated from membership management.",
+        }
+      );
+
+      onRefresh?.();
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  const handleRetire = async (
+    member: Member
+  ) => {
+
+    const confirmed =
+      window.confirm(
+        `Are you sure you want to retire member "${member.membershipNumber}"?`
+      );
+
+    if (!confirmed) {
+      return;
+    }
+
+    setActionLoading(true);
+
+    try {
+      await retireMember(
+        member.id,
+        {
+          reason:
+            "Member retired from membership management.",
+        }
+      );
+
+      onRefresh?.();
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  const handleResign = async (
+    member: Member
+  ) => {
+
+    const confirmed =
+      window.confirm(
+        `Are you sure you want to mark member "${member.membershipNumber}" as resigned?`
+      );
+
+    if (!confirmed) {
+      return;
+    }
+
+    setActionLoading(true);
+
+    try {
+      await resignMember(
+        member.id,
+        {
+          reason:
+            "Member resignation recorded from membership management.",
+        }
+      );
+
+      onRefresh?.();
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  const getStatusClasses = (
+    status: Member["status"]
+  ) => {
+
+    switch (status) {
+
+      case "ACTIVE":
+        return "bg-green-100 text-green-700";
+
+      case "PENDING":
+        return "bg-yellow-100 text-yellow-700";
+
+      case "SUSPENDED":
+        return "bg-orange-100 text-orange-700";
+
+      case "RETIRED":
+        return "bg-blue-100 text-blue-700";
+
+      case "RESIGNED":
+        return "bg-gray-100 text-gray-700";
+
+      default:
+        return "bg-gray-100 text-gray-700";
+    }
+  };
+
+  const getMemberName = (
+    member: Member
+  ) => {
+
+    return [
+      member.profile.firstName,
+      member.profile.otherNames,
+      member.profile.lastName,
+    ]
+      .filter(Boolean)
+      .join(" ");
+  };
+
+  const renderStatusActions = (
+    member: Member
+  ) => {
+
+    switch (member.status) {
+
+      case "PENDING":
+
+        return (
+          <button
+            type="button"
+            disabled={actionLoading}
+            onClick={() =>
+              handleActivate(member)
+            }
+            className="
+              text-green-600
+              hover:text-green-700
+              disabled:opacity-50
+            "
+          >
+            Activate
+          </button>
+        );
+
+      case "ACTIVE":
+
+        return (
+          <>
+            <button
+              type="button"
+              disabled={actionLoading}
+              onClick={() =>
+                handleSuspend(member)
+              }
+              className="
+                text-orange-600
+                hover:text-orange-700
+                disabled:opacity-50
+              "
+            >
+              Suspend
+            </button>
+
+            <button
+              type="button"
+              disabled={actionLoading}
+              onClick={() =>
+                handleRetire(member)
+              }
+              className="
+                text-blue-600
+                hover:text-blue-700
+                disabled:opacity-50
+              "
+            >
+              Retire
+            </button>
+
+            <button
+              type="button"
+              disabled={actionLoading}
+              onClick={() =>
+                handleResign(member)
+              }
+              className="
+                text-red-600
+                hover:text-red-700
+                disabled:opacity-50
+              "
+            >
+              Resign
+            </button>
+          </>
+        );
+
+      case "SUSPENDED":
+
+        return (
+          <>
+            <button
+              type="button"
+              disabled={actionLoading}
+              onClick={() =>
+                handleReinstate(member)
+              }
+              className="
+                text-green-600
+                hover:text-green-700
+                disabled:opacity-50
+              "
+            >
+              Reinstate
+            </button>
+
+            <button
+              type="button"
+              disabled={actionLoading}
+              onClick={() =>
+                handleRetire(member)
+              }
+              className="
+                text-blue-600
+                hover:text-blue-700
+                disabled:opacity-50
+              "
+            >
+              Retire
+            </button>
+
+            <button
+              type="button"
+              disabled={actionLoading}
+              onClick={() =>
+                handleResign(member)
+              }
+              className="
+                text-red-600
+                hover:text-red-700
+                disabled:opacity-50
+              "
+            >
+              Resign
+            </button>
+          </>
+        );
+
+      case "RETIRED":
+      case "RESIGNED":
+        return (
+          <span className="text-sm text-gray-400">
+            No actions available
+          </span>
+        );
+
+      default:
+        return null;
+    }
   };
 
   if (loading) {
+
     return (
       <div className="flex justify-center py-10">
-        <div className="animate-spin h-8 w-8 border-b-2 border-brand-500 rounded-full"></div>
+        <div
+          className="
+            h-8
+            w-8
+            animate-spin
+            rounded-full
+            border-b-2
+            border-brand-500
+          "
+        />
       </div>
     );
   }
 
   return (
+    <>
+      {message && (
+        <div
+          className="
+            mb-4
+            text-sm
+            text-gray-600
+            dark:text-gray-400
+          "
+        >
+          {message}
+        </div>
+      )}
+
+      <div
+        className="
+          overflow-hidden
+          rounded-xl
+          border
+          border-gray-200
+          bg-white
+          dark:border-gray-800
+          dark:bg-white/[0.03]
+        "
+      >
+
+        <div className="max-w-full overflow-x-auto">
+
+          <Table>
+
+            <TableHeader>
+
+              <TableRow>
+
+                <TableCell
+                  isHeader
+                  className="px-5 py-3 text-start"
+                >
+                  Member
+                </TableCell>
+
+                <TableCell
+                  isHeader
+                  className="px-5 py-3 text-start"
+                >
+                  Membership No.
+                </TableCell>
+
+                <TableCell
+                  isHeader
+                  className="px-5 py-3 text-start"
+                >
+                  Status
+                </TableCell>
+
+                <TableCell
+                  isHeader
+                  className="px-5 py-3 text-start"
+                >
+                  Joined
+                </TableCell>
+
+                <TableCell
+                  isHeader
+                  className="px-5 py-3 text-start"
+                >
+                  Actions
+                </TableCell>
+
+              </TableRow>
+
+            </TableHeader>
+
+            <TableBody
+              className="
+                divide-y
+                divide-gray-100
+                dark:divide-gray-800
+              "
+            >
+
+              {members.length === 0 ? (
+
+                <TableRow>
+
+                  <TableCell
+                    className="
+                      px-5
+                      py-10
+                      text-center
+                      text-sm
+                      text-gray-500
+                    "
+                  >
+                    No members found.
+                  </TableCell>
+
+                </TableRow>
+
+              ) : (
+
+                members.map((member) => {
+
+                  const isExpanded =
+                    expandedMemberId ===
+                    member.id;
+
+                  return (
+                    <>
+                      <TableRow
+                        key={member.id}
+                        className="
+                          cursor-pointer
+                          hover:bg-gray-50
+                          dark:hover:bg-white/[0.02]
+                        "
+                        onClick={() =>
+                          handleRowClick(
+                            member.id
+                          )
+                        }
+                      >
+
+                        <TableCell className="px-5 py-4">
+
+                          <div>
+
+                            <p
+                              className="
+                                font-medium
+                                text-gray-900
+                                dark:text-white
+                              "
+                            >
+                              {getMemberName(
+                                member
+                              )}
+                            </p>
+
+                            <p
+                              className="
+                                text-sm
+                                text-gray-500
+                                dark:text-gray-400
+                              "
+                            >
+                              {member.profile
+                                .nationalId ||
+                                "No national ID"}
+                            </p>
+
+                          </div>
+
+                        </TableCell>
+
+                        <TableCell className="px-5 py-4">
+
+                          {member.membershipNumber}
+
+                        </TableCell>
+
+                        <TableCell className="px-5 py-4">
+
+                          <span
+                            className={`
+                              rounded-full
+                              px-3
+                              py-1
+                              text-xs
+                              font-medium
+                              ${getStatusClasses(
+                                member.status
+                              )}
+                            `}
+                          >
+                            {member.status}
+                          </span>
+
+                        </TableCell>
+
+                        <TableCell className="px-5 py-4">
+
+                          {new Date(
+                            member.joinedAt
+                          ).toLocaleDateString()}
+
+                        </TableCell>
+
+                        <TableCell
+                          className="px-5 py-4"
+                          onClick={(event) =>
+                            event.stopPropagation()
+                          }
+                        >
+
+                          <Link
+                            to={`/members/${member.id}`}
+                            className="
+                              text-blue-600
+                              hover:text-blue-700
+                            "
+                          >
+                            View
+                          </Link>
+
+                        </TableCell>
+
+                      </TableRow>
+
+                      {isExpanded && (
+
+                        <TableRow
+                          key={`${member.id}-actions`}
+                        >
+
+                          <TableCell
+                            
+                            className="
+                              bg-gray-50
+                              px-5
+                              py-4
+                              dark:bg-white/[0.02]
+                            "
+                          >
+
+                            <div
+                              className="
+                                flex
+                                flex-wrap
+                                items-center
+                                gap-4
+                              "
+                            >
+
+                              <Link
+                                to={`/members/${member.id}`}
+                                className="
+                                  text-blue-600
+                                  hover:text-blue-700
+                                "
+                              >
+                                View Profile
+                              </Link>
+
+                              <Link
+                                to={`/members/edit/${member.id}`}
+                                className="
+                                  text-gray-600
+                                  hover:text-gray-800
+                                  dark:text-gray-400
+                                  dark:hover:text-gray-200
+                                "
+                              >
+                                Edit
+                              </Link>
+
+                              {renderStatusActions(
+                                member
+                              )}
+
+                            </div>
+
+                          </TableCell>
+
+                        </TableRow>
+
+                      )}
+
+                    </>
+                  );
+                })
+
+              )}
+
+            </TableBody>
+
+          </Table>
+
+        </div>
+
+      </div>
+    </>
+  );
+};
+
+
+
+
+
+interface RegionsTableProps {
+  filters: RegionFilters;
+}
+
+function RegionsTable({
+  filters,
+}: RegionsTableProps) {
+  const {
+    regions,
+    loading,
+    fetchRegions,
+    deleteRegion,
+  } = useRegion();
+
+  /*
+   * ============================================================
+   * FETCH REGIONS
+   * ============================================================
+   */
+
+  useEffect(() => {
+    fetchRegions(filters);
+  }, [fetchRegions, filters]);
+
+  /*
+   * ============================================================
+   * DELETE REGION
+   * ============================================================
+   */
+
+  const handleDelete = async (
+    regionId: string
+  ) => {
+    const confirmed = window.confirm(
+      "Are you sure you want to delete this region?"
+    );
+
+    if (!confirmed) {
+      return;
+    }
+
+    await deleteRegion(regionId);
+  };
+
+  /*
+   * ============================================================
+   * LOADING
+   * ============================================================
+   */
+
+  if (loading) {
+    return (
+      <div className="flex justify-center py-10">
+        <div
+          className="
+            h-8
+            w-8
+            animate-spin
+            rounded-full
+            border-b-2
+            border-brand-500
+          "
+        />
+      </div>
+    );
+  }
+
+  /*
+   * ============================================================
+   * TABLE
+   * ============================================================
+   */
+
+  return (
     <div className="overflow-hidden rounded-xl border bg-white">
       <div className="overflow-x-auto">
         <table className="min-w-full text-sm">
-
           <thead className="border-b">
             <tr>
               <th className="p-3 text-left">
@@ -1040,19 +1495,17 @@ interface Props {
           </thead>
 
           <tbody>
-            {regions.length === 0 && (
+            {regions.length === 0 ? (
               <tr>
                 <td
                   colSpan={6}
-                  className="text-center p-6 text-gray-500"
+                  className="p-6 text-center text-gray-500"
                 >
-                  No regions found
+                  No regions found.
                 </td>
               </tr>
-            )}
-
-            {regions.map(
-              (region: any) => (
+            ) : (
+              regions.map((region) => (
                 <tr
                   key={region.id}
                   className="border-b"
@@ -1066,13 +1519,11 @@ interface Props {
                   </td>
 
                   <td className="p-3">
-                    {region.description ||
-                      "-"}
+                    {region.description || "-"}
                   </td>
 
                   <td className="p-3">
-                    {region._count
-                      ?.users || 0}
+                    {region._count?.users ?? 0}
                   </td>
 
                   <td className="p-3">
@@ -1083,44 +1534,219 @@ interface Props {
 
                   <td className="p-3">
                     <div className="flex gap-3">
-
                       <Link
                         to={`/regions/${region.id}/users`}
-                        className="text-green-600"
+                        className="text-green-600 hover:text-green-700"
                       >
                         Users
                       </Link>
 
                       <Link
                         to={`/regions/edit/${region.id}`}
-                        className="text-blue-600"
+                        className="text-blue-600 hover:text-blue-700"
                       >
                         Edit
                       </Link>
 
                       <button
+                        type="button"
                         onClick={() =>
-                          handleDelete(
-                            region.id
-                          )
+                          handleDelete(region.id)
                         }
-                        className="text-red-600"
+                        className="text-red-600 hover:text-red-700"
                       >
                         Delete
                       </button>
-
                     </div>
                   </td>
                 </tr>
-              )
+              ))
             )}
           </tbody>
-
         </table>
       </div>
     </div>
   );
 }
+
+function PermissionsTable() {
+  const {
+    permissions,
+    loading,
+    message,
+    deletePermission,
+  } = usePermissions();
+
+  const handleDelete = async (
+    permissionId: string
+  ) => {
+    const confirmed =
+      window.confirm(
+        "Are you sure you want to delete this permission?"
+      );
+
+    if (!confirmed) {
+      return;
+    }
+
+    await deletePermission(
+      permissionId
+    );
+  };
+
+  if (loading) {
+    return (
+      <div className="flex justify-center py-10">
+        <div
+          className="
+            h-8
+            w-8
+            animate-spin
+            rounded-full
+            border-b-2
+            border-brand-500
+          "
+        />
+      </div>
+    );
+  }
+
+  return (
+    <>
+      {message && (
+        <div className="mb-4 text-sm">
+          {message}
+        </div>
+      )}
+
+      <div className="mb-4 flex justify-end">
+        <Link
+          to="/permissions/create"
+          className="
+            rounded-lg
+            bg-blue-600
+            px-4
+            py-2
+            text-white
+            hover:bg-blue-700
+          "
+        >
+          + Create Permission
+        </Link>
+      </div>
+
+      <div
+        className="
+          overflow-hidden
+          rounded-xl
+          border
+          bg-white
+        "
+      >
+        <div className="max-w-full overflow-x-auto">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableCell
+                  isHeader
+                  className="px-5 py-3 text-start"
+                >
+                  Name
+                </TableCell>
+
+                <TableCell
+                  isHeader
+                  className="px-5 py-3 text-start"
+                >
+                  Description
+                </TableCell>
+
+                <TableCell
+                  isHeader
+                  className="px-5 py-3 text-start"
+                >
+                  Created At
+                </TableCell>
+
+                <TableCell
+                  isHeader
+                  className="px-5 py-3 text-start"
+                >
+                  Actions
+                </TableCell>
+              </TableRow>
+            </TableHeader>
+
+            <TableBody className="divide-y divide-gray-100">
+              {permissions.length === 0 ? (
+                <TableRow>
+                  <TableCell
+                    colSpan={4}
+                    className="px-5 py-10 text-center text-sm text-gray-500"
+                  >
+                    No permissions found.
+                  </TableCell>
+                </TableRow>
+              ) : (
+                permissions.map(
+                  (permission) => (
+                    <TableRow
+                      key={permission.id}
+                    >
+                      <TableCell className="px-5 py-4">
+                        <p className="font-medium">
+                          {permission.name}
+                        </p>
+                      </TableCell>
+
+                      <TableCell className="px-5 py-4">
+                        {permission.description ||
+                          "-"}
+                      </TableCell>
+
+                      <TableCell className="px-5 py-4">
+                        {new Date(
+                          permission.createdAt
+                        ).toLocaleDateString()}
+                      </TableCell>
+
+                      <TableCell className="px-5 py-4">
+                        <div className="flex gap-4">
+                          <Link
+                            to={`/permissions/edit/${permission.id}`}
+                            className="text-blue-600 hover:text-blue-700"
+                          >
+                            Edit
+                          </Link>
+
+                          <button
+                            type="button"
+                            onClick={() =>
+                              handleDelete(
+                                permission.id
+                              )
+                            }
+                            className="text-red-600 hover:text-red-700"
+                          >
+                            Delete
+                          </button>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  )
+                )
+              )}
+            </TableBody>
+          </Table>
+        </div>
+      </div>
+    </>
+  );
+}
+
+
+
+
 
 
 interface RegionUserFilters {
@@ -1374,4 +2000,4 @@ pagination,
 }
 
 
-export {  RolesTable,  MenuTable, StatusTable, OrdersTable,CustomersTable, PermissionsTable,RegionsTable ,RegionUsersTable}; 
+export {  RolesTable,  MenuTable, StatusTable, OrdersTable,CustomersTable, PermissionsTable,RegionsTable ,RegionUsersTable,MembersTable}; 

@@ -11,7 +11,6 @@ import Input from "../form/input/InputField";
 import Checkbox from "../form/input/Checkbox";
 import Button from "../ui/button/Button";
 
-import NotificationChannelDropdown from "../customDropdowns/NotificationChannelDropdown";
 
 import { useAuth } from "../../hooks/useAuth";
 
