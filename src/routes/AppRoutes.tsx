@@ -41,7 +41,6 @@ import RolePermissionsPage from "../pages/RolesPages/RolePermissionsPage";
 import CreateRegion from "../pages/RegionPages/CreateRegion";
 import RegionsPage from "../pages/RegionPages/RegionPages";
 import UpdateRegion from "../pages/RegionPages/UpdateRegion";
-import RegionUsersPage from "../pages/RegionPages/RegionUserPage";
 import ProtectedRoute from "../pages/ProtectedRoute";
 import UpdatePermission from "../pages/PermissionPages/UpdatePermission";
 import Members from "../pages/MemberPages/Members";
@@ -54,6 +53,17 @@ import CreateNextOfKin from "../pages/MemberPages/CreateNextOfKin";
 import UpdateNextOfKin from "../pages/MemberPages/UpdateNextOfKin";
 import CreateDependant from "../pages/MemberPages/CreateDependant";
 import UpdateDependant from "../pages/MemberPages/UpdateDependant";
+import UpdateMyDependant from "../pages/ProfilePages/UpdateMyDependant";
+import CreateMyDependant from "../pages/ProfilePages/CreateMyDependant";
+import UpdateMyNextOfKin from "../pages/ProfilePages/UpdateMyNextOfKin";
+import CreateMyNextOfKin from "../pages/ProfilePages/CreateMyNextOfKin";
+import UpdateMyEmployment from "../pages/ProfilePages/UpdateMyEmployment";
+import CreateMyEmployment from "../pages/ProfilePages/CreateMyEmployment";
+import UpdateMyProfile from "../pages/ProfilePages/UpdateMyProfile";
+import MyProfile from "../pages/ProfilePages/MyProfile";
+import RegionMembers from "../pages/RegionPages/RegionMembers";
+import Users from "../pages/UserPages/Users";
+import UserDetails from "../pages/UserPages/UserDetails";
 
 
 
@@ -94,9 +104,9 @@ const AppRoutes = () => {
 
             <Route path="/regions/create" element={<CreateRegion />} />
             <Route path="/regions/edit/:id" element={<UpdateRegion />} />
-            <Route path="/regions/:id/users" element={<RegionUsersPage />} />
+            <Route path="/regions/:regionId/members" element={<RegionMembers />} />
 
-            <Route path="/region-users" element={<RegionUsersPage />} />
+
 
             // Membership
             <Route path="/members" element={<Members />} />
@@ -104,7 +114,7 @@ const AppRoutes = () => {
             <Route path="/members/:memberId" element={<MemberProfile />} />
             <Route
               path="/members/:memberId/employment/create"
-              element={<CreateEmployment />}/>
+              element={<CreateEmployment />} />
 
             <Route
               path="/members/:memberId/employment/edit/:employmentId"
@@ -132,26 +142,26 @@ const AppRoutes = () => {
             />
             <Route path="/members/edit/:memberId" element={<UpdateMember />} />
 
+            <Route path="/profile" element={<MyProfile />} />
+            <Route path="/profile/edit" element={<UpdateMyProfile />} />
+            <Route path="/profile/employment/create" element={<CreateMyEmployment />} />
+            <Route path="/profile/employment/edit" element={<UpdateMyEmployment />} />
+            <Route path="/profile/next-of-kin/create" element={<CreateMyNextOfKin />} />
+            <Route path="/profile/next-of-kin/edit" element={<UpdateMyNextOfKin />} />
+            <Route path="/profile/dependants/create" element={<CreateMyDependant />} />
+            <Route path="/profile/dependants/edit/:dependantId" element={<UpdateMyDependant />} />
 
-            <Route path="/menu" element={<Menu />} />
-            <Route path="/menu/create" element={<CreateMenu />} />
-            <Route path="/menu/edit/:id" element={<UpdateMenu />} />
-
-            <Route path="/order-status" element={<Status />} />
-            <Route path="/order-status/create" element={<CreateStatus />} />
-            <Route path="/order-status/edit/:id" element={<UpdateStatus />} />
-
-            <Route path="/orders" element={<OrdersPage />} />
-            <Route path="/orders/:id" element={<OrderDetailsPage />} />
-
-
+            <Route path="/users" element={<Users />} />
+            <Route path="/users/:userId" element={<UserDetails />} />
 
 
-            <Route path="/customers" element={<CustomersPage />} />
-            <Route path="/customers/:id" element={<CustomerDetails />} />
-            <Route path="/customers/create" element={<CreateCustomer />} />
 
-            <Route path="/customers/edit/:id" element={<UpdateCustomer />} />
+
+
+
+
+
+
 
             {/* <Route path="/notifications/create" element={<CreateNotification />} />
             <Route path="/notifications" element={<NotificationsPage />} /> */}

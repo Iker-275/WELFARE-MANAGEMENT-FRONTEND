@@ -190,11 +190,11 @@ export interface MemberFilters {
 
   regionId?: string;
 
-  branchId?: string;
+  // branchId?: string;
 
-  chapterId?: string;
+  // chapterId?: string;
 
-  countyId?: string;
+  // countyId?: string;
 
   groupId?: string;
 }

@@ -6,6 +6,14 @@ import {
   TableRow,
 } from "../../ui/table";
 import { RegionFilters } from "../../../types/RegionType";
+import {
+  useUser,
+} from "../../../hooks/useUser";
+
+import {
+  User,
+} from "../../../types/UserType";
+
 
 import Badge from "../../ui/badge/Badge";
 import { Link } from "react-router";
@@ -18,13 +26,8 @@ import { OrderFilters } from "../../../types/OrderTypes";
 import { useCustomer } from "../../../hooks/useCustomers";
 import {usePermissions}from "../../../hooks/usePermission";
 import { useRegion } from "../../../hooks/useRegion";
-import {
-  useMember,
-} from "../../../hooks/useMember";
-
-import {
-  Member,
-} from "../../../types/MemberType";
+import {useMember,} from "../../../hooks/useMember";
+import { Member,MemberFilters,} from "../../../types/MemberType";
 
 
 
@@ -722,6 +725,8 @@ interface MembersTableProps {
   onRefresh?: () => void;
 }
 
+
+
 const MembersTable = ({
   onRefresh,
 }: MembersTableProps) => {
@@ -747,6 +752,9 @@ const MembersTable = ({
     setActionLoading,
   ] = useState(false);
 
+  /**
+   * Toggle expanded member row.
+   */
   const handleRowClick = (
     memberId: string
   ) => {
@@ -759,6 +767,9 @@ const MembersTable = ({
     );
   };
 
+  /**
+   * Activate member.
+   */
   const handleActivate = async (
     member: Member
   ) => {
@@ -775,13 +786,26 @@ const MembersTable = ({
     setActionLoading(true);
 
     try {
-      await activateMember(member.id);
-      onRefresh?.();
+
+      const success =
+        await activateMember(
+          member.id
+        );
+
+      if (success) {
+        onRefresh?.();
+      }
+
     } finally {
+
       setActionLoading(false);
+
     }
   };
 
+  /**
+   * Suspend member.
+   */
   const handleSuspend = async (
     member: Member
   ) => {
@@ -798,20 +822,30 @@ const MembersTable = ({
     setActionLoading(true);
 
     try {
-      await suspendMember(
-        member.id,
-        {
-          reason:
-            "Member suspended from membership management.",
-        }
-      );
 
-      onRefresh?.();
+      const success =
+        await suspendMember(
+          member.id,
+          {
+            reason:
+              "Member suspended from membership management.",
+          }
+        );
+
+      if (success) {
+        onRefresh?.();
+      }
+
     } finally {
+
       setActionLoading(false);
+
     }
   };
 
+  /**
+   * Reinstate member.
+   */
   const handleReinstate = async (
     member: Member
   ) => {
@@ -828,20 +862,30 @@ const MembersTable = ({
     setActionLoading(true);
 
     try {
-      await reinstateMember(
-        member.id,
-        {
-          reason:
-            "Member reinstated from membership management.",
-        }
-      );
 
-      onRefresh?.();
+      const success =
+        await reinstateMember(
+          member.id,
+          {
+            reason:
+              "Member reinstated from membership management.",
+          }
+        );
+
+      if (success) {
+        onRefresh?.();
+      }
+
     } finally {
+
       setActionLoading(false);
+
     }
   };
 
+  /**
+   * Retire member.
+   */
   const handleRetire = async (
     member: Member
   ) => {
@@ -858,20 +902,30 @@ const MembersTable = ({
     setActionLoading(true);
 
     try {
-      await retireMember(
-        member.id,
-        {
-          reason:
-            "Member retired from membership management.",
-        }
-      );
 
-      onRefresh?.();
+      const success =
+        await retireMember(
+          member.id,
+          {
+            reason:
+              "Member retired from membership management.",
+          }
+        );
+
+      if (success) {
+        onRefresh?.();
+      }
+
     } finally {
+
       setActionLoading(false);
+
     }
   };
 
+  /**
+   * Resign member.
+   */
   const handleResign = async (
     member: Member
   ) => {
@@ -888,20 +942,30 @@ const MembersTable = ({
     setActionLoading(true);
 
     try {
-      await resignMember(
-        member.id,
-        {
-          reason:
-            "Member resignation recorded from membership management.",
-        }
-      );
 
-      onRefresh?.();
+      const success =
+        await resignMember(
+          member.id,
+          {
+            reason:
+              "Member resignation recorded from membership management.",
+          }
+        );
+
+      if (success) {
+        onRefresh?.();
+      }
+
     } finally {
+
       setActionLoading(false);
+
     }
   };
 
+  /**
+   * Get status badge classes.
+   */
   const getStatusClasses = (
     status: Member["status"]
   ) => {
@@ -928,6 +992,9 @@ const MembersTable = ({
     }
   };
 
+  /**
+   * Get member display name.
+   */
   const getMemberName = (
     member: Member
   ) => {
@@ -941,6 +1008,9 @@ const MembersTable = ({
       .join(" ");
   };
 
+  /**
+   * Render status-specific actions.
+   */
   const renderStatusActions = (
     member: Member
   ) => {
@@ -954,11 +1024,14 @@ const MembersTable = ({
             type="button"
             disabled={actionLoading}
             onClick={() =>
-              handleActivate(member)
+              handleActivate(
+                member
+              )
             }
             className="
               text-green-600
               hover:text-green-700
+              disabled:cursor-not-allowed
               disabled:opacity-50
             "
           >
@@ -974,11 +1047,14 @@ const MembersTable = ({
               type="button"
               disabled={actionLoading}
               onClick={() =>
-                handleSuspend(member)
+                handleSuspend(
+                  member
+                )
               }
               className="
                 text-orange-600
                 hover:text-orange-700
+                disabled:cursor-not-allowed
                 disabled:opacity-50
               "
             >
@@ -989,11 +1065,14 @@ const MembersTable = ({
               type="button"
               disabled={actionLoading}
               onClick={() =>
-                handleRetire(member)
+                handleRetire(
+                  member
+                )
               }
               className="
                 text-blue-600
                 hover:text-blue-700
+                disabled:cursor-not-allowed
                 disabled:opacity-50
               "
             >
@@ -1004,11 +1083,14 @@ const MembersTable = ({
               type="button"
               disabled={actionLoading}
               onClick={() =>
-                handleResign(member)
+                handleResign(
+                  member
+                )
               }
               className="
                 text-red-600
                 hover:text-red-700
+                disabled:cursor-not-allowed
                 disabled:opacity-50
               "
             >
@@ -1025,11 +1107,14 @@ const MembersTable = ({
               type="button"
               disabled={actionLoading}
               onClick={() =>
-                handleReinstate(member)
+                handleReinstate(
+                  member
+                )
               }
               className="
                 text-green-600
                 hover:text-green-700
+                disabled:cursor-not-allowed
                 disabled:opacity-50
               "
             >
@@ -1040,11 +1125,14 @@ const MembersTable = ({
               type="button"
               disabled={actionLoading}
               onClick={() =>
-                handleRetire(member)
+                handleRetire(
+                  member
+                )
               }
               className="
                 text-blue-600
                 hover:text-blue-700
+                disabled:cursor-not-allowed
                 disabled:opacity-50
               "
             >
@@ -1055,11 +1143,14 @@ const MembersTable = ({
               type="button"
               disabled={actionLoading}
               onClick={() =>
-                handleResign(member)
+                handleResign(
+                  member
+                )
               }
               className="
                 text-red-600
                 hover:text-red-700
+                disabled:cursor-not-allowed
                 disabled:opacity-50
               "
             >
@@ -1070,8 +1161,14 @@ const MembersTable = ({
 
       case "RETIRED":
       case "RESIGNED":
+
         return (
-          <span className="text-sm text-gray-400">
+          <span
+            className="
+              text-sm
+              text-gray-400
+            "
+          >
             No actions available
           </span>
         );
@@ -1081,10 +1178,20 @@ const MembersTable = ({
     }
   };
 
+  /**
+   * Loading state.
+   */
   if (loading) {
 
     return (
-      <div className="flex justify-center py-10">
+      <div
+        className="
+          flex
+          justify-center
+          py-10
+        "
+      >
+
         <div
           className="
             h-8
@@ -1095,12 +1202,15 @@ const MembersTable = ({
             border-brand-500
           "
         />
+
       </div>
     );
   }
 
   return (
     <>
+      {/* Message */}
+
       {message && (
         <div
           className="
@@ -1114,6 +1224,8 @@ const MembersTable = ({
         </div>
       )}
 
+      {/* Table Container */}
+
       <div
         className="
           overflow-hidden
@@ -1126,9 +1238,16 @@ const MembersTable = ({
         "
       >
 
-        <div className="max-w-full overflow-x-auto">
+        <div
+          className="
+            max-w-full
+            overflow-x-auto
+          "
+        >
 
           <Table>
+
+            {/* Table Header */}
 
             <TableHeader>
 
@@ -1136,35 +1255,55 @@ const MembersTable = ({
 
                 <TableCell
                   isHeader
-                  className="px-5 py-3 text-start"
+                  className="
+                    px-5
+                    py-3
+                    text-start
+                  "
                 >
                   Member
                 </TableCell>
 
                 <TableCell
                   isHeader
-                  className="px-5 py-3 text-start"
+                  className="
+                    px-5
+                    py-3
+                    text-start
+                  "
                 >
                   Membership No.
                 </TableCell>
 
                 <TableCell
                   isHeader
-                  className="px-5 py-3 text-start"
+                  className="
+                    px-5
+                    py-3
+                    text-start
+                  "
                 >
                   Status
                 </TableCell>
 
                 <TableCell
                   isHeader
-                  className="px-5 py-3 text-start"
+                  className="
+                    px-5
+                    py-3
+                    text-start
+                  "
                 >
                   Joined
                 </TableCell>
 
                 <TableCell
                   isHeader
-                  className="px-5 py-3 text-start"
+                  className="
+                    px-5
+                    py-3
+                    text-start
+                  "
                 >
                   Actions
                 </TableCell>
@@ -1172,6 +1311,8 @@ const MembersTable = ({
               </TableRow>
 
             </TableHeader>
+
+            {/* Table Body */}
 
             <TableBody
               className="
@@ -1192,6 +1333,7 @@ const MembersTable = ({
                       text-center
                       text-sm
                       text-gray-500
+                      dark:text-gray-400
                     "
                   >
                     No members found.
@@ -1201,176 +1343,223 @@ const MembersTable = ({
 
               ) : (
 
-                members.map((member) => {
+                members.map(
+                  member => {
 
-                  const isExpanded =
-                    expandedMemberId ===
-                    member.id;
+                    const isExpanded =
+                      expandedMemberId ===
+                      member.id;
 
-                  return (
-                    <>
-                      <TableRow
-                        key={member.id}
-                        className="
-                          cursor-pointer
-                          hover:bg-gray-50
-                          dark:hover:bg-white/[0.02]
-                        "
-                        onClick={() =>
-                          handleRowClick(
-                            member.id
-                          )
-                        }
-                      >
+                    return (
+                      <>
+                        {/* Member Row */}
 
-                        <TableCell className="px-5 py-4">
-
-                          <div>
-
-                            <p
-                              className="
-                                font-medium
-                                text-gray-900
-                                dark:text-white
-                              "
-                            >
-                              {getMemberName(
-                                member
-                              )}
-                            </p>
-
-                            <p
-                              className="
-                                text-sm
-                                text-gray-500
-                                dark:text-gray-400
-                              "
-                            >
-                              {member.profile
-                                .nationalId ||
-                                "No national ID"}
-                            </p>
-
-                          </div>
-
-                        </TableCell>
-
-                        <TableCell className="px-5 py-4">
-
-                          {member.membershipNumber}
-
-                        </TableCell>
-
-                        <TableCell className="px-5 py-4">
-
-                          <span
-                            className={`
-                              rounded-full
-                              px-3
-                              py-1
-                              text-xs
-                              font-medium
-                              ${getStatusClasses(
-                                member.status
-                              )}
-                            `}
-                          >
-                            {member.status}
-                          </span>
-
-                        </TableCell>
-
-                        <TableCell className="px-5 py-4">
-
-                          {new Date(
-                            member.joinedAt
-                          ).toLocaleDateString()}
-
-                        </TableCell>
-
-                        <TableCell
-                          className="px-5 py-4"
-                          onClick={(event) =>
-                            event.stopPropagation()
+                        <TableRow
+                          key={member.id}
+                          className="
+                            cursor-pointer
+                            hover:bg-gray-50
+                            dark:hover:bg-white/[0.02]
+                          "
+                          onClick={() =>
+                            handleRowClick(
+                              member.id
+                            )
                           }
                         >
 
-                          <Link
-                            to={`/members/${member.id}`}
-                            className="
-                              text-blue-600
-                              hover:text-blue-700
-                            "
-                          >
-                            View
-                          </Link>
-
-                        </TableCell>
-
-                      </TableRow>
-
-                      {isExpanded && (
-
-                        <TableRow
-                          key={`${member.id}-actions`}
-                        >
+                          {/* Member */}
 
                           <TableCell
-                            
                             className="
-                              bg-gray-50
                               px-5
                               py-4
-                              dark:bg-white/[0.02]
                             "
                           >
 
-                            <div
-                              className="
-                                flex
-                                flex-wrap
-                                items-center
-                                gap-4
-                              "
-                            >
+                            <div>
 
-                              <Link
-                                to={`/members/${member.id}`}
+                              <p
                                 className="
-                                  text-blue-600
-                                  hover:text-blue-700
+                                  font-medium
+                                  text-gray-900
+                                  dark:text-white
                                 "
                               >
-                                View Profile
-                              </Link>
+                                {getMemberName(
+                                  member
+                                )}
+                              </p>
 
-                              <Link
-                                to={`/members/edit/${member.id}`}
+                              <p
                                 className="
-                                  text-gray-600
-                                  hover:text-gray-800
+                                  text-sm
+                                  text-gray-500
                                   dark:text-gray-400
-                                  dark:hover:text-gray-200
                                 "
                               >
-                                Edit
-                              </Link>
-
-                              {renderStatusActions(
-                                member
-                              )}
+                                {member.profile
+                                  .nationalId ||
+                                  "No national ID"}
+                              </p>
 
                             </div>
 
                           </TableCell>
 
+                          {/* Membership Number */}
+
+                          <TableCell
+                            className="
+                              px-5
+                              py-4
+                            "
+                          >
+                            {member.membershipNumber}
+                          </TableCell>
+
+                          {/* Status */}
+
+                          <TableCell
+                            className="
+                              px-5
+                              py-4
+                            "
+                          >
+
+                            <span
+                              className={`
+                                rounded-full
+                                px-3
+                                py-1
+                                text-xs
+                                font-medium
+                                ${getStatusClasses(
+                                  member.status
+                                )}
+                              `}
+                            >
+                              {member.status}
+                            </span>
+
+                          </TableCell>
+
+                          {/* Joined */}
+
+                          <TableCell
+                            className="
+                              px-5
+                              py-4
+                            "
+                          >
+                            {new Date(
+                              member.joinedAt
+                            ).toLocaleDateString()}
+                          </TableCell>
+
+                          {/* View */}
+
+                          <TableCell
+                            className="
+                              px-5
+                              py-4
+                            "
+                            onClick={event =>
+                              event.stopPropagation()
+                            }
+                          >
+
+                            <Link
+                              to={`/members/${member.id}`}
+                              className="
+                                text-blue-600
+                                hover:text-blue-700
+                              "
+                            >
+                              View
+                            </Link>
+
+                          </TableCell>
+
                         </TableRow>
 
-                      )}
+                        {/* Expanded Actions */}
 
-                    </>
-                  );
-                })
+                        {isExpanded && (
+
+                          <TableRow
+                            key={`${member.id}-actions`}
+                          >
+
+                            <TableCell
+                              colSpan={5}
+                              className="
+                                bg-gray-50
+                                px-5
+                                py-4
+                                dark:bg-white/[0.02]
+                              "
+                            >
+
+                              <div
+                                className="
+                                  flex
+                                  flex-wrap
+                                  items-center
+                                  gap-4
+                                "
+                              >
+
+                                {/* View Profile */}
+
+                                <Link
+                                  to={`/members/${member.id}`}
+                                  onClick={event =>
+                                    event.stopPropagation()
+                                  }
+                                  className="
+                                    text-blue-600
+                                    hover:text-blue-700
+                                  "
+                                >
+                                  View Profile
+                                </Link>
+
+                                {/* Edit */}
+
+                                <Link
+                                  to={`/members/edit/${member.id}`}
+                                  onClick={event =>
+                                    event.stopPropagation()
+                                  }
+                                  className="
+                                    text-gray-600
+                                    hover:text-gray-800
+                                    dark:text-gray-400
+                                    dark:hover:text-gray-200
+                                  "
+                                >
+                                  Edit
+                                </Link>
+
+                                {/* Status Actions */}
+
+                                {renderStatusActions(
+                                  member
+                                )}
+
+                              </div>
+
+                            </TableCell>
+
+                          </TableRow>
+
+                        )}
+
+                      </>
+                    );
+                  }
+                )
 
               )}
 
@@ -1386,12 +1575,10 @@ const MembersTable = ({
 };
 
 
-
-
-
 interface RegionsTableProps {
   filters: RegionFilters;
 }
+
 
 function RegionsTable({
   filters,
@@ -1410,8 +1597,11 @@ function RegionsTable({
    */
 
   useEffect(() => {
-    fetchRegions(filters);
-  }, [fetchRegions, filters]);
+    void fetchRegions(filters);
+  }, [
+    fetchRegions,
+    filters,
+  ]);
 
   /*
    * ============================================================
@@ -1422,9 +1612,10 @@ function RegionsTable({
   const handleDelete = async (
     regionId: string
   ) => {
-    const confirmed = window.confirm(
-      "Are you sure you want to delete this region?"
-    );
+    const confirmed =
+      window.confirm(
+        "Are you sure you want to delete this region?"
+      );
 
     if (!confirmed) {
       return;
@@ -1463,10 +1654,20 @@ function RegionsTable({
    */
 
   return (
-    <div className="overflow-hidden rounded-xl border bg-white">
+    <div
+      className="
+        overflow-hidden
+        rounded-xl
+        border
+        border-gray-200
+        bg-white
+        dark:border-gray-800
+        dark:bg-white/[0.03]
+      "
+    >
       <div className="overflow-x-auto">
         <table className="min-w-full text-sm">
-          <thead className="border-b">
+          <thead className="border-b dark:border-gray-800">
             <tr>
               <th className="p-3 text-left">
                 Name
@@ -1499,16 +1700,25 @@ function RegionsTable({
               <tr>
                 <td
                   colSpan={6}
-                  className="p-6 text-center text-gray-500"
+                  className="
+                    p-6
+                    text-center
+                    text-gray-500
+                    dark:text-gray-400
+                  "
                 >
                   No regions found.
                 </td>
               </tr>
             ) : (
-              regions.map((region) => (
+              regions.map(region => (
                 <tr
                   key={region.id}
-                  className="border-b"
+                  className="
+                    border-b
+                    border-gray-100
+                    dark:border-gray-800
+                  "
                 >
                   <td className="p-3 capitalize">
                     {region.name}
@@ -1535,15 +1745,21 @@ function RegionsTable({
                   <td className="p-3">
                     <div className="flex gap-3">
                       <Link
-                        to={`/regions/${region.id}/users`}
-                        className="text-green-600 hover:text-green-700"
+                        to={`/regions/${region.id}/members`}
+                        className="
+                          text-green-600
+                          hover:text-green-700
+                        "
                       >
-                        Users
+                        Members
                       </Link>
 
                       <Link
                         to={`/regions/edit/${region.id}`}
-                        className="text-blue-600 hover:text-blue-700"
+                        className="
+                          text-blue-600
+                          hover:text-blue-700
+                        "
                       >
                         Edit
                       </Link>
@@ -1551,9 +1767,14 @@ function RegionsTable({
                       <button
                         type="button"
                         onClick={() =>
-                          handleDelete(region.id)
+                          handleDelete(
+                            region.id
+                          )
                         }
-                        className="text-red-600 hover:text-red-700"
+                        className="
+                          text-red-600
+                          hover:text-red-700
+                        "
                       >
                         Delete
                       </button>
@@ -1568,6 +1789,8 @@ function RegionsTable({
     </div>
   );
 }
+
+
 
 function PermissionsTable() {
   const {
@@ -1745,259 +1968,1473 @@ function PermissionsTable() {
 }
 
 
-
-
-
-
-interface RegionUserFilters {
-  search?: string;
-  membershipStatus?: string;
-  employmentStatus?: string;
-  roleId?: string;
-  isActive?: boolean;
-  page?: number;
-  limit?: number;
-}
-
-interface Props2 {
+interface RegionMembersTableProps {
   regionId: string;
-  filters: RegionUserFilters;
-  setFilters: (
-    filters: RegionUserFilters
+  filters: MemberFilters;
+  onPageChange: (
+    page: number
   ) => void;
 }
 
- function RegionUsersTable({
-  regionId,
-  filters,
-  setFilters,
-}: Props2) {
+const RegionMembersTable = ({
+  onPageChange,
+}: RegionMembersTableProps) => {
   const {
-    regionUsers,
-pagination,
+    members,
+    pagination,
     loading,
-    fetchRegionUsers,
-  } = useRegion();
+    message,
 
-  useEffect(() => {
-    if (!regionId) return;
+    activateMember,
+    suspendMember,
+    reinstateMember,
+    retireMember,
+    resignMember,
+  } = useMember();
 
-    fetchRegionUsers(
-      regionId,
-      filters
-    );
-  }, [regionId, filters]);
+  const [
+    expandedMemberId,
+    setExpandedMemberId,
+  ] = useState<string | null>(null);
 
-  const handlePageChange = (
-    page: number
+  const [
+    actionLoading,
+    setActionLoading,
+  ] = useState(false);
+
+  /*
+   * ============================================================
+   * ROW
+   * ============================================================
+   */
+
+  const handleRowClick = (
+    memberId: string
   ) => {
-    setFilters({
-      ...filters,
-      page,
-    });
+    setExpandedMemberId(
+      current =>
+        current === memberId
+          ? null
+          : memberId
+    );
   };
 
-  if (!regionId) {
-    return (
-      <div className="bg-white border rounded-xl p-10 text-center text-gray-500">
-        Select a region to view members
-      </div>
-    );
-  }
+  /*
+   * ============================================================
+   * MEMBER NAME
+   * ============================================================
+   */
+
+  const getMemberName = (
+    member: Member
+  ) => {
+    return [
+      member.profile.firstName,
+      member.profile.otherNames,
+      member.profile.lastName,
+    ]
+      .filter(Boolean)
+      .join(" ");
+  };
+
+  /*
+   * ============================================================
+   * STATUS CLASSES
+   * ============================================================
+   */
+
+  const getStatusClasses = (
+    status: Member["status"]
+  ) => {
+    switch (status) {
+      case "ACTIVE":
+        return "bg-green-100 text-green-700";
+
+      case "PENDING":
+        return "bg-yellow-100 text-yellow-700";
+
+      case "SUSPENDED":
+        return "bg-orange-100 text-orange-700";
+
+      case "RETIRED":
+        return "bg-blue-100 text-blue-700";
+
+      case "RESIGNED":
+        return "bg-gray-100 text-gray-700";
+
+      default:
+        return "bg-gray-100 text-gray-700";
+    }
+  };
+
+  /*
+   * ============================================================
+   * ACTIONS
+   * ============================================================
+   */
+
+  const handleActivate = async (
+    member: Member
+  ) => {
+    const confirmed =
+      window.confirm(
+        `Are you sure you want to activate member "${member.membershipNumber}"?`
+      );
+
+    if (!confirmed) {
+      return;
+    }
+
+    setActionLoading(true);
+
+    try {
+      const success =
+        await activateMember(
+          member.id
+        );
+
+      if (success) {
+        window.location.reload();
+      }
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  const handleSuspend = async (
+    member: Member
+  ) => {
+    const confirmed =
+      window.confirm(
+        `Are you sure you want to suspend member "${member.membershipNumber}"?`
+      );
+
+    if (!confirmed) {
+      return;
+    }
+
+    setActionLoading(true);
+
+    try {
+      const success =
+        await suspendMember(
+          member.id,
+          {
+            reason:
+              "Member suspended from membership management.",
+          }
+        );
+
+      if (success) {
+        window.location.reload();
+      }
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  const handleReinstate = async (
+    member: Member
+  ) => {
+    const confirmed =
+      window.confirm(
+        `Are you sure you want to reinstate member "${member.membershipNumber}"?`
+      );
+
+    if (!confirmed) {
+      return;
+    }
+
+    setActionLoading(true);
+
+    try {
+      const success =
+        await reinstateMember(
+          member.id,
+          {
+            reason:
+              "Member reinstated from membership management.",
+          }
+        );
+
+      if (success) {
+        window.location.reload();
+      }
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  const handleRetire = async (
+    member: Member
+  ) => {
+    const confirmed =
+      window.confirm(
+        `Are you sure you want to retire member "${member.membershipNumber}"?`
+      );
+
+    if (!confirmed) {
+      return;
+    }
+
+    setActionLoading(true);
+
+    try {
+      const success =
+        await retireMember(
+          member.id,
+          {
+            reason:
+              "Member retired from membership management.",
+          }
+        );
+
+      if (success) {
+        window.location.reload();
+      }
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  const handleResign = async (
+    member: Member
+  ) => {
+    const confirmed =
+      window.confirm(
+        `Are you sure you want to mark member "${member.membershipNumber}" as resigned?`
+      );
+
+    if (!confirmed) {
+      return;
+    }
+
+    setActionLoading(true);
+
+    try {
+      const success =
+        await resignMember(
+          member.id,
+          {
+            reason:
+              "Member resignation recorded from membership management.",
+          }
+        );
+
+      if (success) {
+        window.location.reload();
+      }
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  /*
+   * ============================================================
+   * STATUS ACTIONS
+   * ============================================================
+   */
+
+  const renderStatusActions = (
+    member: Member
+  ) => {
+    switch (member.status) {
+      case "PENDING":
+        return (
+          <button
+            type="button"
+            disabled={actionLoading}
+            onClick={() =>
+              handleActivate(member)
+            }
+            className="
+              text-green-600
+              hover:text-green-700
+              disabled:cursor-not-allowed
+              disabled:opacity-50
+            "
+          >
+            Activate
+          </button>
+        );
+
+      case "ACTIVE":
+        return (
+          <>
+            <button
+              type="button"
+              disabled={actionLoading}
+              onClick={() =>
+                handleSuspend(member)
+              }
+              className="
+                text-orange-600
+                hover:text-orange-700
+                disabled:cursor-not-allowed
+                disabled:opacity-50
+              "
+            >
+              Suspend
+            </button>
+
+            <button
+              type="button"
+              disabled={actionLoading}
+              onClick={() =>
+                handleRetire(member)
+              }
+              className="
+                text-blue-600
+                hover:text-blue-700
+                disabled:cursor-not-allowed
+                disabled:opacity-50
+              "
+            >
+              Retire
+            </button>
+
+            <button
+              type="button"
+              disabled={actionLoading}
+              onClick={() =>
+                handleResign(member)
+              }
+              className="
+                text-red-600
+                hover:text-red-700
+                disabled:cursor-not-allowed
+                disabled:opacity-50
+              "
+            >
+              Resign
+            </button>
+          </>
+        );
+
+      case "SUSPENDED":
+        return (
+          <>
+            <button
+              type="button"
+              disabled={actionLoading}
+              onClick={() =>
+                handleReinstate(member)
+              }
+              className="
+                text-green-600
+                hover:text-green-700
+                disabled:cursor-not-allowed
+                disabled:opacity-50
+              "
+            >
+              Reinstate
+            </button>
+
+            <button
+              type="button"
+              disabled={actionLoading}
+              onClick={() =>
+                handleRetire(member)
+              }
+              className="
+                text-blue-600
+                hover:text-blue-700
+                disabled:cursor-not-allowed
+                disabled:opacity-50
+              "
+            >
+              Retire
+            </button>
+
+            <button
+              type="button"
+              disabled={actionLoading}
+              onClick={() =>
+                handleResign(member)
+              }
+              className="
+                text-red-600
+                hover:text-red-700
+                disabled:cursor-not-allowed
+                disabled:opacity-50
+              "
+            >
+              Resign
+            </button>
+          </>
+        );
+
+      case "RETIRED":
+      case "RESIGNED":
+        return (
+          <span
+            className="
+              text-sm
+              text-gray-400
+            "
+          >
+            No actions available
+          </span>
+        );
+
+      default:
+        return null;
+    }
+  };
+
+  /*
+   * ============================================================
+   * LOADING
+   * ============================================================
+   */
 
   if (loading) {
     return (
       <div className="flex justify-center py-10">
-        <div className="animate-spin h-8 w-8 border-b-2 border-brand-500 rounded-full"></div>
+        <div
+          className="
+            h-8
+            w-8
+            animate-spin
+            rounded-full
+            border-b-2
+            border-brand-500
+          "
+        />
       </div>
     );
   }
 
+  /*
+   * ============================================================
+   * TABLE
+   * ============================================================
+   */
+
   return (
     <>
-      <div className="overflow-hidden rounded-xl border bg-white">
-        <div className="overflow-x-auto">
+      {message && (
+        <div
+          className="
+            mb-4
+            text-sm
+            text-gray-600
+            dark:text-gray-400
+          "
+        >
+          {message}
+        </div>
+      )}
 
-          <table className="min-w-full text-sm">
+      <div
+        className="
+          overflow-hidden
+          rounded-xl
+          border
+          border-gray-200
+          bg-white
+          dark:border-gray-800
+          dark:bg-white/[0.03]
+        "
+      >
+        <div className="max-w-full overflow-x-auto">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableCell
+                  isHeader
+                  className="px-5 py-3 text-start"
+                >
+                  Member
+                </TableCell>
 
-            <thead className="border-b">
-              <tr>
-                <th className="p-3 text-left">
-                  Membership No
-                </th>
+                <TableCell
+                  isHeader
+                  className="px-5 py-3 text-start"
+                >
+                  Membership No.
+                </TableCell>
 
-                <th className="p-3 text-left">
-                  Name
-                </th>
+                <TableCell
+                  isHeader
+                  className="px-5 py-3 text-start"
+                >
+                  Status
+                </TableCell>
 
-                <th className="p-3 text-left">
-                  Email
-                </th>
+                <TableCell
+                  isHeader
+                  className="px-5 py-3 text-start"
+                >
+                  Joined
+                </TableCell>
 
-                <th className="p-3 text-left">
-                  Phone
-                </th>
+                <TableCell
+                  isHeader
+                  className="px-5 py-3 text-start"
+                >
+                  Actions
+                </TableCell>
+              </TableRow>
+            </TableHeader>
 
-                <th className="p-3 text-left">
-                  Role
-                </th>
-
-                <th className="p-3 text-left">
-                  Membership Status
-                </th>
-
-                <th className="p-3 text-left">
-                  Employment Status
-                </th>
-
-                <th className="p-3 text-left">
-                  NEC
-                </th>
-
-                <th className="p-3 text-left">
-                  Active
-                </th>
-              </tr>
-            </thead>
-
-            <tbody>
-              {regionUsers.length === 0 && (
-                <tr>
-                  <td
-                    colSpan={9}
-                    className="text-center p-6 text-gray-500"
+            <TableBody
+              className="
+                divide-y
+                divide-gray-100
+                dark:divide-gray-800
+              "
+            >
+              {members.length === 0 ? (
+                <TableRow>
+                  <TableCell
+                    colSpan={5}
+                    className="
+                      px-5
+                      py-10
+                      text-center
+                      text-sm
+                      text-gray-500
+                      dark:text-gray-400
+                    "
                   >
-                    No users found
-                  </td>
-                </tr>
-              )}
+                    No members found in this
+                    region.
+                  </TableCell>
+                </TableRow>
+              ) : (
+                members.map(member => {
+                  const isExpanded =
+                    expandedMemberId ===
+                    member.id;
 
-              {regionUsers.map(
-                (user: any) => (
-                  <tr
-                    key={user.id}
-                    className="border-b"
-                  >
-                    <td className="p-3">
-                      {user.membershipNumber ||
-                        "-"}
-                    </td>
-
-                    <td className="p-3">
-                      {[
-                        user.firstName,
-                        user.lastName,
-                      ]
-                        .filter(Boolean)
-                        .join(" ") || "-"}
-                    </td>
-
-                    <td className="p-3">
-                      {user.email ||
-                        "-"}
-                    </td>
-
-                    <td className="p-3">
-                      {user.phone ||
-                        "-"}
-                    </td>
-
-                    <td className="p-3">
-                      {user.role
-                        ?.name || "-"}
-                    </td>
-
-                    <td className="p-3">
-                      <span className="px-2 py-1 rounded text-xs bg-blue-100 text-blue-700">
-                        {
-                          user.membershipStatus
+                  return (
+                    <>
+                      <TableRow
+                        key={member.id}
+                        className="
+                          cursor-pointer
+                          hover:bg-gray-50
+                          dark:hover:bg-white/[0.02]
+                        "
+                        onClick={() =>
+                          handleRowClick(
+                            member.id
+                          )
                         }
-                      </span>
-                    </td>
-
-                    <td className="p-3">
-                      {
-                        user.employmentStatus
-                      }
-                    </td>
-
-                    <td className="p-3">
-                      {user.isNecMember
-                        ? "Yes"
-                        : "No"}
-                    </td>
-
-                    <td className="p-3">
-                      <span
-                        className={`px-2 py-1 rounded text-xs ${
-                          user.isActive
-                            ? "bg-green-100 text-green-700"
-                            : "bg-red-100 text-red-700"
-                        }`}
                       >
-                        {user.isActive
-                          ? "Active"
-                          : "Inactive"}
-                      </span>
-                    </td>
-                  </tr>
-                )
-              )}
-            </tbody>
+                        <TableCell className="px-5 py-4">
+                          <div>
+                            <p
+                              className="
+                                font-medium
+                                text-gray-900
+                                dark:text-white
+                              "
+                            >
+                              {getMemberName(
+                                member
+                              )}
+                            </p>
 
-          </table>
+                            <p
+                              className="
+                                text-sm
+                                text-gray-500
+                                dark:text-gray-400
+                              "
+                            >
+                              {member.profile
+                                .nationalId ||
+                                "No national ID"}
+                            </p>
+                          </div>
+                        </TableCell>
+
+                        <TableCell className="px-5 py-4">
+                          {member.membershipNumber}
+                        </TableCell>
+
+                        <TableCell className="px-5 py-4">
+                          <span
+                            className={`
+                              rounded-full
+                              px-3
+                              py-1
+                              text-xs
+                              font-medium
+                              ${getStatusClasses(
+                                member.status
+                              )}
+                            `}
+                          >
+                            {member.status}
+                          </span>
+                        </TableCell>
+
+                        <TableCell className="px-5 py-4">
+                          {new Date(
+                            member.joinedAt
+                          ).toLocaleDateString()}
+                        </TableCell>
+
+                        <TableCell
+                          className="px-5 py-4"
+                          onClick={event =>
+                            event.stopPropagation()
+                          }
+                        >
+                          <Link
+                            to={`/members/${member.id}`}
+                            className="
+                              text-blue-600
+                              hover:text-blue-700
+                            "
+                          >
+                            View
+                          </Link>
+                        </TableCell>
+                      </TableRow>
+
+                      {isExpanded && (
+                        <TableRow
+                          key={`${member.id}-actions`}
+                        >
+                          <TableCell
+                            colSpan={5}
+                            className="
+                              bg-gray-50
+                              px-5
+                              py-4
+                              dark:bg-white/[0.02]
+                            "
+                          >
+                            <div
+                              className="
+                                flex
+                                flex-wrap
+                                items-center
+                                gap-4
+                              "
+                            >
+                              <Link
+                                to={`/members/${member.id}`}
+                                onClick={event =>
+                                  event.stopPropagation()
+                                }
+                                className="
+                                  text-blue-600
+                                  hover:text-blue-700
+                                "
+                              >
+                                View Profile
+                              </Link>
+
+                              <Link
+                                to={`/members/edit/${member.id}`}
+                                onClick={event =>
+                                  event.stopPropagation()
+                                }
+                                className="
+                                  text-gray-600
+                                  hover:text-gray-800
+                                  dark:text-gray-400
+                                  dark:hover:text-gray-200
+                                "
+                              >
+                                Edit
+                              </Link>
+
+                              {renderStatusActions(
+                                member
+                              )}
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                      )}
+                    </>
+                  );
+                })
+              )}
+            </TableBody>
+          </Table>
         </div>
       </div>
 
+      {/* ========================================================
+          PAGINATION
+      ======================================================== */}
+
       {pagination &&
-        pagination.totalPages >
-          0 && (
-          <div className="flex justify-between items-center mt-4">
-
-            <button
-              disabled={
-                !pagination.hasPreviousPage
-              }
-              onClick={() =>
-                handlePageChange(
-                  filters.page! - 1
-                )
-              }
-              className="px-3 py-1 border rounded disabled:opacity-50"
+        pagination.total > 0 && (
+          <div
+            className="
+              mt-4
+              flex
+              items-center
+              justify-between
+            "
+          >
+            <div
+              className="
+                text-sm
+                text-gray-500
+                dark:text-gray-400
+              "
             >
-              Prev
-            </button>
-
-            <span>
               Page{" "}
-              {
-                pagination.page
-              }{" "}
+              {pagination.page}{" "}
               of{" "}
-              {
-                pagination.totalPages
-              }
-            </span>
+              {pagination.totalPages}
 
-            <button
-              disabled={
-                !pagination.hasNextPage
-              }
-              onClick={() =>
-                handlePageChange(
-                  filters.page! + 1
-                )
-              }
-              className="px-3 py-1 border rounded disabled:opacity-50"
+              <span className="mx-2">
+                •
+              </span>
+
+              {pagination.total}{" "}
+              members
+            </div>
+
+            <div
+              className="
+                flex
+                items-center
+                gap-2
+              "
             >
-              Next
-            </button>
+              <button
+                type="button"
+                disabled={
+                  !pagination.hasPreviousPage
+                }
+                onClick={() =>
+                  onPageChange(
+                    pagination.page - 1
+                  )
+                }
+                className="
+                  rounded-lg
+                  border
+                  border-gray-300
+                  px-3
+                  py-2
+                  text-sm
+                  disabled:cursor-not-allowed
+                  disabled:opacity-50
+                  dark:border-gray-700
+                "
+              >
+                Previous
+              </button>
 
+              <span
+                className="
+                  px-3
+                  text-sm
+                  text-gray-700
+                  dark:text-gray-300
+                "
+              >
+                {pagination.page}
+              </span>
+
+              <button
+                type="button"
+                disabled={
+                  !pagination.hasNextPage
+                }
+                onClick={() =>
+                  onPageChange(
+                    pagination.page + 1
+                  )
+                }
+                className="
+                  rounded-lg
+                  border
+                  border-gray-300
+                  px-3
+                  py-2
+                  text-sm
+                  disabled:cursor-not-allowed
+                  disabled:opacity-50
+                  dark:border-gray-700
+                "
+              >
+                Next
+              </button>
+            </div>
           </div>
         )}
     </>
   );
+};
+
+
+interface UsersTableProps {
+  onRefresh?: () => void;
 }
 
+const UsersTable = ({
+  onRefresh,
+}: UsersTableProps) => {
 
-export {  RolesTable,  MenuTable, StatusTable, OrdersTable,CustomersTable, PermissionsTable,RegionsTable ,RegionUsersTable,MembersTable}; 
+  const {
+    users,
+    loading,
+    message,
+
+    updateUserStatus,
+    restoreUser,
+    deleteUser,
+  } = useUser();
+
+  const [
+    expandedUserId,
+    setExpandedUserId,
+  ] = useState<string | null>(
+    null
+  );
+
+  const [
+    actionLoading,
+    setActionLoading,
+  ] = useState(false);
+
+  /*
+   * ============================================================
+   * ROW
+   * ============================================================
+   */
+
+  const handleRowClick = (
+    userId: string
+  ) => {
+
+    setExpandedUserId(
+      current =>
+        current === userId
+          ? null
+          : userId
+    );
+  };
+
+  /*
+   * ============================================================
+   * USER NAME
+   * ============================================================
+   */
+
+  const getUserName = (
+    user: User
+  ) => {
+
+    return [
+      user.firstName,
+      user.lastName,
+    ]
+      .filter(Boolean)
+      .join(" ") || "Unnamed user";
+  };
+
+  /*
+   * ============================================================
+   * STATUS CLASSES
+   * ============================================================
+   */
+
+  const getStatusClasses = (
+    status: string
+  ) => {
+
+    switch (status) {
+
+      case "ACTIVE":
+        return "bg-green-100 text-green-700";
+
+      case "PENDING":
+        return "bg-yellow-100 text-yellow-700";
+
+      case "SUSPENDED":
+        return "bg-orange-100 text-orange-700";
+
+      case "DEACTIVATED":
+        return "bg-red-100 text-red-700";
+
+      default:
+        return "bg-gray-100 text-gray-700";
+    }
+  };
+
+  /*
+   * ============================================================
+   * UPDATE STATUS
+   * ============================================================
+   */
+
+  const handleStatusChange = async (
+    user: User,
+    accountStatus: string
+  ) => {
+
+    const confirmed =
+      window.confirm(
+        `Are you sure you want to change "${getUserName(user)}" to ${accountStatus}?`
+      );
+
+    if (!confirmed) {
+      return;
+    }
+
+    setActionLoading(true);
+
+    try {
+
+      const success =
+        await updateUserStatus(
+          user.id,
+          {
+            accountStatus,
+          }
+        );
+
+      if (success) {
+        onRefresh?.();
+      }
+
+    } finally {
+
+      setActionLoading(false);
+    }
+  };
+
+  /*
+   * ============================================================
+   * RESTORE
+   * ============================================================
+   */
+
+  const handleRestore = async (
+    user: User
+  ) => {
+
+    const confirmed =
+      window.confirm(
+        `Are you sure you want to restore "${getUserName(user)}"?`
+      );
+
+    if (!confirmed) {
+      return;
+    }
+
+    setActionLoading(true);
+
+    try {
+
+      const success =
+        await restoreUser(
+          user.id
+        );
+
+      if (success) {
+        onRefresh?.();
+      }
+
+    } finally {
+
+      setActionLoading(false);
+    }
+  };
+
+  /*
+   * ============================================================
+   * DELETE
+   * ============================================================
+   */
+
+  const handleDelete = async (
+    user: User
+  ) => {
+
+    const confirmed =
+      window.confirm(
+        `Are you sure you want to delete "${getUserName(user)}"?`
+      );
+
+    if (!confirmed) {
+      return;
+    }
+
+    setActionLoading(true);
+
+    try {
+
+      const success =
+        await deleteUser(
+          user.id
+        );
+
+      if (success) {
+        onRefresh?.();
+      }
+
+    } finally {
+
+      setActionLoading(false);
+    }
+  };
+
+  /*
+   * ============================================================
+   * STATUS ACTIONS
+   * ============================================================
+   */
+
+  const renderStatusActions = (
+    user: User
+  ) => {
+
+    switch (user.accountStatus) {
+
+      case "ACTIVE":
+        return (
+          <button
+            type="button"
+            disabled={
+              actionLoading
+            }
+            onClick={() =>
+              handleStatusChange(
+                user,
+                "SUSPENDED"
+              )
+            }
+            className="
+              text-orange-600
+              hover:text-orange-700
+              disabled:cursor-not-allowed
+              disabled:opacity-50
+            "
+          >
+            Suspend
+          </button>
+        );
+
+      case "SUSPENDED":
+        return (
+          <button
+            type="button"
+            disabled={
+              actionLoading
+            }
+            onClick={() =>
+              handleStatusChange(
+                user,
+                "ACTIVE"
+              )
+            }
+            className="
+              text-green-600
+              hover:text-green-700
+              disabled:cursor-not-allowed
+              disabled:opacity-50
+            "
+          >
+            Activate
+          </button>
+        );
+
+      case "DEACTIVATED":
+        return (
+          <button
+            type="button"
+            disabled={
+              actionLoading
+            }
+            onClick={() =>
+              handleRestore(user)
+            }
+            className="
+              text-green-600
+              hover:text-green-700
+              disabled:cursor-not-allowed
+              disabled:opacity-50
+            "
+          >
+            Restore
+          </button>
+        );
+
+      default:
+        return null;
+    }
+  };
+
+  /*
+   * ============================================================
+   * LOADING
+   * ============================================================
+   */
+
+  if (loading) {
+    return (
+      <div className="flex justify-center py-10">
+        <div
+          className="
+            h-8
+            w-8
+            animate-spin
+            rounded-full
+            border-b-2
+            border-brand-500
+          "
+        />
+      </div>
+    );
+  }
+
+  /*
+   * ============================================================
+   * TABLE
+   * ============================================================
+   */
+
+  return (
+    <>
+      {message && (
+        <div
+          className="
+            mb-4
+            text-sm
+            text-gray-600
+            dark:text-gray-400
+          "
+        >
+          {message}
+        </div>
+      )}
+
+      <div
+        className="
+          overflow-hidden
+          rounded-xl
+          border
+          border-gray-200
+          bg-white
+          dark:border-gray-800
+          dark:bg-white/[0.03]
+        "
+      >
+        <div className="max-w-full overflow-x-auto">
+
+          <Table>
+
+            <TableHeader>
+
+              <TableRow>
+
+                <TableCell
+                  isHeader
+                  className="px-5 py-3 text-start"
+                >
+                  User
+                </TableCell>
+
+                <TableCell
+                  isHeader
+                  className="px-5 py-3 text-start"
+                >
+                  Email
+                </TableCell>
+
+                <TableCell
+                  isHeader
+                  className="px-5 py-3 text-start"
+                >
+                  Phone
+                </TableCell>
+
+                <TableCell
+                  isHeader
+                  className="px-5 py-3 text-start"
+                >
+                  Role
+                </TableCell>
+
+                <TableCell
+                  isHeader
+                  className="px-5 py-3 text-start"
+                >
+                  Region
+                </TableCell>
+
+                <TableCell
+                  isHeader
+                  className="px-5 py-3 text-start"
+                >
+                  Status
+                </TableCell>
+
+                <TableCell
+                  isHeader
+                  className="px-5 py-3 text-start"
+                >
+                  Created
+                </TableCell>
+
+                <TableCell
+                  isHeader
+                  className="px-5 py-3 text-start"
+                >
+                  Actions
+                </TableCell>
+
+              </TableRow>
+
+            </TableHeader>
+
+            <TableBody
+              className="
+                divide-y
+                divide-gray-100
+                dark:divide-gray-800
+              "
+            >
+
+              {users.length === 0 ? (
+
+                <TableRow>
+
+                  <TableCell
+                    colSpan={8}
+                    className="
+                      px-5
+                      py-10
+                      text-center
+                      text-sm
+                      text-gray-500
+                      dark:text-gray-400
+                    "
+                  >
+                    No users found.
+                  </TableCell>
+
+                </TableRow>
+
+              ) : (
+
+                users.map(user => {
+
+                  const isExpanded =
+                    expandedUserId ===
+                    user.id;
+
+                  return (
+                    <>
+                      <TableRow
+                        key={user.id}
+                        className="
+                          cursor-pointer
+                          hover:bg-gray-50
+                          dark:hover:bg-white/[0.02]
+                        "
+                        onClick={() =>
+                          handleRowClick(
+                            user.id
+                          )
+                        }
+                      >
+
+                        <TableCell className="px-5 py-4">
+
+                          <div>
+
+                            <p
+                              className="
+                                font-medium
+                                text-gray-900
+                                dark:text-white
+                              "
+                            >
+                              {getUserName(user)}
+                            </p>
+
+                            <p
+                              className="
+                                text-sm
+                                text-gray-500
+                                dark:text-gray-400
+                              "
+                            >
+                              {user.userType}
+                            </p>
+
+                          </div>
+
+                        </TableCell>
+
+                        <TableCell className="px-5 py-4">
+                          {user.email}
+                        </TableCell>
+
+                        <TableCell className="px-5 py-4">
+                          {user.phoneNumber || "-"}
+                        </TableCell>
+
+                        <TableCell className="px-5 py-4">
+                          {user.role?.name || "-"}
+                        </TableCell>
+
+                        <TableCell className="px-5 py-4">
+                          {user.region?.name || "-"}
+                        </TableCell>
+
+                        <TableCell className="px-5 py-4">
+
+                          <span
+                            className={`
+                              rounded-full
+                              px-3
+                              py-1
+                              text-xs
+                              font-medium
+                              ${getStatusClasses(
+                                user.accountStatus
+                              )}
+                            `}
+                          >
+                            {user.accountStatus}
+                          </span>
+
+                        </TableCell>
+
+                        <TableCell className="px-5 py-4">
+                          {new Date(
+                            user.createdAt
+                          ).toLocaleDateString()}
+                        </TableCell>
+
+                        <TableCell
+                          className="px-5 py-4"
+                          onClick={event =>
+                            event.stopPropagation()
+                          }
+                        >
+
+                          <Link
+                            to={`/users/${user.id}`}
+                            className="
+                              text-blue-600
+                              hover:text-blue-700
+                            "
+                          >
+                            View
+                          </Link>
+
+                        </TableCell>
+
+                      </TableRow>
+
+                      {isExpanded && (
+
+                        <TableRow
+                          key={`${user.id}-actions`}
+                        >
+
+                          <TableCell
+                            colSpan={8}
+                            className="
+                              bg-gray-50
+                              px-5
+                              py-4
+                              dark:bg-white/[0.02]
+                            "
+                          >
+
+                            <div
+                              className="
+                                flex
+                                flex-wrap
+                                items-center
+                                gap-4
+                              "
+                            >
+
+                              <Link
+                                to={`/users/${user.id}`}
+                                onClick={event =>
+                                  event.stopPropagation()
+                                }
+                                className="
+                                  text-blue-600
+                                  hover:text-blue-700
+                                "
+                              >
+                                View Profile
+                              </Link>
+
+                              <Link
+                                to={`/users/edit/${user.id}`}
+                                onClick={event =>
+                                  event.stopPropagation()
+                                }
+                                className="
+                                  text-gray-600
+                                  hover:text-gray-800
+                                  dark:text-gray-400
+                                  dark:hover:text-gray-200
+                                "
+                              >
+                                Edit
+                              </Link>
+
+                              {renderStatusActions(
+                                user
+                              )}
+
+                              <button
+                                type="button"
+                                disabled={
+                                  actionLoading
+                                }
+                                onClick={() =>
+                                  handleDelete(user)
+                                }
+                                className="
+                                  text-red-600
+                                  hover:text-red-700
+                                  disabled:cursor-not-allowed
+                                  disabled:opacity-50
+                                "
+                              >
+                                Delete
+                              </button>
+
+                            </div>
+
+                          </TableCell>
+
+                        </TableRow>
+
+                      )}
+                    </>
+                  );
+                })
+
+              )}
+
+            </TableBody>
+
+          </Table>
+
+        </div>
+      </div>
+    </>
+  );
+};
+
+
+
+
+
+
+export {  RolesTable,  MenuTable, StatusTable, OrdersTable,CustomersTable, PermissionsTable,RegionsTable ,RegionMembersTable,MembersTable,UsersTable}; 

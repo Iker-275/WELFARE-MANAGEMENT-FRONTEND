@@ -41,7 +41,7 @@ export interface UserFilters {
   accountStatus?: string;
   userType?: string;
   roleId?: string;
-
+ search?: string;
   page?: number;
   limit?: number;
 }
