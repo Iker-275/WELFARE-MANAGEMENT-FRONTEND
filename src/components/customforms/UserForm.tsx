@@ -1,128 +1,294 @@
+import {
+  useEffect,
+  useState,
+} from "react";
 
-// import { useState, useEffect } from "react";
-// import ComponentCard from "../common/ComponentCard";
-// import Label from "../form/Label";
-// import Input from "../form/input/InputField";
-// import Button from "../ui/button/Button";
-// import Select from "../customComponents/DropDowns";
+import ComponentCard from "../common/ComponentCard";
 
-// import { useRoles } from "../../hooks/useRoles";
+import Label from "../form/Label";
 
-// import Switch from "../customComponents/Switch";
+import Input from "../form/input/InputField";
 
-// interface UserFormProps {
-//   mode: "edit";
-//   userId: string;
-//   initialData?: {
-//     email: string;
-//     role: string;
-//     active: boolean;
-//   };
-//   onSubmit: (data: { role: string; active: boolean }) => void;
-// }
+import Button from "../ui/button/Button";
 
-// export default function UserForm({
-//   initialData,
-//   onSubmit,
-// }: UserFormProps) {
+import RoleDropdown from "../customDropdowns/RoleDropdown";
 
-//   const { roles } = useRoles();
-//   const { loading } = useUsers();
+import AccountStatusDropdown from "../customDropdowns/AccountStatusDropdown";
 
-//   const [email, setEmail] = useState("");
-//   const [role, setRole] = useState("");
-//   const [active, setActive] = useState(true);
+import {
+  User,
+} from "../../types/UserType";
 
-//   const [errors, setErrors] = useState<any>({});
 
-//   useEffect(() => {
-//     if (initialData) {
-//       setEmail(initialData.email);
-//       setRole(initialData.role);
-//       setActive(initialData.active);
-//     }
-//   }, [initialData]);
+interface UserFormProps {
+  user: User;
 
-//   /* Convert roles to dropdown options */
-//   const roleOptions = roles.map((role: any) => ({
-//     label: role.name,
-//     value: role.name,
-//   }));
+  loading?: boolean;
 
-//   const validate = () => {
-//     const newErrors: any = {};
+  onSubmit: (data: {
+    roleId: string;
+    accountStatus: string;
+  }) => void;
 
-//     if (!role) newErrors.role = "Role is required";
+  onCancel: () => void;
+}
 
-//     setErrors(newErrors);
 
-//     return Object.keys(newErrors).length === 0;
-//   };
+export default function UserForm({
+  user,
+  loading = false,
+  onSubmit,
+  onCancel,
+}: UserFormProps) {
 
-//   const handleSubmit = () => {
-//     if (!validate()) return;
+  const [
+    roleId,
+    setRoleId,
+  ] = useState(
+    user.roleId || ""
+  );
 
-//     onSubmit({
-//       role,
-//       active,
-//     });
-//   };
 
-//   return (
-//     <ComponentCard title="Edit User">
-//       <div className="space-y-6">
+  const [
+    accountStatus,
+    setAccountStatus,
+  ] = useState(
+    user.accountStatus || ""
+  );
 
-//         {/* Email */}
-//         <div>
-//           <Label>Email</Label>
-//           <Input
-//             type="text"
-//             value={email}
-//             disabled
-//           />
-//         </div>
 
-//         {/* Role */}
-//         <div>
-//           <Label>Select Role</Label>
+  const [
+    errors,
+    setErrors,
+  ] = useState<{
+    roleId?: string;
+    accountStatus?: string;
+  }>({});
 
-//           <Select
-//             options={roleOptions}
-//             defaultValue={role}
-//             placeholder="Select Role"
-//             onChange={(value: string) => setRole(value)}
-//           />
 
-//           {errors.role && (
-//             <p className="text-red-500 text-sm mt-1">
-//               {errors.role}
-//             </p>
-//           )}
-//         </div>
+  useEffect(() => {
+    setRoleId(
+      user.roleId || ""
+    );
 
-//         {/* Active Switch */}
-//         <Switch
-//           label="Active Status"
-//           checked={active}
-//           onChange={(value: boolean) => setActive(value)}
-//         />
+    setAccountStatus(
+      user.accountStatus || ""
+    );
 
-//       </div>
+    setErrors({});
+  }, [user]);
 
-//       {/* Buttons */}
-//       <div className="flex justify-end gap-3 pt-4 border-t border-gray-200 dark:border-gray-700">
-//         <Button variant="outline">
-//           Cancel
-//         </Button>
 
-//         <Button
-//           variant="outline"
-//           onClick={handleSubmit}
-//           disabled={loading}
-//         >
-//           {loading ? "Saving..." : "Update User"}
-//         </Button>
-//       </div>
-//     </ComponentCard>
-//   );
-// }
+  const validate = () => {
+    const newErrors: {
+      roleId?: string;
+      accountStatus?: string;
+    } = {};
+
+
+    if (!roleId) {
+      newErrors.roleId =
+        "Role is required";
+    }
+
+
+    if (!accountStatus) {
+      newErrors.accountStatus =
+        "Account status is required";
+    }
+
+
+    setErrors(newErrors);
+
+
+    return (
+      Object.keys(newErrors)
+        .length === 0
+    );
+  };
+
+
+  const handleSubmit = () => {
+    if (!validate()) {
+      return;
+    }
+
+
+    onSubmit({
+      roleId,
+      accountStatus,
+    });
+  };
+
+
+  return (
+    <ComponentCard
+      title="Update User"
+    >
+
+      <div className="space-y-6">
+
+        {/* Email */}
+        <div>
+          <Label>
+            Email
+          </Label>
+
+          <Input
+            type="email"
+            value={user.email}
+            disabled
+          />
+
+          <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
+            Email cannot be changed from this screen.
+          </p>
+        </div>
+
+
+        {/* Name */}
+        <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
+
+          <div>
+            <Label>
+              First Name
+            </Label>
+
+            <Input
+              type="text"
+              value={
+                user.firstName || ""
+              }
+              disabled
+            />
+          </div>
+
+
+          <div>
+            <Label>
+              Last Name
+            </Label>
+
+            <Input
+              type="text"
+              value={
+                user.lastName || ""
+              }
+              disabled
+            />
+          </div>
+
+        </div>
+
+
+        {/* Role */}
+        <RoleDropdown
+          value={roleId}
+          onChange={(value) => {
+            setRoleId(value);
+
+            setErrors(
+              previous => ({
+                ...previous,
+                roleId:
+                  undefined,
+              })
+            );
+          }}
+          label="Role"
+          placeholder="Select role"
+          required
+          error={errors.roleId}
+          disabled={loading}
+        />
+
+
+        {/* Account Status */}
+        <AccountStatusDropdown
+          value={accountStatus}
+          onChange={(value) => {
+            setAccountStatus(value);
+
+            setErrors(
+              previous => ({
+                ...previous,
+                accountStatus:
+                  undefined,
+              })
+            );
+          }}
+          label="Account Status"
+          placeholder="Select account status"
+          required
+          error={
+            errors.accountStatus
+          }
+          disabled={loading}
+        />
+
+
+        {/* Read-only information */}
+        <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
+
+          <div>
+            <Label>
+              User Type
+            </Label>
+
+            <Input
+              type="text"
+              value={
+                user.userType
+              }
+              disabled
+            />
+          </div>
+
+
+          <div>
+            <Label>
+              Region
+            </Label>
+
+            <Input
+              type="text"
+              value={
+                user.region?.name ||
+                "Not assigned"
+              }
+              disabled
+            />
+          </div>
+
+        </div>
+
+      </div>
+
+
+      {/* Buttons */}
+      <div className="mt-6 flex justify-end gap-3 border-t border-gray-200 pt-4 dark:border-gray-700">
+
+        <Button
+          variant="outline"
+          onClick={onCancel}
+          disabled={loading}
+        >
+          Cancel
+        </Button>
+
+
+        <Button
+          variant="primary"
+          onClick={handleSubmit}
+          disabled={loading}
+        >
+          {loading
+            ? "Updating..."
+            : "Update User"}
+        </Button>
+
+      </div>
+
+    </ComponentCard>
+  );
+}

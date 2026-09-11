@@ -61,6 +61,9 @@ export interface UserStatistics {
 export interface UpdateUserStatusDto {
   accountStatus: string;
 }
+export interface UpdateUserRoleDto {
+  roleId: string;
+}
 
 export interface UsersPagination {
   page: number;

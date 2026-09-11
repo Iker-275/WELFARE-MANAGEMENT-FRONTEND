@@ -8,6 +8,7 @@ import {
   ImportResponse,
   ImportsResponse,
 } from "../types/ImportTypes";
+import api2 from "./api2";
 
 export const importService = {
 
@@ -20,31 +21,55 @@ export const importService = {
    * - file
    * - type
    */
-  preview: async (
-    payload: ImportPreviewPayload
-  ): Promise<ImportPreviewResponse> => {
+  // preview: async (
+  //   payload: ImportPreviewPayload
+  // ): Promise<ImportPreviewResponse> => {
 
-    const formData = new FormData();
+  //   const formData = new FormData();
 
-    formData.append(
-      "file",
-      payload.file
+  //   formData.append(
+  //     "file",
+  //     payload.file
+  //   );
+
+  //   formData.append(
+  //     "type",
+  //     payload.type
+  //   );
+
+  //   const { data } =
+  //     await api.post<ImportPreviewResponse>(
+  //       "/imports/preview",
+  //       formData
+  //     );
+
+  //   return data;
+  // },
+preview: async (
+  payload: ImportPreviewPayload
+): Promise<ImportPreviewResponse> => {
+
+  const formData = new FormData();
+
+  formData.append(
+    "file",
+    payload.file,
+    payload.file.name
+  );
+
+  formData.append(
+    "type",
+    payload.type
+  );
+
+  const { data } =
+    await api2.post<ImportPreviewResponse>(
+      "/imports/preview",
+      formData
     );
 
-    formData.append(
-      "type",
-      payload.type
-    );
-
-    const { data } =
-      await api.post<ImportPreviewResponse>(
-        "/imports/preview",
-        formData
-      );
-
-    return data;
-  },
-
+  return data;
+},
   /**
    * Execute a previously previewed import.
    *

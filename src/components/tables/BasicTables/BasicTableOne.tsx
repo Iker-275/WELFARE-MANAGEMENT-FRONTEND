@@ -16,7 +16,7 @@ import {
 
 
 import Badge from "../../ui/badge/Badge";
-import { Link } from "react-router";
+import { Link, useNavigate } from "react-router";
 import { useRoles } from "../../../hooks/useRoles";
 import { useMenu } from "../../../hooks/useMenu";
 import { useEffect, useState } from "react";
@@ -28,6 +28,12 @@ import {usePermissions}from "../../../hooks/usePermission";
 import { useRegion } from "../../../hooks/useRegion";
 import {useMember,} from "../../../hooks/useMember";
 import { Member,MemberFilters,} from "../../../types/MemberType";
+import {
+  ImportJob,
+  ImportPreview as ImportPreviewType,
+} from "../../../types/ImportTypes";
+import ComponentCard from "../../common/ComponentCard";
+import Button from "../../ui/button/Button";
 
 
 
@@ -3436,5 +3442,221 @@ const UsersTable = ({
 
 
 
+interface ImportsTableProps {
+  imports: ImportJob[];
+  
 
-export {  RolesTable,  MenuTable, StatusTable, OrdersTable,CustomersTable, PermissionsTable,RegionsTable ,RegionMembersTable,MembersTable,UsersTable}; 
+  loading?: boolean;
+
+  onRefresh?: () => void;
+}
+
+const getStatusClass = (
+  status: string
+) => {
+
+  switch (status) {
+
+    case "COMPLETED":
+      return "bg-success-50 text-success-600 dark:bg-success-500/10 dark:text-success-400";
+
+    case "FAILED":
+      return "bg-error-50 text-error-600 dark:bg-error-500/10 dark:text-error-400";
+
+    case "PROCESSING":
+      return "bg-warning-50 text-warning-600 dark:bg-warning-500/10 dark:text-warning-400";
+
+    default:
+      return "bg-gray-100 text-gray-600 dark:bg-white/[0.06] dark:text-gray-300";
+  }
+};
+
+export default function ImportsTable({
+  imports,
+  loading = false,
+}: ImportsTableProps) {
+
+  const navigate =
+    useNavigate();
+
+  if (
+    loading &&
+    imports.length === 0
+  ) {
+
+    return (
+      <div className="rounded-xl border border-gray-200 bg-white p-8 text-center dark:border-gray-800 dark:bg-white/[0.03]">
+
+        <p className="text-sm text-gray-500 dark:text-gray-400">
+          Loading imports...
+        </p>
+
+      </div>
+    );
+  }
+
+  return (
+    <div className="overflow-hidden rounded-xl border border-gray-200 bg-white dark:border-gray-800 dark:bg-white/[0.03]">
+
+      <div className="overflow-x-auto">
+
+        <table className="min-w-full text-left text-sm">
+
+          <thead>
+
+            <tr className="border-b border-gray-200 dark:border-gray-800">
+
+              <th className="px-5 py-3 font-medium text-gray-600 dark:text-gray-300">
+                File
+              </th>
+
+              <th className="px-5 py-3 font-medium text-gray-600 dark:text-gray-300">
+                Type
+              </th>
+
+              <th className="px-5 py-3 font-medium text-gray-600 dark:text-gray-300">
+                Status
+              </th>
+
+              <th className="px-5 py-3 font-medium text-gray-600 dark:text-gray-300">
+                Rows
+              </th>
+
+              <th className="px-5 py-3 font-medium text-gray-600 dark:text-gray-300">
+                Successful
+              </th>
+
+              <th className="px-5 py-3 font-medium text-gray-600 dark:text-gray-300">
+                Failed
+              </th>
+
+              <th className="px-5 py-3 text-right font-medium text-gray-600 dark:text-gray-300">
+                Actions
+              </th>
+
+            </tr>
+
+          </thead>
+
+          <tbody>
+
+            {imports.length === 0 ? (
+
+              <tr>
+
+                <td
+                  colSpan={7}
+                  className="px-5 py-10 text-center text-gray-500 dark:text-gray-400"
+                >
+                  No imports found.
+                </td>
+
+              </tr>
+
+            ) : (
+
+              imports.map(
+                importJob => (
+                  <tr
+                    key={importJob.id}
+                    className="border-b border-gray-100 dark:border-gray-800"
+                  >
+
+                    <td className="px-5 py-4">
+
+                      <p className="font-medium text-gray-800 dark:text-white/90">
+                        {importJob.originalName}
+                      </p>
+
+                      <p className="mt-1 text-xs text-gray-500">
+                        {new Date(
+                          importJob.createdAt
+                        ).toLocaleString()}
+                      </p>
+
+                    </td>
+
+                    <td className="px-5 py-4">
+
+                      <span className="font-medium text-gray-700 dark:text-gray-300">
+                        {importJob.type}
+                      </span>
+
+                    </td>
+
+                    <td className="px-5 py-4">
+
+                      <span
+                        className={`rounded-full px-2.5 py-1 text-xs font-medium ${getStatusClass(
+                          importJob.status
+                        )}`}
+                      >
+                        {importJob.status}
+                      </span>
+
+                    </td>
+
+                    <td className="px-5 py-4 text-gray-700 dark:text-gray-300">
+                      {importJob.totalRows}
+                    </td>
+
+                    <td className="px-5 py-4 text-success-600 dark:text-success-400">
+                      {importJob.successfulRows}
+                    </td>
+
+                    <td className="px-5 py-4 text-error-600 dark:text-error-400">
+                      {importJob.failedRows}
+                    </td>
+
+                    <td className="px-5 py-4">
+
+                      <div className="flex justify-end gap-2">
+
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() =>
+                            navigate(
+                              `/imports/${importJob.id}`
+                            )
+                          }
+                        >
+                          View
+                        </Button>
+
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() =>
+                            navigate(
+                              `/imports/${importJob.id}/errors`
+                            )
+                          }
+                        >
+                          Errors
+                        </Button>
+
+                      </div>
+
+                    </td>
+
+                  </tr>
+                )
+              )
+
+            )}
+
+          </tbody>
+
+        </table>
+
+      </div>
+
+    </div>
+  );
+}
+
+
+
+
+export {  RolesTable,  MenuTable, StatusTable, OrdersTable,CustomersTable, PermissionsTable,RegionsTable ,RegionMembersTable,MembersTable,UsersTable,ImportsTable}; 

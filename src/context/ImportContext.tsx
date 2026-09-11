@@ -1,8 +1,8 @@
+
 import {
   createContext,
   ReactNode,
   useCallback,
-  useEffect,
   useState,
 } from "react";
 
@@ -16,7 +16,9 @@ import {
   ImportRowError,
 } from "../types/ImportTypes";
 
-import { getApiError } from "../utils/apiError";
+import {
+  getApiError,
+} from "../utils/apiError";
 
 interface ImportContextType {
 
@@ -31,7 +33,7 @@ interface ImportContextType {
   selectedImport: ImportDetails | null;
 
   /**
-   * Current preview.
+   * Current import preview.
    */
   preview: ImportPreview | null;
 
@@ -61,6 +63,9 @@ interface ImportContextType {
 
   /**
    * Get all imports.
+   *
+   * Collection fetching is controlled
+   * by the page.
    */
   fetchImports: () => Promise<boolean>;
 
@@ -78,8 +83,14 @@ interface ImportContextType {
     importId: string
   ) => Promise<boolean>;
 
+  /**
+   * Clear current preview.
+   */
   clearPreview: () => void;
 
+  /**
+   * Clear notification message.
+   */
   clearMessage: () => void;
 
   setMessage: React.Dispatch<
@@ -100,382 +111,391 @@ export const ImportProvider = ({
   children,
 }: ImportProviderProps) => {
 
-  const [imports, setImports] =
-    useState<ImportJob[]>([]);
+  const [
+    imports,
+    setImports,
+  ] = useState<ImportJob[]>([]);
 
-  const [selectedImport, setSelectedImport] =
-    useState<ImportDetails | null>(null);
+  const [
+    selectedImport,
+    setSelectedImport,
+  ] = useState<ImportDetails | null>(
+    null
+  );
 
-  const [preview, setPreview] =
-    useState<ImportPreview | null>(null);
+  const [
+    preview,
+    setPreview,
+  ] = useState<ImportPreview | null>(
+    null
+  );
 
-  const [errors, setErrors] =
-    useState<ImportRowError[]>([]);
+  const [
+    errors,
+    setErrors,
+  ] = useState<ImportRowError[]>([]);
 
-  const [loading, setLoading] =
-    useState(false);
+  const [
+    loading,
+    setLoading,
+  ] = useState(false);
 
-  const [message, setMessage] =
-    useState("");
+  const [
+    message,
+    setMessage,
+  ] = useState("");
 
-  /**
-   * Preview import.
+  /*
+   * ============================================================
+   * PREVIEW IMPORT
+   * ============================================================
    */
-  const previewImport = useCallback(
-    async (
-      payload: ImportPreviewPayload
-    ): Promise<boolean> => {
 
-      setLoading(true);
-      setMessage("");
+  const previewImport =
+    useCallback(
+      async (
+        payload: ImportPreviewPayload
+      ): Promise<boolean> => {
 
-      try {
+        setLoading(true);
+        setMessage("");
+        setErrors([]);
 
-        const response =
-          await importService.preview(
-            payload
+        try {
+
+          const response =
+            await importService.preview(
+              payload
+            );
+
+          if (!response.success) {
+
+            setMessage(
+              response.message ??
+                "Import preview failed."
+            );
+
+            return false;
+          }
+
+          /*
+           * Store the dynamic preview.
+           */
+          setPreview(
+            response.data.preview
           );
 
-        if (!response.success) {
+          /*
+           * The preview endpoint creates
+           * the import job as well.
+           *
+           * The returned job is the job
+           * that will later be executed.
+           */
+          setSelectedImport(
+            response.data.importJob as ImportDetails
+          );
 
           setMessage(
-            response.message ??
-              "Import preview failed."
+            response.message ?? ""
+          );
+
+          return true;
+
+        } catch (error) {
+
+          setMessage(
+            getApiError(error).message
           );
 
           return false;
+
+        } finally {
+
+          setLoading(false);
         }
+      },
+      []
+    );
 
-        setPreview(
-          response.data.preview
-        );
-
-        setSelectedImport(
-          response.data.importJob as ImportDetails
-        );
-
-        setMessage(
-          response.message ?? ""
-        );
-
-        return true;
-
-      } catch (error) {
-
-        setMessage(
-          getApiError(error).message
-        );
-
-        return false;
-
-      } finally {
-
-        setLoading(false);
-      }
-    },
-    []
-  );
-
-  /**
-   * Execute import.
+  /*
+   * ============================================================
+   * EXECUTE IMPORT
+   * ============================================================
    */
-//   const executeImport = useCallback(
-//     async (
-//       importId: string
-//     ): Promise<boolean> => {
 
-//       setLoading(true);
-//       setMessage("");
+  const executeImport =
+    useCallback(
+      async (
+        importId: string
+      ): Promise<boolean> => {
 
-//       try {
+        setLoading(true);
+        setMessage("");
 
-//         const response =
-//           await importService.execute(
-//             importId
-//           );
+        try {
 
-//         if (!response.success) {
+          const response =
+            await importService.execute(
+              importId
+            );
 
-//           setMessage(
-//             response.message ??
-//               "Import execution failed."
-//           );
+          if (!response.success) {
 
-//           return false;
-//         }
+            setMessage(
+              response.message ??
+                "Import execution failed."
+            );
 
-//         setMessage(
-//           response.message ?? ""
-//         );
-
-//         /**
-//          * Refresh the import list so the
-//          * latest status is available.
-//          */
-//         await fetchImports();
-
-//         /**
-//          * Refresh the individual import.
-//          */
-//         await fetchImport(importId);
-
-//         return true;
-
-//       } catch (error) {
-
-//         /**
-//          * IMPORTANT:
-//          *
-//          * If backend returns:
-//          *
-//          * Unique constraint failed on
-//          * the fields: (email)
-//          *
-//          * getApiError preserves that message.
-//          */
-//         setMessage(
-//           getApiError(error).message
-//         );
-
-//         /**
-//          * Even when execution fails at HTTP level,
-//          * refresh the import because the backend may
-//          * have changed its status to FAILED.
-//          */
-//         await fetchImports();
-//         await fetchImport(importId);
-
-//         return false;
-
-//       } finally {
-
-//         setLoading(false);
-//       }
-//     },
-//     []
-//   );
-const executeImport = useCallback(
-  async (importId: string): Promise<boolean> => {
-    setLoading(true);
-    setMessage("");
-
-    try {
-      const response =
-        await importService.execute(importId);
-
-      if (!response.success) {
-        setMessage(
-          response.message ??
-            "Import execution failed."
-        );
-
-        return false;
-      }
-
-      setMessage(response.message ?? "");
-
-      return true;
-
-    } catch (error) {
-      setMessage(
-        getApiError(error).message
-      );
-
-      return false;
-
-    } finally {
-      setLoading(false);
-    }
-  },
-  []
-);
-  /**
-   * Get all imports.
-   */
-  const fetchImports = useCallback(
-    async (): Promise<boolean> => {
-
-      setLoading(true);
-
-      try {
-
-        const response =
-          await importService.getAll();
-
-        if (!response.success) {
+            return false;
+          }
 
           setMessage(
-            response.message ??
-              "Failed to retrieve imports."
+            response.message ?? ""
+          );
+
+          return true;
+
+        } catch (error) {
+
+          setMessage(
+            getApiError(error).message
           );
 
           return false;
+
+        } finally {
+
+          setLoading(false);
         }
+      },
+      []
+    );
 
-        setImports(
-          response.data
-        );
-
-        return true;
-
-      } catch (error) {
-
-        setMessage(
-          getApiError(error).message
-        );
-
-        return false;
-
-      } finally {
-
-        setLoading(false);
-      }
-    },
-    []
-  );
-
-  /**
-   * Get one import.
+  /*
+   * ============================================================
+   * FETCH IMPORTS
+   * ============================================================
    */
-  const fetchImport = useCallback(
-    async (
-      importId: string
-    ): Promise<ImportDetails | null> => {
 
-      setLoading(true);
+  const fetchImports =
+    useCallback(
+      async (): Promise<boolean> => {
 
-      try {
+        setLoading(true);
+        setMessage("");
 
-        const response =
-          await importService.getById(
-            importId
+        try {
+
+          const response =
+            await importService.getAll();
+
+          if (!response.success) {
+
+            setMessage(
+              response.message ??
+                "Failed to retrieve imports."
+            );
+
+            return false;
+          }
+
+          setImports(
+            response.data
           );
 
-        if (!response.success) {
+          return true;
+
+        } catch (error) {
 
           setMessage(
-            response.message ??
-              "Failed to retrieve import."
+            getApiError(error).message
+          );
+
+          return false;
+
+        } finally {
+
+          setLoading(false);
+        }
+      },
+      []
+    );
+
+  /*
+   * ============================================================
+   * FETCH IMPORT
+   * ============================================================
+   */
+
+  const fetchImport =
+    useCallback(
+      async (
+        importId: string
+      ): Promise<ImportDetails | null> => {
+
+        setLoading(true);
+        setMessage("");
+
+        try {
+
+          const response =
+            await importService.getById(
+              importId
+            );
+
+          if (!response.success) {
+
+            setMessage(
+              response.message ??
+                "Failed to retrieve import."
+            );
+
+            return null;
+          }
+
+          setSelectedImport(
+            response.data
+          );
+
+          return response.data;
+
+        } catch (error) {
+
+          setMessage(
+            getApiError(error).message
+          );
+
+          setSelectedImport(
+            null
           );
 
           return null;
+
+        } finally {
+
+          setLoading(false);
         }
+      },
+      []
+    );
 
-        setSelectedImport(
-          response.data
-        );
-
-        return response.data;
-
-      } catch (error) {
-
-        setMessage(
-          getApiError(error).message
-        );
-
-        return null;
-
-      } finally {
-
-        setLoading(false);
-      }
-    },
-    []
-  );
-
-  /**
-   * Get import errors.
+  /*
+   * ============================================================
+   * FETCH IMPORT ERRORS
+   * ============================================================
    */
-  const fetchImportErrors = useCallback(
-    async (
-      importId: string
-    ): Promise<boolean> => {
 
-      setLoading(true);
+  const fetchImportErrors =
+    useCallback(
+      async (
+        importId: string
+      ): Promise<boolean> => {
 
-      try {
+        setLoading(true);
+        setMessage("");
 
-        const response =
-          await importService.getErrors(
-            importId
+        try {
+
+          const response =
+            await importService.getErrors(
+              importId
+            );
+
+          if (!response.success) {
+
+            setMessage(
+              response.message ??
+                "Failed to retrieve import errors."
+            );
+
+            return false;
+          }
+
+          setErrors(
+            response.data
           );
 
-        if (!response.success) {
+          return true;
+
+        } catch (error) {
 
           setMessage(
-            response.message ??
-              "Failed to retrieve import errors."
+            getApiError(error).message
           );
 
+          setErrors([]);
+
           return false;
+
+        } finally {
+
+          setLoading(false);
         }
+      },
+      []
+    );
 
-        setErrors(
-          response.data
-        );
-
-        return true;
-
-      } catch (error) {
-
-        setMessage(
-          getApiError(error).message
-        );
-
-        return false;
-
-      } finally {
-
-        setLoading(false);
-      }
-    },
-    []
-  );
-
-  /**
-   * Clear current preview.
+  /*
+   * ============================================================
+   * CLEAR PREVIEW
+   * ============================================================
    */
-  const clearPreview = useCallback(() => {
 
-    setPreview(null);
-    setSelectedImport(null);
-    setMessage("");
+  const clearPreview =
+    useCallback(() => {
 
-  }, []);
+      setPreview(null);
 
-  /**
-   * Clear notification message.
+      setSelectedImport(null);
+
+      setErrors([]);
+
+      setMessage("");
+
+    }, []);
+
+  /*
+   * ============================================================
+   * CLEAR MESSAGE
+   * ============================================================
    */
-  const clearMessage = useCallback(() => {
 
-    setMessage("");
+  const clearMessage =
+    useCallback(() => {
 
-  }, []);
+      setMessage("");
 
-  useEffect(() => {
-
-    fetchImports();
-
-  }, [fetchImports]);
+    }, []);
 
   return (
     <ImportContext.Provider
       value={{
+
         imports,
+
         selectedImport,
+
         preview,
+
         errors,
 
         loading,
+
         message,
 
         previewImport,
+
         executeImport,
+
         fetchImports,
+
         fetchImport,
+
         fetchImportErrors,
 
         clearPreview,
+
         clearMessage,
 
         setMessage,

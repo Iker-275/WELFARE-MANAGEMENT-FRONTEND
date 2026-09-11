@@ -64,6 +64,10 @@ import MyProfile from "../pages/ProfilePages/MyProfile";
 import RegionMembers from "../pages/RegionPages/RegionMembers";
 import Users from "../pages/UserPages/Users";
 import UserDetails from "../pages/UserPages/UserDetails";
+import UpdateUser from "../pages/UserPages/UpdateUsers";
+import ImportErrors from "../pages/ImportPages/ImportErrors";
+import ImportDetails from "../pages/ImportPages/ImportDetails";
+import Imports from "../pages/ImportPages/Imports";
 
 
 
@@ -153,8 +157,11 @@ const AppRoutes = () => {
 
             <Route path="/users" element={<Users />} />
             <Route path="/users/:userId" element={<UserDetails />} />
+            <Route path="/users/edit/:userId" element={<UpdateUser />} />
 
-
+            <Route path="/imports" element={<Imports />} />
+            <Route path="/imports/:importId" element={<ImportDetails />} />
+            <Route path="/imports/:importId/errors" element={<ImportErrors />} />
 
 
 
