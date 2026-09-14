@@ -1,3 +1,4 @@
+
 import {
   useEffect,
   useState,
@@ -18,7 +19,10 @@ import {
 
 interface RoleDropdownProps {
   value: string;
-  onChange: (roleId: string) => void;
+
+  onChange: (
+    roleId: string
+  ) => void;
 
   label?: string;
   placeholder?: string;
@@ -71,6 +75,11 @@ export default function RoleDropdown({
   ]);
 
 
+  /*
+   * Always derive the selected role
+   * from the controlled value and the
+   * current roles collection.
+   */
   const selectedRole =
     roles.find(
       (role) =>
@@ -78,26 +87,39 @@ export default function RoleDropdown({
     );
 
 
-  const selectedLabel =
-    selectedRole?.name ??
-    (
-      includeAllOption &&
-      value === ""
-    )
-      ? allOptionLabel
-      : placeholder;
+  let selectedLabel = placeholder;
+
+  if (selectedRole) {
+    selectedLabel =
+      selectedRole.name;
+  } else if (
+    includeAllOption &&
+    value === ""
+  ) {
+    selectedLabel =
+      allOptionLabel;
+  }
 
 
   const handleSelect = (
     roleId: string
   ) => {
     onChange(roleId);
+
     setIsOpen(false);
   };
 
 
   const isDisabled =
     disabled || loading;
+
+
+  const hasSelectedValue =
+    Boolean(selectedRole) ||
+    (
+      includeAllOption &&
+      value === ""
+    );
 
 
   return (
@@ -159,11 +181,7 @@ export default function RoleDropdown({
 
         <span
           className={
-            selectedRole ||
-            (
-              includeAllOption &&
-              value === ""
-            )
+            hasSelectedValue
               ? ""
               : "text-gray-400"
           }
@@ -186,7 +204,7 @@ export default function RoleDropdown({
         >
           <path
             fillRule="evenodd"
-            d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.51a.75.75 0 011.08 1.04l-4.25-4.51a.75.75 0 01-1.08-1.06z"
+            d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.51a.75.75 0 111.08 1.04l-4.25 4.51a.75.75 0 01-1.08 1.04l-4.25-4.51a.75.75 0 01-1.08-1.04l-4.25-4.51a.75.75 0 01-.02-1.06z"
             clipRule="evenodd"
           />
         </svg>

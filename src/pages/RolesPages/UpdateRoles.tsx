@@ -1,3 +1,4 @@
+
 import {
   useEffect,
   useState,
@@ -9,20 +10,29 @@ import {
 } from "react-router-dom";
 
 import RoleForm from "../../components/customforms/RolesForm";
+
 import { useRoles } from "../../hooks/useRoles";
-import { Role } from "../../types/RoleType";
+
+import {
+  Role,
+  UpdateRolePayload,
+} from "../../types/RoleType";
 
 export default function UpdateRole() {
-  const { id } = useParams<{
-    id: string;
-  }>();
+  const { id } =
+    useParams<{
+      id: string;
+    }>();
 
-  const navigate = useNavigate();
+  const navigate =
+    useNavigate();
 
   const {
     fetchRole,
     updateRole,
+    loading,
     message,
+    clearMessage,
   } = useRoles();
 
   const [role, setRole] =
@@ -37,33 +47,45 @@ export default function UpdateRole() {
       return;
     }
 
+    let mounted = true;
+
     const loadRole = async () => {
       setPageLoading(true);
 
-      const result = await fetchRole(id);
+      const result =
+        await fetchRole(id);
 
-      setRole(result);
-
-      setPageLoading(false);
+      if (mounted) {
+        setRole(result);
+        setPageLoading(false);
+      }
     };
 
-    loadRole();
-  }, [id, fetchRole, navigate]);
+    void loadRole();
+
+    return () => {
+      mounted = false;
+    };
+  }, [
+    id,
+    fetchRole,
+    navigate,
+  ]);
 
   const handleUpdate = async (
-    data: { name: string }
+    data: UpdateRolePayload
   ) => {
-    if (!id || !role) {
+    if (!id) {
       return;
     }
 
-    const success = await updateRole(
-      id,
-      {
-        name: data.name,
-        isSystem: role.isSystem,
-      }
-    );
+    clearMessage();
+
+    const success =
+      await updateRole(
+        id,
+        data
+      );
 
     if (success) {
       navigate("/roles");
@@ -81,7 +103,15 @@ export default function UpdateRole() {
   if (!role) {
     return (
       <div className="py-10 text-center">
-        Role not found.
+        <p className="text-sm text-red-500">
+          Role not found.
+        </p>
+
+        {message && (
+          <p className="mt-2 text-sm text-gray-600">
+            {message}
+          </p>
+        )}
       </div>
     );
   }
@@ -90,8 +120,12 @@ export default function UpdateRole() {
     <>
       <RoleForm
         mode="edit"
+        loading={loading}
         initialData={{
           name: role.name,
+          isSystem: role.isSystem,
+          description:
+            role.description ?? "",
         }}
         onSubmit={handleUpdate}
       />
@@ -104,3 +138,4 @@ export default function UpdateRole() {
     </>
   );
 }
+

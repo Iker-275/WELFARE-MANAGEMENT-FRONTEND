@@ -30,9 +30,7 @@ import {useMember,} from "../../../hooks/useMember";
 import { Member,MemberFilters,} from "../../../types/MemberType";
 import {
   ImportJob,
-  ImportPreview as ImportPreviewType,
 } from "../../../types/ImportTypes";
-import ComponentCard from "../../common/ComponentCard";
 import Button from "../../ui/button/Button";
 
 
@@ -1739,7 +1737,7 @@ function RegionsTable({
                   </td>
 
                   <td className="p-3">
-                    {region._count?.users ?? 0}
+                    {region._count?.members ?? 0}
                   </td>
 
                   <td className="p-3">
@@ -2780,6 +2778,7 @@ interface UsersTableProps {
   onRefresh?: () => void;
 }
 
+
 const UsersTable = ({
   onRefresh,
 }: UsersTableProps) => {
@@ -2789,10 +2788,10 @@ const UsersTable = ({
     loading,
     message,
 
-    updateUserStatus,
     restoreUser,
     deleteUser,
   } = useUser();
+
 
   const [
     expandedUserId,
@@ -2801,10 +2800,12 @@ const UsersTable = ({
     null
   );
 
+
   const [
     actionLoading,
     setActionLoading,
   ] = useState(false);
+
 
   /*
    * ============================================================
@@ -2824,6 +2825,7 @@ const UsersTable = ({
     );
   };
 
+
   /*
    * ============================================================
    * USER NAME
@@ -2842,6 +2844,7 @@ const UsersTable = ({
       .join(" ") || "Unnamed user";
   };
 
+
   /*
    * ============================================================
    * STATUS CLASSES
@@ -2857,61 +2860,20 @@ const UsersTable = ({
       case "ACTIVE":
         return "bg-green-100 text-green-700";
 
-      case "PENDING":
-        return "bg-yellow-100 text-yellow-700";
+      // case "PENDING":
+      //   return "bg-yellow-100 text-yellow-700";
 
       case "SUSPENDED":
         return "bg-orange-100 text-orange-700";
 
-      case "DEACTIVATED":
-        return "bg-red-100 text-red-700";
+      // case "DEACTIVATED":
+      //   return "bg-red-100 text-red-700";
 
       default:
         return "bg-gray-100 text-gray-700";
     }
   };
 
-  /*
-   * ============================================================
-   * UPDATE STATUS
-   * ============================================================
-   */
-
-  const handleStatusChange = async (
-    user: User,
-    accountStatus: string
-  ) => {
-
-    const confirmed =
-      window.confirm(
-        `Are you sure you want to change "${getUserName(user)}" to ${accountStatus}?`
-      );
-
-    if (!confirmed) {
-      return;
-    }
-
-    setActionLoading(true);
-
-    try {
-
-      const success =
-        await updateUserStatus(
-          user.id,
-          {
-            accountStatus,
-          }
-        );
-
-      if (success) {
-        onRefresh?.();
-      }
-
-    } finally {
-
-      setActionLoading(false);
-    }
-  };
 
   /*
    * ============================================================
@@ -2932,6 +2894,7 @@ const UsersTable = ({
       return;
     }
 
+
     setActionLoading(true);
 
     try {
@@ -2950,6 +2913,7 @@ const UsersTable = ({
       setActionLoading(false);
     }
   };
+
 
   /*
    * ============================================================
@@ -2970,6 +2934,7 @@ const UsersTable = ({
       return;
     }
 
+
     setActionLoading(true);
 
     try {
@@ -2989,6 +2954,7 @@ const UsersTable = ({
     }
   };
 
+
   /*
    * ============================================================
    * STATUS ACTIONS
@@ -2999,81 +2965,35 @@ const UsersTable = ({
     user: User
   ) => {
 
-    switch (user.accountStatus) {
-
-      case "ACTIVE":
-        return (
-          <button
-            type="button"
-            disabled={
-              actionLoading
-            }
-            onClick={() =>
-              handleStatusChange(
-                user,
-                "SUSPENDED"
-              )
-            }
-            className="
-              text-orange-600
-              hover:text-orange-700
-              disabled:cursor-not-allowed
-              disabled:opacity-50
-            "
-          >
-            Suspend
-          </button>
-        );
-
-      case "SUSPENDED":
-        return (
-          <button
-            type="button"
-            disabled={
-              actionLoading
-            }
-            onClick={() =>
-              handleStatusChange(
-                user,
-                "ACTIVE"
-              )
-            }
-            className="
-              text-green-600
-              hover:text-green-700
-              disabled:cursor-not-allowed
-              disabled:opacity-50
-            "
-          >
-            Activate
-          </button>
-        );
-
-      case "DEACTIVATED":
-        return (
-          <button
-            type="button"
-            disabled={
-              actionLoading
-            }
-            onClick={() =>
-              handleRestore(user)
-            }
-            className="
-              text-green-600
-              hover:text-green-700
-              disabled:cursor-not-allowed
-              disabled:opacity-50
-            "
-          >
-            Restore
-          </button>
-        );
-
-      default:
-        return null;
+    if (
+      user.accountStatus !==
+      "DEACTIVATED"
+    ) {
+      return null;
     }
+
+
+    return (
+      <button
+        type="button"
+        disabled={
+          actionLoading
+        }
+        onClick={() =>
+          handleRestore(user)
+        }
+        className="
+          text-green-600
+          hover:text-green-700
+          disabled:cursor-not-allowed
+          disabled:opacity-50
+        "
+      >
+        Restore
+      </button>
+    );
   };
+
 
   /*
    * ============================================================
@@ -3082,8 +3002,10 @@ const UsersTable = ({
    */
 
   if (loading) {
+
     return (
       <div className="flex justify-center py-10">
+
         <div
           className="
             h-8
@@ -3094,9 +3016,11 @@ const UsersTable = ({
             border-brand-500
           "
         />
+
       </div>
     );
   }
+
 
   /*
    * ============================================================
@@ -3119,6 +3043,7 @@ const UsersTable = ({
         </div>
       )}
 
+
       <div
         className="
           overflow-hidden
@@ -3130,6 +3055,7 @@ const UsersTable = ({
           dark:bg-white/[0.03]
         "
       >
+
         <div className="max-w-full overflow-x-auto">
 
           <Table>
@@ -3198,6 +3124,7 @@ const UsersTable = ({
 
             </TableHeader>
 
+
             <TableBody
               className="
                 divide-y
@@ -3233,6 +3160,7 @@ const UsersTable = ({
                   const isExpanded =
                     expandedUserId ===
                     user.id;
+
 
                   return (
                     <>
@@ -3278,21 +3206,26 @@ const UsersTable = ({
 
                         </TableCell>
 
+
                         <TableCell className="px-5 py-4">
                           {user.email}
                         </TableCell>
+
 
                         <TableCell className="px-5 py-4">
                           {user.phoneNumber || "-"}
                         </TableCell>
 
+
                         <TableCell className="px-5 py-4">
                           {user.role?.name || "-"}
                         </TableCell>
 
+
                         <TableCell className="px-5 py-4">
                           {user.region?.name || "-"}
                         </TableCell>
+
 
                         <TableCell className="px-5 py-4">
 
@@ -3313,11 +3246,15 @@ const UsersTable = ({
 
                         </TableCell>
 
+
                         <TableCell className="px-5 py-4">
+
                           {new Date(
                             user.createdAt
                           ).toLocaleDateString()}
+
                         </TableCell>
+
 
                         <TableCell
                           className="px-5 py-4"
@@ -3339,6 +3276,7 @@ const UsersTable = ({
                         </TableCell>
 
                       </TableRow>
+
 
                       {isExpanded && (
 
@@ -3365,6 +3303,7 @@ const UsersTable = ({
                               "
                             >
 
+                              {/* View */}
                               <Link
                                 to={`/users/${user.id}`}
                                 onClick={event =>
@@ -3378,6 +3317,8 @@ const UsersTable = ({
                                 View Profile
                               </Link>
 
+
+                              {/* Edit */}
                               <Link
                                 to={`/users/edit/${user.id}`}
                                 onClick={event =>
@@ -3393,10 +3334,14 @@ const UsersTable = ({
                                 Edit
                               </Link>
 
+
+                              {/* Restore */}
                               {renderStatusActions(
                                 user
                               )}
 
+
+                              {/* Delete */}
                               <button
                                 type="button"
                                 disabled={
@@ -3420,8 +3365,8 @@ const UsersTable = ({
                           </TableCell>
 
                         </TableRow>
-
                       )}
+
                     </>
                   );
                 })
@@ -3433,6 +3378,7 @@ const UsersTable = ({
           </Table>
 
         </div>
+
       </div>
     </>
   );

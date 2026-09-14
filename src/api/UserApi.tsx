@@ -1,3 +1,4 @@
+
 // import api from "./api";
 
 // import {
@@ -8,6 +9,7 @@
 //   UserActionResponse,
 //   UserFilters,
 //   UpdateUserStatusDto,
+//   UpdateUserRoleDto,
 // } from "../types/UserType";
 
 // export const userService = {
@@ -91,6 +93,23 @@
 //   },
 
 //   /**
+//    * Update user role
+//    */
+//   updateRole: async (
+//     userId: string,
+//     payload: UpdateUserRoleDto
+//   ): Promise<UserResponse> => {
+
+//     const { data } =
+//       await api.patch<UserResponse>(
+//         `/users/${userId}/role`,
+//         payload
+//       );
+
+//     return data;
+//   },
+
+//   /**
 //    * Restore user
 //    */
 //   restore: async (
@@ -123,6 +142,7 @@
 
 // export default userService;
 
+
 import api from "./api";
 
 import {
@@ -132,8 +152,7 @@ import {
   UserStatisticsResponse,
   UserActionResponse,
   UserFilters,
-  UpdateUserStatusDto,
-  UpdateUserRoleDto,
+  UpdateUserDto,
 } from "../types/UserType";
 
 export const userService = {
@@ -200,33 +219,19 @@ export const userService = {
   },
 
   /**
-   * Update account status
+   * Update user
+   *
+   * Updates account status and role
+   * in a single request.
    */
-  updateStatus: async (
+  update: async (
     userId: string,
-    payload: UpdateUserStatusDto
+    payload: UpdateUserDto
   ): Promise<UserResponse> => {
 
     const { data } =
       await api.patch<UserResponse>(
-        `/users/${userId}/status`,
-        payload
-      );
-
-    return data;
-  },
-
-  /**
-   * Update user role
-   */
-  updateRole: async (
-    userId: string,
-    payload: UpdateUserRoleDto
-  ): Promise<UserResponse> => {
-
-    const { data } =
-      await api.patch<UserResponse>(
-        `/users/${userId}/role`,
+        `/users/${userId}/update`,
         payload
       );
 
@@ -265,3 +270,4 @@ export const userService = {
 };
 
 export default userService;
+

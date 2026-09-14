@@ -6,9 +6,10 @@ export interface Region {
   createdAt: string;
   updatedAt: string;
 
+  
   _count?: {
-    users: number;
-  };
+  members: number;
+};
 }
 
 export interface RegionUser {

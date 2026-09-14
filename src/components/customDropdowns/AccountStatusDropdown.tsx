@@ -1,3 +1,4 @@
+
 import {
   useState,
 } from "react";
@@ -33,6 +34,7 @@ export const ACCOUNT_STATUSES = [
 
 interface AccountStatusDropdownProps {
   value: string;
+
   onChange: (
     status: string
   ) => void;
@@ -71,6 +73,10 @@ export default function AccountStatusDropdown({
   ] = useState(false);
 
 
+  /*
+   * Always derive the selected status
+   * from the controlled value.
+   */
   const selectedStatus =
     ACCOUNT_STATUSES.find(
       (status) =>
@@ -78,26 +84,35 @@ export default function AccountStatusDropdown({
     );
 
 
-  const selectedLabel =
-    selectedStatus?.label ??
-    (
-      includeAllOption &&
-      value === ""
-    )
-      ? allOptionLabel
-      : placeholder;
+  let selectedLabel = placeholder;
+
+  if (selectedStatus) {
+    selectedLabel =
+      selectedStatus.label;
+  } else if (
+    includeAllOption &&
+    value === ""
+  ) {
+    selectedLabel =
+      allOptionLabel;
+  }
 
 
   const handleSelect = (
     status: string
   ) => {
     onChange(status);
+
     setIsOpen(false);
   };
 
 
-  const isDisabled =
-    disabled;
+  const hasSelectedValue =
+    Boolean(selectedStatus) ||
+    (
+      includeAllOption &&
+      value === ""
+    );
 
 
   return (
@@ -122,7 +137,7 @@ export default function AccountStatusDropdown({
 
       <button
         type="button"
-        disabled={isDisabled}
+        disabled={disabled}
         onClick={() =>
           setIsOpen(
             (open) => !open
@@ -149,7 +164,7 @@ export default function AccountStatusDropdown({
               : "border-gray-300 dark:border-gray-700"
           }
           ${
-            isDisabled
+            disabled
               ? "cursor-not-allowed bg-gray-100 text-gray-400 dark:bg-gray-800"
               : "text-gray-700 hover:border-gray-400 dark:text-gray-200"
           }
@@ -158,11 +173,7 @@ export default function AccountStatusDropdown({
 
         <span
           className={
-            selectedStatus ||
-            (
-              includeAllOption &&
-              value === ""
-            )
+            hasSelectedValue
               ? ""
               : "text-gray-400"
           }
@@ -183,7 +194,7 @@ export default function AccountStatusDropdown({
         >
           <path
             fillRule="evenodd"
-            d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25-4.51a.75.75 0 01-1.08 1.04l-4.25-4.51a.75.75 0 01-1.08-1.06z"
+            d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.51a.75.75 0 111.08 1.04l-4.25 4.51a.75.75 0 01-1.08 0l-4.25-4.51a.75.75 0 01-.02-1.06z"
             clipRule="evenodd"
           />
         </svg>

@@ -1,3 +1,4 @@
+
 import api from "./api";
 
 import {
@@ -13,10 +14,12 @@ import {
 
 export const regionService = {
 
+  /**
+   * Create region
+   */
   create: async (
     payload: CreateRegionDto
   ): Promise<RegionResponse> => {
-
     const { data } =
       await api.post<RegionResponse>(
         "/regions",
@@ -26,10 +29,12 @@ export const regionService = {
     return data;
   },
 
+  /**
+   * Get all regions
+   */
   getAll: async (
     filters?: RegionFilters
   ): Promise<RegionsResponse> => {
-
     const { data } =
       await api.get<RegionsResponse>(
         "/regions",
@@ -41,10 +46,12 @@ export const regionService = {
     return data;
   },
 
+  /**
+   * Get single region
+   */
   getById: async (
     regionId: string
   ): Promise<RegionResponse> => {
-
     const { data } =
       await api.get<RegionResponse>(
         `/regions/${regionId}`
@@ -53,11 +60,13 @@ export const regionService = {
     return data;
   },
 
+  /**
+   * Update region
+   */
   update: async (
     regionId: string,
     payload: UpdateRegionDto
   ): Promise<RegionResponse> => {
-
     const { data } =
       await api.patch<RegionResponse>(
         `/regions/${regionId}`,
@@ -67,10 +76,12 @@ export const regionService = {
     return data;
   },
 
+  /**
+   * Delete region
+   */
   delete: async (
     regionId: string
   ): Promise<RegionActionResponse> => {
-
     const { data } =
       await api.delete<RegionActionResponse>(
         `/regions/${regionId}`
@@ -79,11 +90,16 @@ export const regionService = {
     return data;
   },
 
+  /**
+   * Get members/users assigned to region
+   *
+   * Keep this only if the backend still exposes
+   * GET /regions/:regionId/users.
+   */
   getUsers: async (
     regionId: string,
     filters?: RegionUserFilters
   ): Promise<RegionUsersResponse> => {
-
     const { data } =
       await api.get<RegionUsersResponse>(
         `/regions/${regionId}/users`,
@@ -97,3 +113,4 @@ export const regionService = {
 };
 
 export default regionService;
+
