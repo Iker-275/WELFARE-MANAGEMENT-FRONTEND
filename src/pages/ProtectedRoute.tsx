@@ -176,20 +176,20 @@ function ProtectedRoute() {
    * ------------------------------------------------------------
    */
 
-  if (
-    !profileCompletion.isComplete &&
-    location.pathname !== "/profile"
-  ) {
-    return (
-      <Navigate
-        to="/profile"
-        replace
-        state={{
-          required: true,
-        }}
-      />
-    );
-  }
+  // if (
+  //   !profileCompletion.isComplete &&
+  //   location.pathname !== "/profile"
+  // ) {
+  //   return (
+  //     <Navigate
+  //       to="/profile"
+  //       replace
+  //       state={{
+  //         required: true,
+  //       }}
+  //     />
+  //   );
+  // }
 
 
   /*

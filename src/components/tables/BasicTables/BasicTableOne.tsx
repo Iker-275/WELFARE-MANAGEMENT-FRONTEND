@@ -33,6 +33,29 @@ import {
 } from "../../../types/ImportTypes";
 import Button from "../../ui/button/Button";
 
+import { useContributionPlans } from "../../../hooks/useContributionPlans";
+import { ContributionPlan ,ContributionPlanStatus,} from "../../../types/ContributionPlanType";
+import { useContributionRules } from "../../../hooks/useContributionRules";
+
+import  {
+  ContributionRule,
+  ContributionRuleScope,
+}  from "../../../types/ContributionRuleType";
+
+import { useContributionPeriods } from "../../../hooks/useContributionPeriods";
+import type {
+  ContributionPeriod,
+  ContributionPeriodStatus,
+} from "../../../types/ContributionPeriodType";
+import {
+  MemberContribution,
+  MemberContributionStatus,
+} from "../../../types/MemberContributionType";
+
+import { useMemberContributions } from "../../../hooks/useMemberContributions";
+import MemberContributionActions from "../../customComponents/MemberContributionActions";
+import { PaymentProvider, PaymentProviderType } from "../../../types/PaymentProviderType";
+import { usePaymentProviders } from "../../../hooks/usePaymentProviders";
 
 
 
@@ -3605,4 +3628,1794 @@ export default function ImportsTable({
 
 
 
-export {  RolesTable,  MenuTable, StatusTable, OrdersTable,CustomersTable, PermissionsTable,RegionsTable ,RegionMembersTable,MembersTable,UsersTable,ImportsTable}; 
+
+interface ContributionPlansTableProps {
+  onEdit: (plan: ContributionPlan) => void;
+}
+
+const formatDate = (date: string | null | undefined): string => {
+  if (!date) return "—";
+
+  const parsedDate = new Date(date);
+
+  if (Number.isNaN(parsedDate.getTime())) {
+    return "—";
+  }
+
+  return parsedDate.toLocaleDateString("en-GB", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+  });
+};
+
+const getStatusClassesP = (status: ContributionPlanStatus): string => {
+  switch (status) {
+    case "ACTIVE":
+      return "bg-success-50 text-success-700 dark:bg-success-500/10 dark:text-success-400";
+
+    case "DRAFT":
+      return "bg-gray-100 text-gray-700 dark:bg-gray-500/10 dark:text-gray-400";
+
+    case "INACTIVE":
+      return "bg-warning-50 text-warning-700 dark:bg-warning-500/10 dark:text-warning-400";
+
+    case "ARCHIVED":
+      return "bg-error-50 text-error-700 dark:bg-error-500/10 dark:text-error-400";
+
+    default:
+      return "bg-gray-100 text-gray-700 dark:bg-gray-500/10 dark:text-gray-400";
+  }
+};
+
+const getCreatorName = (plan: ContributionPlan): string => {
+  if (!plan.createdBy) return "—";
+
+  const fullName = [
+    plan.createdBy.firstName,
+    plan.createdBy.lastName,
+  ]
+    .filter(Boolean)
+    .join(" ");
+
+  return fullName || plan.createdBy.email;
+};
+
+const ContributionPlansTable = ({
+  onEdit,
+}: ContributionPlansTableProps) => {
+  const {
+    plans,
+    loading,
+    message,
+    activatePlan,
+    deactivatePlan,
+    archivePlan,
+  } = useContributionPlans();
+
+  const handleActivate = async (plan: ContributionPlan) => {
+    const confirmed = window.confirm(
+      `Are you sure you want to activate the contribution plan "${plan.name}"?`
+    );
+
+    if (!confirmed) return;
+
+    await activatePlan(plan.id);
+  };
+
+  const handleDeactivate = async (plan: ContributionPlan) => {
+    const confirmed = window.confirm(
+      `Are you sure you want to deactivate the contribution plan "${plan.name}"?`
+    );
+
+    if (!confirmed) return;
+
+    await deactivatePlan(plan.id);
+  };
+
+  const handleArchive = async (plan: ContributionPlan) => {
+    const confirmed = window.confirm(
+      `Are you sure you want to archive "${plan.name}"? This action may prevent the plan from being used for new contributions.`
+    );
+
+    if (!confirmed) return;
+
+    await archivePlan(plan.id);
+  };
+
+  const renderActions = (plan: ContributionPlan) => {
+    return (
+      <div className="flex flex-wrap items-center gap-2">
+        <button
+          type="button"
+          onClick={() => onEdit(plan)}
+          disabled={loading || plan.status === "ARCHIVED"}
+          className="rounded-md border border-gray-300 px-3 py-1.5 text-xs font-medium text-gray-700 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-white/[0.05]"
+        >
+          Edit
+        </button>
+
+        {plan.status === "ACTIVE" && (
+          <button
+            type="button"
+            onClick={() => handleDeactivate(plan)}
+            disabled={loading}
+            className="rounded-md border border-warning-300 px-3 py-1.5 text-xs font-medium text-warning-700 hover:bg-warning-50 disabled:cursor-not-allowed disabled:opacity-50 dark:border-warning-500/30 dark:text-warning-400"
+          >
+            Deactivate
+          </button>
+        )}
+
+        {(plan.status === "DRAFT" || plan.status === "INACTIVE") && (
+          <button
+            type="button"
+            onClick={() => handleActivate(plan)}
+            disabled={loading}
+            className="rounded-md border border-success-300 px-3 py-1.5 text-xs font-medium text-success-700 hover:bg-success-50 disabled:cursor-not-allowed disabled:opacity-50 dark:border-success-500/30 dark:text-success-400"
+          >
+            Activate
+          </button>
+        )}
+
+        {plan.status !== "ARCHIVED" && (
+          <button
+            type="button"
+            onClick={() => handleArchive(plan)}
+            disabled={loading}
+            className="rounded-md border border-error-300 px-3 py-1.5 text-xs font-medium text-error-700 hover:bg-error-50 disabled:cursor-not-allowed disabled:opacity-50 dark:border-error-500/30 dark:text-error-400"
+          >
+            Archive
+          </button>
+        )}
+      </div>
+    );
+  };
+
+  return (
+    <div className="space-y-4">
+      {/* Backend message */}
+      {message && (
+        <div
+          role="status"
+          className="rounded-lg border border-gray-200 bg-gray-50 px-4 py-3 text-sm text-gray-700 dark:border-gray-800 dark:bg-white/[0.03] dark:text-gray-300"
+        >
+          {message}
+        </div>
+      )}
+
+      <div className="overflow-hidden rounded-xl border border-gray-200 bg-white dark:border-gray-800 dark:bg-white/[0.03]">
+        <div className="max-w-full overflow-x-auto">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableCell
+                  isHeader
+                  className="px-5 py-3 text-start text-theme-xs font-medium text-gray-500 dark:text-gray-400"
+                >
+                  Plan
+                </TableCell>
+
+                <TableCell
+                  isHeader
+                  className="px-5 py-3 text-start text-theme-xs font-medium text-gray-500 dark:text-gray-400"
+                >
+                  Frequency
+                </TableCell>
+
+                <TableCell
+                  isHeader
+                  className="px-5 py-3 text-start text-theme-xs font-medium text-gray-500 dark:text-gray-400"
+                >
+                  Currency
+                </TableCell>
+
+                <TableCell
+                  isHeader
+                  className="px-5 py-3 text-start text-theme-xs font-medium text-gray-500 dark:text-gray-400"
+                >
+                  Effective Period
+                </TableCell>
+
+                <TableCell
+                  isHeader
+                  className="px-5 py-3 text-start text-theme-xs font-medium text-gray-500 dark:text-gray-400"
+                >
+                  Status
+                </TableCell>
+
+                <TableCell
+                  isHeader
+                  className="px-5 py-3 text-start text-theme-xs font-medium text-gray-500 dark:text-gray-400"
+                >
+                  Related Records
+                </TableCell>
+
+                <TableCell
+                  isHeader
+                  className="px-5 py-3 text-start text-theme-xs font-medium text-gray-500 dark:text-gray-400"
+                >
+                  Created By
+                </TableCell>
+
+                <TableCell
+                  isHeader
+                  className="px-5 py-3 text-start text-theme-xs font-medium text-gray-500 dark:text-gray-400"
+                >
+                  Actions
+                </TableCell>
+              </TableRow>
+            </TableHeader>
+
+            <TableBody>
+              {loading && plans.length === 0 ? (
+                <TableRow>
+                  <TableCell
+                    colSpan={8}
+                    className="px-5 py-10 text-center text-sm text-gray-500 dark:text-gray-400"
+                  >
+                    <div className="flex items-center justify-center gap-2">
+                      <span className="h-5 w-5 animate-spin rounded-full border-2 border-gray-300 border-t-brand-500" />
+                      Loading contribution plans...
+                    </div>
+                  </TableCell>
+                </TableRow>
+              ) : plans.length === 0 ? (
+                <TableRow>
+                  <TableCell
+                    colSpan={8}
+                    className="px-5 py-10 text-center text-sm text-gray-500 dark:text-gray-400"
+                  >
+                    No contribution plans found.
+                  </TableCell>
+                </TableRow>
+              ) : (
+                plans.map((plan) => (
+                  <TableRow key={plan.id}>
+                    {/* Plan */}
+                    <TableCell className="px-5 py-4">
+                      <div className="flex flex-col">
+                        <span className="font-medium text-gray-800 dark:text-white/90">
+                          {plan.name}
+                        </span>
+
+                        <span className="text-xs text-gray-500 dark:text-gray-400">
+                          {plan.code}
+                        </span>
+                      </div>
+                    </TableCell>
+
+                    {/* Frequency */}
+                    <TableCell className="px-5 py-4 text-sm text-gray-600 dark:text-gray-300">
+                      {plan.frequencyOverride || plan.frequency}
+                    </TableCell>
+
+                    {/* Currency */}
+                    <TableCell className="px-5 py-4 text-sm text-gray-600 dark:text-gray-300">
+                      {plan.currency}
+                    </TableCell>
+
+                    {/* Effective Period */}
+                    <TableCell className="px-5 py-4">
+                      <div className="flex flex-col text-sm text-gray-600 dark:text-gray-300">
+                        <span>
+                          From: {formatDate(plan.effectiveFrom)}
+                        </span>
+
+                        <span className="text-xs text-gray-500 dark:text-gray-400">
+                          To: {formatDate(plan.effectiveTo)}
+                        </span>
+                      </div>
+                    </TableCell>
+
+                    {/* Status */}
+                    <TableCell className="px-5 py-4">
+                      <span
+                        className={`inline-flex rounded-full px-2.5 py-1 text-xs font-medium ${getStatusClassesP(
+                          plan.status
+                        )}`}
+                      >
+                        {plan.status}
+                      </span>
+                    </TableCell>
+
+                    {/* Related Records */}
+                    <TableCell className="px-5 py-4">
+                      <div className="flex flex-col gap-1 text-xs text-gray-600 dark:text-gray-300">
+                        <span>Rules: {plan._count?.rules ?? 0}</span>
+                        <span>Periods: {plan._count?.periods ?? 0}</span>
+                        <span>
+                          Member Contributions:{" "}
+                          {plan._count?.memberContributions ?? 0}
+                        </span>
+                        <span>
+                          Penalty Rules: {plan._count?.penaltyRules ?? 0}
+                        </span>
+                      </div>
+                    </TableCell>
+
+                    {/* Creator */}
+                    <TableCell className="px-5 py-4">
+                      <div className="flex flex-col text-sm">
+                        <span className="text-gray-700 dark:text-gray-300">
+                          {getCreatorName(plan)}
+                        </span>
+
+                        <span className="text-xs text-gray-500 dark:text-gray-400">
+                          {formatDate(plan.createdAt)}
+                        </span>
+                      </div>
+                    </TableCell>
+
+                    {/* Actions */}
+                    <TableCell className="px-5 py-4">
+                      {renderActions(plan)}
+                    </TableCell>
+                  </TableRow>
+                ))
+              )}
+            </TableBody>
+          </Table>
+        </div>
+
+        {loading && plans.length > 0 && (
+          <div className="border-t border-gray-200 px-5 py-2 text-xs text-gray-500 dark:border-gray-800 dark:text-gray-400">
+            Updating contribution plans...
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
+
+
+
+
+
+
+interface ContributionRuleTableProps {
+  onEdit: (rule: ContributionRule) => void;
+}
+
+/*
+ * ============================================================
+ * HELPERS
+ * ============================================================
+ */
+
+
+const formatAmount = (
+  amount: string | number,
+  currency: string
+): string => {
+  const parsedAmount = Number(amount);
+
+  if (Number.isNaN(parsedAmount)) {
+    return `${currency} ${amount}`;
+  }
+
+  return `${currency} ${parsedAmount.toLocaleString("en-KE", {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  })}`;
+};
+
+const formatScope = (
+  scope: ContributionRuleScope
+): string => {
+  const labels: Record<ContributionRuleScope, string> = {
+    GLOBAL: "Global",
+    REGION: "Region",
+    BRANCH: "Branch",
+    CHAPTER: "Chapter",
+    GROUP: "Group",
+    MEMBER: "Individual Member",
+  };
+
+  return labels[scope] || scope;
+};
+
+const formatDeadline = (
+  rule: ContributionRule
+): string => {
+  switch (rule.deadlineType) {
+    case "FIXED_DAY_OF_MONTH":
+      return rule.deadlineDay
+        ? `Day ${rule.deadlineDay} of month`
+        : "Fixed day of month";
+
+    case "FIRST_WEEKDAY":
+      return "First weekday";
+
+    case "LAST_WEEKDAY":
+      return "Last weekday";
+
+    case "NTH_WEEKDAY":
+      return `Week ${rule.deadlineWeek ?? "—"}, weekday ${
+        rule.deadlineWeekday ?? "—"
+      }`;
+
+    case "DAYS_AFTER_PERIOD_START":
+      return `${rule.deadlineOffsetDays ?? 0} days after period start`;
+
+    case "DAYS_BEFORE_PERIOD_END":
+      return `${rule.deadlineOffsetDays ?? 0} days before period end`;
+
+    default:
+      return rule.deadlineType;
+  }
+};
+
+const getScopeName = (
+  rule: ContributionRule
+): string => {
+  switch (rule.scopeType) {
+    case "REGION":
+      return rule.region?.name || "—";
+
+    case "BRANCH":
+      return rule.branch?.name || "—";
+
+    case "CHAPTER":
+      return rule.chapter?.name || "—";
+
+    case "GROUP":
+      return rule.group?.name || "—";
+
+    case "MEMBER":
+      return (
+        rule.member?.membershipNumber ||
+        [
+          rule.member?.firstName,
+          rule.member?.lastName,
+        ]
+          .filter(Boolean)
+          .join(" ") ||
+        "—"
+      );
+
+    default:
+      return "All members";
+  }
+};
+
+
+
+/*
+ * ============================================================
+ * COMPONENT
+ * ============================================================
+ */
+const getStatusClassesR = (
+  isActive: boolean
+): string => {
+  return isActive
+    ? "bg-success-50 text-success-700 dark:bg-success-500/10 dark:text-success-400"
+    : "bg-gray-100 text-gray-700 dark:bg-gray-500/10 dark:text-gray-400";
+};
+const ContributionRuleTable = ({
+  onEdit,
+}: ContributionRuleTableProps) => {
+  
+
+  const {
+    rules,
+    loading,
+    message,
+    activateRule,
+    deactivateRule,
+    deleteRule,
+  } = useContributionRules();
+
+  /*
+   * ============================================================
+   * ACTIVATE RULE
+   * ============================================================
+   */
+
+  const handleActivate = async (
+    rule: ContributionRule
+  ) => {
+    const confirmed = window.confirm(
+      `Are you sure you want to activate the contribution rule "${rule.name}"?`
+    );
+
+    if (!confirmed) return;
+
+    await activateRule(rule.id);
+  };
+
+  /*
+   * ============================================================
+   * DEACTIVATE RULE
+   * ============================================================
+   */
+
+  const handleDeactivate = async (
+    rule: ContributionRule
+  ) => {
+    const confirmed = window.confirm(
+      `Are you sure you want to deactivate the contribution rule "${rule.name}"?`
+    );
+
+    if (!confirmed) return;
+
+    await deactivateRule(rule.id);
+  };
+
+  /*
+   * ============================================================
+   * DELETE RULE
+   * ============================================================
+   */
+
+  const handleDelete = async (
+    rule: ContributionRule
+  ) => {
+    const confirmed = window.confirm(
+      `Are you sure you want to delete the contribution rule "${rule.name}"?`
+    );
+
+    if (!confirmed) return;
+
+    await deleteRule(rule.id);
+  };
+
+  /*
+   * ============================================================
+   * ACTIONS
+   * ============================================================
+   */
+
+  const renderActions = (
+    rule: ContributionRule
+  ) => {
+    return (
+      <div className="flex flex-wrap items-center gap-2">
+        <button
+          type="button"
+          onClick={() => onEdit(rule)}
+          disabled={loading}
+          className="rounded-md border border-gray-300 px-3 py-1.5 text-xs font-medium text-gray-700 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-white/[0.05]"
+        >
+          Edit
+        </button>
+
+        {rule.isActive ? (
+          <button
+            type="button"
+            onClick={() => handleDeactivate(rule)}
+            disabled={loading}
+            className="rounded-md border border-warning-300 px-3 py-1.5 text-xs font-medium text-warning-700 hover:bg-warning-50 disabled:cursor-not-allowed disabled:opacity-50 dark:border-warning-500/30 dark:text-warning-400"
+          >
+            Deactivate
+          </button>
+        ) : (
+          <button
+            type="button"
+            onClick={() => handleActivate(rule)}
+            disabled={loading}
+            className="rounded-md border border-success-300 px-3 py-1.5 text-xs font-medium text-success-700 hover:bg-success-50 disabled:cursor-not-allowed disabled:opacity-50 dark:border-success-500/30 dark:text-success-400"
+          >
+            Activate
+          </button>
+        )}
+
+        <button
+          type="button"
+          onClick={() => handleDelete(rule)}
+          disabled={loading}
+          className="rounded-md border border-error-300 px-3 py-1.5 text-xs font-medium text-error-700 hover:bg-error-50 disabled:cursor-not-allowed disabled:opacity-50 dark:border-error-500/30 dark:text-error-400"
+        >
+          Delete
+        </button>
+      </div>
+    );
+  };
+
+  /*
+   * ============================================================
+   * TABLE
+   * ============================================================
+   */
+
+  return (
+    <div className="space-y-4">
+      {/* Backend message */}
+      {message && (
+        <div
+          role="status"
+          className="rounded-lg border border-gray-200 bg-gray-50 px-4 py-3 text-sm text-gray-700 dark:border-gray-800 dark:bg-white/[0.03] dark:text-gray-300"
+        >
+          {message}
+        </div>
+      )}
+
+      <div className="overflow-hidden rounded-xl border border-gray-200 bg-white dark:border-gray-800 dark:bg-white/[0.03]">
+        <div className="max-w-full overflow-x-auto">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableCell
+                  isHeader
+                  className="px-5 py-3 text-start text-theme-xs font-medium text-gray-500 dark:text-gray-400"
+                >
+                  Rule
+                </TableCell>
+
+                <TableCell
+                  isHeader
+                  className="px-5 py-3 text-start text-theme-xs font-medium text-gray-500 dark:text-gray-400"
+                >
+                  Contribution Plan
+                </TableCell>
+
+                <TableCell
+                  isHeader
+                  className="px-5 py-3 text-start text-theme-xs font-medium text-gray-500 dark:text-gray-400"
+                >
+                  Scope
+                </TableCell>
+
+                <TableCell
+                  isHeader
+                  className="px-5 py-3 text-start text-theme-xs font-medium text-gray-500 dark:text-gray-400"
+                >
+                  Amount
+                </TableCell>
+
+                <TableCell
+                  isHeader
+                  className="px-5 py-3 text-start text-theme-xs font-medium text-gray-500 dark:text-gray-400"
+                >
+                  Frequency
+                </TableCell>
+
+                <TableCell
+                  isHeader
+                  className="px-5 py-3 text-start text-theme-xs font-medium text-gray-500 dark:text-gray-400"
+                >
+                  Deadline
+                </TableCell>
+
+                <TableCell
+                  isHeader
+                  className="px-5 py-3 text-start text-theme-xs font-medium text-gray-500 dark:text-gray-400"
+                >
+                  Priority
+                </TableCell>
+
+                <TableCell
+                  isHeader
+                  className="px-5 py-3 text-start text-theme-xs font-medium text-gray-500 dark:text-gray-400"
+                >
+                  Effective Period
+                </TableCell>
+
+                <TableCell
+                  isHeader
+                  className="px-5 py-3 text-start text-theme-xs font-medium text-gray-500 dark:text-gray-400"
+                >
+                  Status
+                </TableCell>
+
+                <TableCell
+                  isHeader
+                  className="px-5 py-3 text-start text-theme-xs font-medium text-gray-500 dark:text-gray-400"
+                >
+                  Actions
+                </TableCell>
+              </TableRow>
+            </TableHeader>
+
+            <TableBody>
+              {loading && rules.length === 0 ? (
+                <TableRow>
+                  <TableCell
+                    colSpan={10}
+                    className="px-5 py-10 text-center text-sm text-gray-500 dark:text-gray-400"
+                  >
+                    <div className="flex items-center justify-center gap-2">
+                      <span className="h-5 w-5 animate-spin rounded-full border-2 border-gray-300 border-t-brand-500" />
+                      Loading contribution rules...
+                    </div>
+                  </TableCell>
+                </TableRow>
+              ) : rules.length === 0 ? (
+                <TableRow>
+                  <TableCell
+                    colSpan={10}
+                    className="px-5 py-10 text-center text-sm text-gray-500 dark:text-gray-400"
+                  >
+                    No contribution rules found.
+                  </TableCell>
+                </TableRow>
+              ) : (
+                rules.map((rule) => (
+                  <TableRow key={rule.id}>
+                    {/* Rule */}
+                    <TableCell className="px-5 py-4">
+                      <div className="flex flex-col">
+                        <span className="font-medium text-gray-800 dark:text-white/90">
+                          {rule.name}
+                        </span>
+
+                        <span className="text-xs text-gray-500 dark:text-gray-400">
+                          {rule.id}
+                        </span>
+                      </div>
+                    </TableCell>
+
+                    {/* Plan */}
+                    <TableCell className="px-5 py-4">
+                      <div className="flex flex-col">
+                        <span className="text-sm text-gray-700 dark:text-gray-300">
+                          {rule.plan?.name || "—"}
+                        </span>
+
+                        <span className="text-xs text-gray-500 dark:text-gray-400">
+                          {rule.plan?.code || "—"}
+                        </span>
+                      </div>
+                    </TableCell>
+
+                    {/* Scope */}
+                    <TableCell className="px-5 py-4">
+                      <div className="flex flex-col">
+                        <span className="text-sm text-gray-700 dark:text-gray-300">
+                          {formatScope(rule.scopeType)}
+                        </span>
+
+                        <span className="text-xs text-gray-500 dark:text-gray-400">
+                          {getScopeName(rule)}
+                        </span>
+                      </div>
+                    </TableCell>
+
+                    {/* Amount */}
+                    <TableCell className="px-5 py-4 text-sm text-gray-600 dark:text-gray-300">
+                      {formatAmount(
+                        rule.amount,
+                        rule.currency
+                      )}
+                    </TableCell>
+
+                    {/* Frequency */}
+                    <TableCell className="px-5 py-4 text-sm text-gray-600 dark:text-gray-300">
+                      {rule.frequencyOverride ||
+                        rule.plan?.frequency ||
+                        "—"}
+                    </TableCell>
+
+                    {/* Deadline */}
+                    <TableCell className="px-5 py-4 text-sm text-gray-600 dark:text-gray-300">
+                      {formatDeadline(rule)}
+                    </TableCell>
+
+                    {/* Priority */}
+                    <TableCell className="px-5 py-4 text-sm text-gray-600 dark:text-gray-300">
+                      {rule.priority}
+                    </TableCell>
+
+                    {/* Effective Period */}
+                    <TableCell className="px-5 py-4">
+                      <div className="flex flex-col text-sm text-gray-600 dark:text-gray-300">
+                        <span>
+                          From: {formatDate(rule.effectiveFrom)}
+                        </span>
+
+                        <span className="text-xs text-gray-500 dark:text-gray-400">
+                          To: {formatDate(rule.effectiveTo)}
+                        </span>
+                      </div>
+                    </TableCell>
+
+                    {/* Status */}
+                    <TableCell className="px-5 py-4">
+                      <span
+                        className={`inline-flex rounded-full px-2.5 py-1 text-xs font-medium 
+                           ${getStatusClassesR(
+                          rule.isActive 
+                        )
+                      }
+               `}
+                      >
+                        {rule.isActive ? "ACTIVE" : "INACTIVE"}
+                      </span>
+                    </TableCell>
+
+                    {/* Actions */}
+                    <TableCell className="px-5 py-4">
+                      {renderActions(rule)}
+                    </TableCell>
+                  </TableRow>
+                ))
+              )}
+            </TableBody>
+          </Table>
+        </div>
+
+        {loading && rules.length > 0 && (
+          <div className="border-t border-gray-200 px-5 py-2 text-xs text-gray-500 dark:border-gray-800 dark:text-gray-400">
+            Updating contribution rules...
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
+
+
+
+
+// interface ContributionPeriodTableProps {
+//   onView?: (period: ContributionPeriod) => void;
+// }
+
+interface ContributionPeriodTableProps {
+  periods: ContributionPeriod[];
+  loading: boolean;
+  onView?: (period: ContributionPeriod) => void;
+}
+
+
+
+const formatStatus = (status: ContributionPeriodStatus): string => {
+  return status.charAt(0) + status.slice(1).toLowerCase();
+};
+
+const getStatusClasses = (status: ContributionPeriodStatus): string => {
+  const classes: Record<ContributionPeriodStatus, string> = {
+    UPCOMING:
+      "bg-blue-50 text-blue-700 dark:bg-blue-500/15 dark:text-blue-400",
+    OPEN:
+      "bg-green-50 text-green-700 dark:bg-green-500/15 dark:text-green-400",
+    DUE:
+      "bg-yellow-50 text-yellow-700 dark:bg-yellow-500/15 dark:text-yellow-400",
+    OVERDUE:
+      "bg-red-50 text-red-700 dark:bg-red-500/15 dark:text-red-400",
+    CLOSED:
+      "bg-gray-100 text-gray-700 dark:bg-gray-500/15 dark:text-gray-400",
+  };
+
+  return classes[status];
+};
+
+const getAvailableActions = (
+  status: ContributionPeriodStatus
+): string[] => {
+  const actions: Record<ContributionPeriodStatus, string[]> = {
+    UPCOMING: ["open"],
+    OPEN: ["due", "close"],
+    DUE: ["overdue", "close"],
+    OVERDUE: ["close"],
+    CLOSED: [],
+  };
+
+  return actions[status];
+};
+
+const ContributionPeriodTable = ({
+  onView,
+}: ContributionPeriodTableProps) => {
+  const {
+    periods,
+    loading,
+    message,
+    openPeriod,
+    closePeriod,
+    markPeriodDue,
+    markPeriodOverdue,
+  } = useContributionPeriods();
+
+  const handleAction = async (
+    period: ContributionPeriod,
+    action: string
+  ) => {
+    const actionLabels: Record<string, string> = {
+      open: "open",
+      due: "mark as due",
+      overdue: "mark as overdue",
+      close: "close",
+    };
+
+    const confirmed = window.confirm(
+      `Are you sure you want to ${actionLabels[action]} "${period.name}"?`
+    );
+
+    if (!confirmed) return;
+
+    switch (action) {
+      case "open":
+        await openPeriod(period.id);
+        break;
+
+      case "due":
+        await markPeriodDue(period.id);
+        break;
+
+      case "overdue":
+        await markPeriodOverdue(period.id);
+        break;
+
+      case "close":
+        await closePeriod(period.id);
+        break;
+
+      default:
+        break;
+    }
+  };
+
+  const renderActionButton = (
+    period: ContributionPeriod,
+    action: string
+  ) => {
+    const labels: Record<string, string> = {
+      open: "Open",
+      due: "Mark Due",
+      overdue: "Mark Overdue",
+      close: "Close",
+    };
+
+    const styles: Record<string, string> = {
+      open: "text-green-600 hover:text-green-800 dark:text-green-400",
+      due: "text-yellow-600 hover:text-yellow-800 dark:text-yellow-400",
+      overdue: "text-red-600 hover:text-red-800 dark:text-red-400",
+      close: "text-gray-600 hover:text-gray-800 dark:text-gray-400",
+    };
+
+    return (
+      <button
+        key={action}
+        type="button"
+        disabled={loading}
+        onClick={() => void handleAction(period, action)}
+        className={`text-xs font-medium transition disabled:cursor-not-allowed disabled:opacity-50 ${styles[action]}`}
+      >
+        {labels[action]}
+      </button>
+    );
+  };
+
+  return (
+    <div className="space-y-4">
+      {message && (
+        <div className="rounded-lg border border-gray-200 bg-gray-50 px-4 py-3 text-sm text-gray-700 dark:border-gray-800 dark:bg-gray-900 dark:text-gray-300">
+          {message}
+        </div>
+      )}
+
+      <div className="overflow-hidden rounded-xl border border-gray-200 bg-white dark:border-gray-800 dark:bg-white/[0.03]">
+        <div className="max-w-full overflow-x-auto">
+          <table className="min-w-full text-sm">
+            <thead className="border-b border-gray-200 bg-gray-50 dark:border-gray-800 dark:bg-gray-900">
+              <tr>
+                <th className="whitespace-nowrap px-4 py-3 text-left font-medium text-gray-600 dark:text-gray-300">
+                  Period
+                </th>
+
+                <th className="whitespace-nowrap px-4 py-3 text-left font-medium text-gray-600 dark:text-gray-300">
+                  Contribution Plan
+                </th>
+
+                <th className="whitespace-nowrap px-4 py-3 text-left font-medium text-gray-600 dark:text-gray-300">
+                  Period Dates
+                </th>
+
+                <th className="whitespace-nowrap px-4 py-3 text-left font-medium text-gray-600 dark:text-gray-300">
+                  Due Date
+                </th>
+
+                <th className="whitespace-nowrap px-4 py-3 text-center font-medium text-gray-600 dark:text-gray-300">
+                  Contributions
+                </th>
+
+                <th className="whitespace-nowrap px-4 py-3 text-left font-medium text-gray-600 dark:text-gray-300">
+                  Status
+                </th>
+
+                <th className="whitespace-nowrap px-4 py-3 text-left font-medium text-gray-600 dark:text-gray-300">
+                  Generated
+                </th>
+
+                <th className="whitespace-nowrap px-4 py-3 text-left font-medium text-gray-600 dark:text-gray-300">
+                  Actions
+                </th>
+              </tr>
+            </thead>
+
+            <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
+              {loading && periods.length === 0 ? (
+                <tr>
+                  <td
+                    colSpan={8}
+                    className="px-4 py-10 text-center text-gray-500 dark:text-gray-400"
+                  >
+                    <div className="flex items-center justify-center gap-2">
+                      <span className="h-5 w-5 animate-spin rounded-full border-2 border-gray-300 border-t-brand-500" />
+                      Loading contribution periods...
+                    </div>
+                  </td>
+                </tr>
+              ) : periods.length === 0 ? (
+                <tr>
+                  <td
+                    colSpan={8}
+                    className="px-4 py-10 text-center text-gray-500 dark:text-gray-400"
+                  >
+                    No contribution periods found.
+                  </td>
+                </tr>
+              ) : (
+                periods.map((period) => {
+                  const actions = getAvailableActions(period.status);
+
+                  return (
+                    <tr
+                      key={period.id}
+                      className="transition hover:bg-gray-50 dark:hover:bg-white/[0.02]"
+                    >
+                      <td className="px-4 py-4">
+                        <div className="font-medium text-gray-800 dark:text-white/90">
+                          {period.name}
+                        </div>
+                        <div className="mt-1 text-xs text-gray-500">
+                          {period.id}
+                        </div>
+                      </td>
+
+                      <td className="px-4 py-4">
+                        <div className="font-medium text-gray-800 dark:text-white/90">
+                          {period.plan?.name ?? "—"}
+                        </div>
+                        {period.plan?.code && (
+                          <div className="mt-1 text-xs text-gray-500">
+                            {period.plan.code}
+                          </div>
+                        )}
+                      </td>
+
+                      <td className="whitespace-nowrap px-4 py-4 text-gray-600 dark:text-gray-300">
+                        <div>{formatDate(period.periodStart)}</div>
+                        <div className="mt-1 text-xs text-gray-500">
+                          to {formatDate(period.periodEnd)}
+                        </div>
+                      </td>
+
+                      <td className="whitespace-nowrap px-4 py-4 text-gray-600 dark:text-gray-300">
+                        {formatDate(period.dueDate)}
+                      </td>
+
+                      <td className="px-4 py-4 text-center font-medium text-gray-800 dark:text-white/90">
+                        {period._count?.memberContributions ?? 0}
+                      </td>
+
+                      <td className="whitespace-nowrap px-4 py-4">
+                        <span
+                          className={`inline-flex rounded-full px-2.5 py-1 text-xs font-medium ${getStatusClasses(period.status)}`}
+                        >
+                          {formatStatus(period.status)}
+                        </span>
+                      </td>
+
+                      <td className="whitespace-nowrap px-4 py-4 text-gray-600 dark:text-gray-300">
+                        {formatDate(period.generatedAt)}
+                      </td>
+
+                      <td className="px-4 py-4">
+                        <div className="flex min-w-[120px] flex-col items-start gap-2">
+                          {onView && (
+                            <button
+                              type="button"
+                              onClick={() => onView(period)}
+                              className="text-xs font-medium text-brand-600 hover:text-brand-800 dark:text-brand-400"
+                            >
+                              View
+                            </button>
+                          )}
+
+                          {actions.length > 0 ? (
+                            actions.map((action) =>
+                              renderActionButton(period, action)
+                            )
+                          ) : (
+                            !onView && (
+                              <span className="text-xs text-gray-400">
+                                No actions
+                              </span>
+                            )
+                          )}
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })
+              )}
+            </tbody>
+          </table>
+        </div>
+
+        {loading && periods.length > 0 && (
+          <div className="border-t border-gray-100 px-4 py-2 text-center text-xs text-gray-500 dark:border-gray-800">
+            Updating contribution periods...
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
+
+
+
+interface MemberContributionTableProps {
+  onView?: (contribution: MemberContribution) => void;
+  onPay?: (contribution: MemberContribution) => void;
+  onWaive?: (contribution: MemberContribution) => void;
+}
+
+const formatStatusC = (status: MemberContributionStatus): string => {
+  return status
+    .replace(/_/g, " ")
+    .toLowerCase()
+    .replace(/\b\w/g, (char) => char.toUpperCase());
+};
+
+const getStatusClassesC = (status: MemberContributionStatus): string => {
+  const classes: Record<string, string> = {
+    PENDING:
+      "bg-blue-50 text-blue-700 dark:bg-blue-500/15 dark:text-blue-400",
+
+    PARTIALLY_PAID:
+      "bg-yellow-50 text-yellow-700 dark:bg-yellow-500/15 dark:text-yellow-400",
+
+    PAID:
+      "bg-green-50 text-green-700 dark:bg-green-500/15 dark:text-green-400",
+
+    OVERDUE:
+      "bg-red-50 text-red-700 dark:bg-red-500/15 dark:text-red-400",
+
+    WAIVED:
+      "bg-purple-50 text-purple-700 dark:bg-purple-500/15 dark:text-purple-400",
+
+    CANCELLED:
+      "bg-gray-100 text-gray-700 dark:bg-gray-500/15 dark:text-gray-400",
+  };
+
+  return (
+    classes[status] ??
+    "bg-gray-100 text-gray-700 dark:bg-gray-500/15 dark:text-gray-400"
+  );
+};
+
+const formatAmountC = (
+  amount: number | string | null | undefined,
+  currency: string
+): string => {
+  const numericAmount = Number(amount ?? 0);
+
+  return `${currency} ${numericAmount.toLocaleString(undefined, {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  })}`;
+};
+
+const formatDateC = (date?: string | null): string => {
+  if (!date) return "—";
+
+  const parsedDate = new Date(date);
+
+  if (Number.isNaN(parsedDate.getTime())) return "—";
+
+  return parsedDate.toLocaleDateString();
+};
+
+const MemberContributionTable = ({
+  onView,
+  onPay,
+  onWaive,
+}: MemberContributionTableProps) => {
+  const {
+    contributions,
+    loading,
+    message,
+    markContributionOverdue,
+    cancelContribution,
+  } = useMemberContributions();
+
+  const handleMarkOverdue = async (contribution: MemberContribution) => {
+    await markContributionOverdue(contribution.id);
+  };
+
+  const handleCancel = async (contribution: MemberContribution) => {
+    await cancelContribution(contribution.id);
+  };
+
+  return (
+    <div className="space-y-4">
+      {message && (
+        <div className="rounded-lg border border-gray-200 bg-gray-50 px-4 py-3 text-sm text-gray-700 dark:border-gray-800 dark:bg-gray-900 dark:text-gray-300">
+          {message}
+        </div>
+      )}
+
+      <div className="overflow-hidden rounded-xl border border-gray-200 bg-white dark:border-gray-800 dark:bg-white/[0.03]">
+        <div className="max-w-full overflow-x-auto">
+          <table className="min-w-full text-sm">
+            <thead className="border-b border-gray-200 bg-gray-50 dark:border-gray-800 dark:bg-gray-900">
+              <tr>
+                <th className="whitespace-nowrap px-4 py-3 text-left font-medium text-gray-600 dark:text-gray-300">
+                  Member
+                </th>
+
+                <th className="whitespace-nowrap px-4 py-3 text-left font-medium text-gray-600 dark:text-gray-300">
+                  Contribution Plan
+                </th>
+
+                <th className="whitespace-nowrap px-4 py-3 text-left font-medium text-gray-600 dark:text-gray-300">
+                  Period
+                </th>
+
+                <th className="whitespace-nowrap px-4 py-3 text-right font-medium text-gray-600 dark:text-gray-300">
+                  Amount Due
+                </th>
+
+                <th className="whitespace-nowrap px-4 py-3 text-right font-medium text-gray-600 dark:text-gray-300">
+                  Amount Paid
+                </th>
+
+                <th className="whitespace-nowrap px-4 py-3 text-right font-medium text-gray-600 dark:text-gray-300">
+                  Outstanding
+                </th>
+
+                <th className="whitespace-nowrap px-4 py-3 text-left font-medium text-gray-600 dark:text-gray-300">
+                  Due Date
+                </th>
+
+                <th className="whitespace-nowrap px-4 py-3 text-left font-medium text-gray-600 dark:text-gray-300">
+                  Status
+                </th>
+
+                <th className="whitespace-nowrap px-4 py-3 text-left font-medium text-gray-600 dark:text-gray-300">
+                  Actions
+                </th>
+              </tr>
+            </thead>
+
+            <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
+              {loading && contributions.length === 0 ? (
+                <tr>
+                  <td
+                    colSpan={9}
+                    className="px-4 py-10 text-center text-gray-500 dark:text-gray-400"
+                  >
+                    <div className="flex items-center justify-center gap-2">
+                      <span className="h-5 w-5 animate-spin rounded-full border-2 border-gray-300 border-t-brand-500" />
+                      Loading member contributions...
+                    </div>
+                  </td>
+                </tr>
+              ) : contributions.length === 0 ? (
+                <tr>
+                  <td
+                    colSpan={9}
+                    className="px-4 py-10 text-center text-gray-500 dark:text-gray-400"
+                  >
+                    No member contributions found.
+                  </td>
+                </tr>
+              ) : (
+                contributions.map((contribution) => (
+                  <tr
+                    key={contribution.id}
+                    className="transition hover:bg-gray-50 dark:hover:bg-white/[0.02]"
+                  >
+                    <td className="px-4 py-4">
+                      <div className="font-medium text-gray-800 dark:text-white/90">
+                        {contribution.member?.membershipNumber ?? "—"}
+                      </div>
+
+                      <div className="mt-1 text-xs text-gray-500">
+                        {contribution.memberId}
+                      </div>
+                    </td>
+
+                    <td className="px-4 py-4">
+                      <div className="font-medium text-gray-800 dark:text-white/90">
+                        {contribution.plan?.name ?? "—"}
+                      </div>
+
+                      {contribution.plan?.code && (
+                        <div className="mt-1 text-xs text-gray-500">
+                          {contribution.plan.code}
+                        </div>
+                      )}
+                    </td>
+
+                    <td className="px-4 py-4">
+                      <div className="font-medium text-gray-800 dark:text-white/90">
+                        {contribution.period?.name ?? "—"}
+                      </div>
+
+                      <div className="mt-1 text-xs text-gray-500">
+                        {contribution.periodId}
+                      </div>
+                    </td>
+
+                    <td className="whitespace-nowrap px-4 py-4 text-right text-gray-600 dark:text-gray-300">
+                      {formatAmountC(
+                        contribution.amountDue,
+                        contribution.currency
+                      )}
+                    </td>
+
+                    <td className="whitespace-nowrap px-4 py-4 text-right text-gray-600 dark:text-gray-300">
+                      {formatAmountC(
+                        contribution.amountPaid,
+                        contribution.currency
+                      )}
+                    </td>
+
+                    <td className="whitespace-nowrap px-4 py-4 text-right font-medium text-gray-800 dark:text-white/90">
+                      {formatAmountC(
+                        contribution.outstandingAmount,
+                        contribution.currency
+                      )}
+                    </td>
+
+                    <td className="whitespace-nowrap px-4 py-4 text-gray-600 dark:text-gray-300">
+                      {formatDateC(contribution.dueAt)}
+                    </td>
+
+                    <td className="whitespace-nowrap px-4 py-4">
+                      <span
+                        className={`inline-flex rounded-full px-2.5 py-1 text-xs font-medium ${getStatusClassesC(
+                          contribution.status
+                        )}`}
+                      >
+                        {formatStatusC(contribution.status)}
+                      </span>
+                    </td>
+
+                    <td className="px-4 py-4">
+                      <div className="flex min-w-[100px] flex-col items-start gap-2">
+                        {onView && (
+                          <button
+                            type="button"
+                            onClick={() => onView(contribution)}
+                            className="text-xs font-medium text-brand-600 hover:text-brand-800 dark:text-brand-400"
+                          >
+                            View
+                          </button>
+                        )}
+
+                        <MemberContributionActions
+                          contribution={contribution}
+                          loading={loading}
+                          onPay={onPay}
+                          onWaive={onWaive}
+                          onMarkOverdue={handleMarkOverdue}
+                          onCancel={handleCancel}
+                        />
+                      </div>
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
+
+        {loading && contributions.length > 0 && (
+          <div className="border-t border-gray-100 px-4 py-2 text-center text-xs text-gray-500 dark:border-gray-800">
+            Updating member contributions...
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
+
+
+interface PaymentProviderTableProps {
+  onEdit?: (provider: PaymentProvider) => void;
+  onView?: (provider: PaymentProvider) => void;
+}
+
+const formatProviderType = (type: PaymentProviderType): string => {
+  return type
+    .replace(/_/g, " ")
+    .toLowerCase()
+    .replace(/\b\w/g, (char) => char.toUpperCase());
+};
+
+const PaymentProviderTable = ({
+  onEdit,
+  onView,
+}: PaymentProviderTableProps) => {
+  const {
+    providers,
+    loading,
+    message,
+    activatePaymentProvider,
+    deactivatePaymentProvider,
+  } = usePaymentProviders();
+
+  const handleToggleStatus = async (provider: PaymentProvider) => {
+    const action = provider.isActive ? "deactivate" : "activate";
+
+    const confirmed = window.confirm(
+      `Are you sure you want to ${action} ${provider.name}?`,
+    );
+
+    if (!confirmed) return;
+
+    if (provider.isActive) {
+      await deactivatePaymentProvider(provider.id);
+    } else {
+      await activatePaymentProvider(provider.id);
+    }
+  };
+
+  return (
+    <div className="space-y-4">
+      {/* {message && (
+        <div className="rounded-lg border border-gray-200 bg-gray-50 px-4 py-3 text-sm text-gray-700 dark:border-gray-800 dark:bg-gray-900 dark:text-gray-300">
+          {message}
+        </div>
+      )} */}
+
+      <div className="overflow-hidden rounded-xl border border-gray-200 bg-white dark:border-gray-800 dark:bg-white/[0.03]">
+        <div className="max-w-full overflow-x-auto">
+          <table className="min-w-full text-sm">
+            <thead className="border-b border-gray-200 bg-gray-50 dark:border-gray-800 dark:bg-gray-900">
+              <tr>
+                {[
+                  "Provider",
+                  "Code",
+                  "Type",
+                  "Description",
+                  "Payments",
+                  "Transactions",
+                  "Status",
+                  "Actions",
+                ].map((heading) => (
+                  <th
+                    key={heading}
+                    className="whitespace-nowrap px-4 py-3 text-left font-medium text-gray-600 dark:text-gray-300"
+                  >
+                    {heading}
+                  </th>
+                ))}
+              </tr>
+            </thead>
+
+            <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
+              {loading && providers.length === 0 ? (
+                <tr>
+                  <td
+                    colSpan={8}
+                    className="px-4 py-10 text-center text-gray-500 dark:text-gray-400"
+                  >
+                    <div className="flex items-center justify-center gap-2">
+                      <span className="h-5 w-5 animate-spin rounded-full border-2 border-gray-300 border-t-brand-500" />
+                      Loading payment providers...
+                    </div>
+                  </td>
+                </tr>
+              ) : providers.length === 0 ? (
+                <tr>
+                  <td
+                    colSpan={8}
+                    className="px-4 py-10 text-center text-gray-500 dark:text-gray-400"
+                  >
+                    No payment providers found.
+                  </td>
+                </tr>
+              ) : (
+                providers.map((provider) => (
+                  <tr
+                    key={provider.id}
+                    className="transition hover:bg-gray-50 dark:hover:bg-white/[0.02]"
+                  >
+                    <td className="px-4 py-4">
+                      <div className="font-medium text-gray-800 dark:text-white/90">
+                        {provider.name}
+                      </div>
+                    </td>
+
+                    <td className="whitespace-nowrap px-4 py-4 font-mono text-xs text-gray-600 dark:text-gray-300">
+                      {provider.code}
+                    </td>
+
+                    <td className="whitespace-nowrap px-4 py-4 text-gray-600 dark:text-gray-300">
+                      {formatProviderType(provider.type)}
+                    </td>
+
+                    <td className="max-w-xs px-4 py-4 text-gray-600 dark:text-gray-300">
+                      <span className="line-clamp-2">
+                        {provider.description || "—"}
+                      </span>
+                    </td>
+
+                    <td className="px-4 py-4 text-gray-600 dark:text-gray-300">
+                      {provider._count?.payments ?? "—"}
+                    </td>
+
+                    <td className="px-4 py-4 text-gray-600 dark:text-gray-300">
+                      {provider._count?.transactions ?? "—"}
+                    </td>
+
+                    <td className="whitespace-nowrap px-4 py-4">
+                      <span
+                        className={`inline-flex rounded-full px-2.5 py-1 text-xs font-medium ${
+                          provider.isActive
+                            ? "bg-green-50 text-green-700 dark:bg-green-500/15 dark:text-green-400"
+                            : "bg-gray-100 text-gray-700 dark:bg-gray-500/15 dark:text-gray-400"
+                        }`}
+                      >
+                        {provider.isActive ? "Active" : "Inactive"}
+                      </span>
+                    </td>
+
+                    <td className="px-4 py-4">
+                      <div className="flex min-w-[100px] flex-col items-start gap-2">
+                        {onView && (
+                          <button
+                            type="button"
+                            onClick={() => onView(provider)}
+                            className="text-xs font-medium text-brand-600 hover:text-brand-800 dark:text-brand-400"
+                          >
+                            View
+                          </button>
+                        )}
+
+                        {onEdit && (
+                          <button
+                            type="button"
+                            onClick={() => onEdit(provider)}
+                            className="text-xs font-medium text-blue-600 hover:text-blue-800 dark:text-blue-400"
+                          >
+                            Edit
+                          </button>
+                        )}
+
+                        <button
+                          type="button"
+                          disabled={loading}
+                          onClick={() => handleToggleStatus(provider)}
+                          className={`text-xs font-medium disabled:cursor-not-allowed disabled:opacity-50 ${
+                            provider.isActive
+                              ? "text-red-600 hover:text-red-800 dark:text-red-400"
+                              : "text-green-600 hover:text-green-800 dark:text-green-400"
+                          }`}
+                        >
+                          {provider.isActive ? "Deactivate" : "Activate"}
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
+
+        {loading && providers.length > 0 && (
+          <div className="border-t border-gray-100 px-4 py-2 text-center text-xs text-gray-500 dark:border-gray-800">
+            Updating payment providers...
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
+
+import { Payment } from "../../../types/PaymentType";
+
+interface PaymentTableProps {
+  payments: Payment[];
+  loading?: boolean;
+  message?: string | null;
+  showMember?: boolean;
+  onView?: (payment: Payment) => void;
+}
+
+const formatPaymentStatus = (status: string): string => {
+  return status
+    .replace(/_/g, " ")
+    .toLowerCase()
+    .replace(/\b\w/g, (char) => char.toUpperCase());
+};
+
+const getPaymentStatusClasses = (status: string): string => {
+  const classes: Record<string, string> = {
+    INITIATED:
+      "bg-blue-50 text-blue-700 dark:bg-blue-500/15 dark:text-blue-400",
+    PENDING:
+      "bg-yellow-50 text-yellow-700 dark:bg-yellow-500/15 dark:text-yellow-400",
+    COMPLETED:
+      "bg-green-50 text-green-700 dark:bg-green-500/15 dark:text-green-400",
+    FAILED:
+      "bg-red-50 text-red-700 dark:bg-red-500/15 dark:text-red-400",
+    CANCELLED:
+      "bg-gray-100 text-gray-700 dark:bg-gray-500/15 dark:text-gray-400",
+  };
+
+  return (
+    classes[status] ??
+    "bg-gray-100 text-gray-700 dark:bg-gray-500/15 dark:text-gray-400"
+  );
+};
+
+const formatPaymentMethod = (method: string): string => {
+  const methods: Record<string, string> = {
+    MPESA: "M-Pesa",
+    CASH: "Cash",
+    BANK: "Bank Transfer",
+    CARD: "Card",
+    CHEQUE: "Cheque",
+  };
+
+  return methods[method] ?? formatPaymentStatus(method);
+};
+
+
+
+
+
+const PaymentTable = ({
+  payments,
+  loading = false,
+  message,
+  showMember = false,
+  onView,
+}: PaymentTableProps) => {
+  const columnCount = showMember ? 8 : 7;
+
+  return (
+    <div className="overflow-x-auto rounded-lg border border-gray-200 dark:border-gray-800">
+      {message && (
+        <div className="border-b border-gray-200 bg-gray-50 px-4 py-3 text-sm text-gray-600 dark:border-gray-800 dark:bg-gray-900 dark:text-gray-400">
+          {message}
+        </div>
+      )}
+
+      <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-800">
+        <thead className="bg-gray-50 dark:bg-gray-900">
+          <tr>
+            {showMember && (
+              <th className="px-5 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">
+                Member
+              </th>
+            )}
+
+            <th className="px-5 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">
+              Amount
+            </th>
+
+            <th className="px-5 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">
+              Method
+            </th>
+
+            <th className="px-5 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">
+              Provider
+            </th>
+
+            <th className="px-5 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">
+              Reference
+            </th>
+
+            <th className="px-5 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">
+              Status
+            </th>
+
+            <th className="px-5 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">
+              Date
+            </th>
+
+            {onView && (
+              <th className="px-5 py-3 text-right text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">
+                Actions
+              </th>
+            )}
+          </tr>
+        </thead>
+
+        <tbody className="divide-y divide-gray-200 bg-white dark:divide-gray-800 dark:bg-gray-950">
+          {loading ? (
+            <tr>
+              <td
+                colSpan={columnCount}
+                className="px-5 py-8 text-center text-sm text-gray-500 dark:text-gray-400"
+              >
+                Loading payments...
+              </td>
+            </tr>
+          ) : payments.length === 0 ? (
+            <tr>
+              <td
+                colSpan={columnCount}
+                className="px-5 py-8 text-center text-sm text-gray-500 dark:text-gray-400"
+              >
+                No payments found.
+              </td>
+            </tr>
+          ) : (
+            payments.map((payment) => (
+              <tr
+                key={payment.id}
+                className="transition hover:bg-gray-50 dark:hover:bg-gray-900"
+              >
+                {showMember && (
+                  <td className="whitespace-nowrap px-5 py-4 text-sm text-gray-700 dark:text-gray-300">
+                    {payment.member?.membershipNumber ??
+                      payment.memberId}
+                  </td>
+                )}
+
+                <td className="whitespace-nowrap px-5 py-4 text-sm font-medium text-gray-800 dark:text-white">
+                  {formatAmount(payment.amount, payment.currency)}
+                </td>
+
+                <td className="whitespace-nowrap px-5 py-4 text-sm text-gray-700 dark:text-gray-300">
+                  {formatPaymentMethod(payment.method)}
+                </td>
+
+                <td className="whitespace-nowrap px-5 py-4 text-sm text-gray-700 dark:text-gray-300">
+                  {payment.provider?.name ?? "—"}
+                </td>
+
+                <td className="whitespace-nowrap px-5 py-4 text-sm text-gray-700 dark:text-gray-300">
+                  <div>
+                    <p>{payment.internalReference}</p>
+                    {payment.externalReference && (
+                      <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                        External: {payment.externalReference}
+                      </p>
+                    )}
+                  </div>
+                </td>
+
+                <td className="whitespace-nowrap px-5 py-4">
+                  <span
+                    className={`inline-flex rounded-full px-2.5 py-1 text-xs font-medium ${getPaymentStatusClasses(
+                      payment.status,
+                    )}`}
+                  >
+                    {formatPaymentStatus(payment.status)}
+                  </span>
+                </td>
+
+                <td className="whitespace-nowrap px-5 py-4 text-sm text-gray-700 dark:text-gray-300">
+                  {formatDate(payment.createdAt)}
+                </td>
+
+                {onView && (
+                  <td className="whitespace-nowrap px-5 py-4 text-right">
+                    <button
+                      type="button"
+                      onClick={() => onView(payment)}
+                      className="text-sm font-medium text-brand-500 hover:text-brand-600"
+                    >
+                      View
+                    </button>
+                  </td>
+                )}
+              </tr>
+            ))
+          )}
+        </tbody>
+      </table>
+    </div>
+  );
+};
+
+
+
+
+
+
+
+
+
+export {PaymentTable, PaymentProviderTable , RolesTable,  MenuTable, StatusTable, OrdersTable,CustomersTable, PermissionsTable,RegionsTable ,RegionMembersTable,MembersTable,UsersTable,ImportsTable, ContributionPlansTable,ContributionRuleTable,ContributionPeriodTable,MemberContributionTable}; 

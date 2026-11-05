@@ -22,6 +22,17 @@ import { NotificationProvider } from "./context/NotificationContext.tsx";
 import { DashboardProvider } from "./context/DashboardContext.tsx";
 import { MembershipMetadataProvider } from "./context/MembershipMetadataContext.tsx";
 import { MemberProvider } from "./context/MemberContext.tsx";
+import { ContributionPlanProvider } from "./context/ContributionPlanContext.tsx";
+import { ContributionRuleProvider } from "./context/ContributionRuleContext.tsx";
+import { ContributionPeriodProvider } from "./context/ContributionPeriodContext.tsx";
+import { MemberContributionProvider } from "./context/MemberContributionContext.tsx";
+import { PaymentProviderProvider } from "./context/PaymentProviderContext.tsx";
+import { PaymentProvider } from "./context/PaymentContext.tsx";
+import { PenaltyRuleProvider } from "./context/PenaltyRuleContext.tsx";
+import { PenaltyProvider } from "./context/PenaltyContext.tsx";
+import { PenaltyAdjustmentProvider } from "./context/PenaltyAdjustmentContext.tsx";
+import { ReceiptProvider } from "./context/ReceiptContext.tsx";
+import { MemberStatementProvider } from "./context/MemberStatementContext.tsx";
 
 
 createRoot(document.getElementById("root")!).render(
@@ -42,16 +53,38 @@ createRoot(document.getElementById("root")!).render(
                               <ImportProvider>
                                 <MembershipMetadataProvider>
                                   <MemberProvider>
-                                    <AnnouncementProvider>
-                                      <DashboardProvider>
+                                    <ContributionPlanProvider>
+                                      <ContributionRuleProvider>
+                                        <ContributionPeriodProvider>
+                                          <MemberContributionProvider>
+                                            <PaymentProviderProvider>
+                                              <PaymentProvider>
+                                                <PenaltyRuleProvider>
+                                                  <PenaltyProvider>
+                                                    <PenaltyAdjustmentProvider>
+                                                      <ReceiptProvider>
+                                                        <MemberStatementProvider>
+                                                          <AnnouncementProvider>
+                                                            <DashboardProvider>
 
 
 
-                                        <App />
+                                                              <App />
 
 
-                                      </DashboardProvider>
-                                    </AnnouncementProvider>
+                                                            </DashboardProvider>
+                                                          </AnnouncementProvider>
+                                                        </MemberStatementProvider>
+                                                      </ReceiptProvider>
+                                                    </PenaltyAdjustmentProvider>
+                                                  </PenaltyProvider>
+                                                </PenaltyRuleProvider>
+                                              </PaymentProvider>
+                                            </PaymentProviderProvider>
+                                          </MemberContributionProvider>
+                                        </ContributionPeriodProvider>
+                                      </ContributionRuleProvider>
+                                    </ContributionPlanProvider>
                                   </MemberProvider>
                                 </MembershipMetadataProvider>
                               </ImportProvider>

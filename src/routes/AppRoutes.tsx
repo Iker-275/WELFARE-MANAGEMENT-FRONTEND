@@ -16,18 +16,7 @@ import UpdateRole from "../pages/RolesPages/UpdateRoles";
 
 // import { ProtectedRoute, AuthRoute } from "../pages/ProtectedRoute";
 // import CreateNotification from "../pages/NotificationPages/CreateNotification";
-import Menu from "../pages/MenuPages/Menu";
-import CreateMenu from "../pages/MenuPages/CreateMenu";
-import UpdateMenu from "../pages/MenuPages/UpdateMenu";
-import Status from "../pages/StatusPages/Status";
-import CreateStatus from "../pages/StatusPages/CreateStatus";
-import UpdateStatus from "../pages/StatusPages/UpdateStatus";
-import OrdersPage from "../pages/OrderPages/Orders";
-import OrderDetailsPage from "../pages/OrderPages/OrderDetails";
-import CustomersPage from "../pages/CustomerPages/Customers";
-import CustomerDetails from "../pages/CustomerPages/CustomerDetails";
-import CreateCustomer from "../pages/CustomerPages/CreateCustomer";
-import UpdateCustomer from "../pages/CustomerPages/UpdateCustomer";
+
 // import { RoleRoute } from "../pages/GuardedRoutes/RoleRoutes";
 import VerifyOtp from "../pages/AuthPages/OTP";
 import ResetPassword from "../pages/AuthPages/ResetPassword";
@@ -68,6 +57,26 @@ import UpdateUser from "../pages/UserPages/UpdateUsers";
 import ImportErrors from "../pages/ImportPages/ImportErrors";
 import ImportDetails from "../pages/ImportPages/ImportDetails";
 import Imports from "../pages/ImportPages/Imports";
+import CreateContributionPlan from "../pages/ContributionPlanPages/CreateContributionPlan";
+import UpdateContributionPlan from "../pages/ContributionPlanPages/UpdateContributionPlan";
+import ContributionPlans from "../pages/ContributionPlanPages/ContributionPlans";
+import CreateContributionRulePage from "../pages/ContributionRulePages/CreateContributionRule";
+import EditContributionRulePage from "../pages/ContributionRulePages/UpdateContributionRule";
+import ContributionRulesPage from "../pages/ContributionRulePages/ContributionRules";
+import ContributionPeriodsPage from "../pages/ContributionPeriodPages/ContributionPeriodsPage";
+import GenerateContributionPeriodPage from "../pages/ContributionPeriodPages/GenerateContributionPeriodPage";
+import GenerateContributionPeriodsBatchPage from "../pages/ContributionPeriodPages/GenerateContributionPeriodsBatchPage";
+import MemberContributionsPage from "../pages/MemberContributionPages/MemberContributionsPage";
+import GenerateMemberContributionPage from "../pages/MemberContributionPages/GenerateMemberContributionPage";
+import GenerateBulkMemberContributionsPage from "../pages/MemberContributionPages/GenerateBulkMemberContributionsPage";
+import CreatePaymentProviderPage from "../pages/PaymentProviderPages/CreatePaymentProviderPage";
+import PaymentProvidersPage from "../pages/PaymentProviderPages/PaymentProvidersPage";
+import MemberPaymentsPage from "../pages/Payments/Member/MemberPaymentsPage";
+import CreateMemberPaymentPage from "../pages/Payments/Member/CreateMemberPaymentPage";
+import MemberPaymentDetailsPage from "../pages/Payments/Member/MemberPaymentDetailsPage";
+import AdminPaymentsPage from "../pages/Payments/Admin/PaymentsPage";
+import CreateAdminPaymentPage from "../pages/Payments/Admin/CreatePaymentPage";
+import AdminPaymentDetailsPage from "../pages/Payments/Admin/PaymentDetailsPage";
 
 
 
@@ -163,13 +172,96 @@ const AppRoutes = () => {
             <Route path="/imports/:importId" element={<ImportDetails />} />
             <Route path="/imports/:importId/errors" element={<ImportErrors />} />
 
+            {/* contribution plans */}
 
+            <Route path="/contribution-plans/create" element={<CreateContributionPlan />} />
+            <Route path="/contribution-plans/edit/:planId" element={<UpdateContributionPlan />} />
+            <Route path="/contribution-plans" element={<ContributionPlans />} />
 
+            {/* contribution rules */}
+            <Route path="/contribution-rules/create" element={<CreateContributionRulePage />} />
+            <Route path="/contribution-rules/edit/:ruleId" element={<EditContributionRulePage />} />
+            <Route path="/contribution-rules" element={<ContributionRulesPage />} />
 
+            {/* contribution periods */}
+            <Route
+              path="/contribution-periods"
+              element={<ContributionPeriodsPage />}
+            />
 
+            <Route
+              path="/contribution-periods/generate"
+              element={<GenerateContributionPeriodPage />}
+            />
 
+            <Route
+              path="/contribution-periods/generate-batch"
+              element={<GenerateContributionPeriodsBatchPage />}
+            />
 
+            {/* member contributions */}
+            <Route
+              path="/member-contributions"
+              element={<MemberContributionsPage />}
+            />
 
+            <Route
+              path="/member-contributions/generate"
+              element={<GenerateMemberContributionPage />}
+            />
+
+            <Route
+              path="/member-contributions/generate-bulk"
+              element={<GenerateBulkMemberContributionsPage />}
+            />
+
+            {/* payment providers */}
+            <Route
+              path="/payment-providers"
+              element={<PaymentProvidersPage />}
+            />
+
+            <Route
+              path="/payment-providers/create"
+              element={<CreatePaymentProviderPage />}
+            />
+
+            {/* <Route
+              path="/payment-providers/:id/edit"
+              element={<EditPaymentProviderPage />}
+            /> */}
+
+            {/* member-payment */}
+            <Route
+              path="/member-payments"
+              element={<MemberPaymentsPage />}
+            />
+
+            <Route
+              path="/member-payments/:memberId/payments/create"
+              element={<CreateMemberPaymentPage />}
+            />
+
+            <Route
+              path="/member-payments/:memberId/payments/:paymentId"
+              element={<MemberPaymentDetailsPage />}
+            />
+
+            {/* admin payments */}
+            <Route
+              path="/payments"
+              element={<AdminPaymentsPage />}
+            />
+
+            <Route
+              path="/payments/create"
+              element={<CreateAdminPaymentPage />}
+            />
+
+            <Route
+              path="/payments/:paymentId"
+              element={<AdminPaymentDetailsPage />}
+            />
             {/* <Route path="/notifications/create" element={<CreateNotification />} />
             <Route path="/notifications" element={<NotificationsPage />} /> */}
 

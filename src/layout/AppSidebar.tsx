@@ -31,6 +31,12 @@ const navItems: NavItem[] = [
 
     // subItems: [{ name: "Ecommerce", path: "/", pro: false }],
   },
+  {
+    icon: <UserCircleIcon />,
+    name: "My Profile",
+     path: "/profile",
+   
+  },
    {
     icon: <GridIcon />,
     name: "Users",
@@ -45,12 +51,7 @@ const navItems: NavItem[] = [
 
     // subItems: [{ name: "Ecommerce", path: "/", pro: false }],
   },
-  {
-    icon: <UserCircleIcon />,
-    name: "My Profile",
-     path: "/profile",
-   
-  },
+  
   {
     icon: <UserCircleIcon />,
     name: "Members",
@@ -78,6 +79,52 @@ const navItems: NavItem[] = [
      path: "/regions",
    
   },
+  {
+    icon: <BoxCubeIcon />,
+    name: "Contribution Plans",
+     path: "/contribution-plans",
+   
+  },
+  {
+    icon: <BoxCubeIcon />,
+    name: "Contribution Rules",
+     path: "/contribution-rules",
+   
+  },
+  {
+    icon: <BoxCubeIcon />,
+    name: "Contribution Periods",
+     path: "/contribution-periods",
+   
+  },
+
+  {
+    icon: <BoxCubeIcon />,
+    name: "Member Contributions",
+     path: "/member-contributions",
+   
+  },
+
+  {
+    icon: <BoxCubeIcon />,
+    name: "Payment Providers",
+     path: "/payment-providers",
+   
+  },
+
+   {
+    icon: <BoxCubeIcon />,
+    name: "Member Payments",
+     path: "/member-payments",
+   
+  },
+   {
+    icon: <BoxCubeIcon />,
+    name: "Payments",
+     path: "/payments",
+   
+  },
+
 
  
   
