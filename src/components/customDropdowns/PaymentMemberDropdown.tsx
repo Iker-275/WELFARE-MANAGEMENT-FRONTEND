@@ -32,7 +32,7 @@ const PaymentMemberDropdown = ({
 
   useEffect(() => {
     fetchMembers({
-      status: "ACTIVE",
+      // status: "ACTIVE",
       page: 1,
       limit: 100,
     });

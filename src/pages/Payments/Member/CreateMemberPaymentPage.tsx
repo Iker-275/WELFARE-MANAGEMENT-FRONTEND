@@ -240,7 +240,7 @@ const CreateMemberPaymentPage = () => {
               <button
                 type="button"
                 onClick={() =>
-                  navigate(`/members/${memberId}/payments/${payment.id}`)
+                  navigate(`/member-payments/${memberId}/payments/${payment.id}`)
                 }
                 className="rounded-lg bg-brand-500 px-5 py-2.5 text-sm font-medium text-white hover:bg-brand-600"
               >
@@ -249,7 +249,7 @@ const CreateMemberPaymentPage = () => {
 
               <button
                 type="button"
-                onClick={() => navigate(`/members/${memberId}/payments`)}
+                onClick={() => navigate(`/member-payments`)}
                 className="rounded-lg border border-gray-300 px-5 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-100 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-gray-800"
               >
                 Back to Payments

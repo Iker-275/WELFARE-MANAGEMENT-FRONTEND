@@ -4747,10 +4747,291 @@ const ContributionPeriodTable = ({
 
 
 
+// interface MemberContributionTableProps {
+//   onView?: (contribution: MemberContribution) => void;
+//   onPay?: (contribution: MemberContribution) => void;
+//   onWaive?: (contribution: MemberContribution) => void;
+// }
+
+// interface MemberContributionTableProps {
+//   onView?: (contribution: MemberContribution) => void;
+//   onPay?: (contribution: MemberContribution) => void;
+//   onWaive?: (contribution: MemberContribution) => void;
+
+//   showMember?: boolean;
+//   showActions?: boolean;
+// }
+
+// const formatStatusC = (status: MemberContributionStatus): string => {
+//   return status
+//     .replace(/_/g, " ")
+//     .toLowerCase()
+//     .replace(/\b\w/g, (char) => char.toUpperCase());
+// };
+
+// const getStatusClassesC = (status: MemberContributionStatus): string => {
+//   const classes: Record<string, string> = {
+//     PENDING:
+//       "bg-blue-50 text-blue-700 dark:bg-blue-500/15 dark:text-blue-400",
+
+//     PARTIALLY_PAID:
+//       "bg-yellow-50 text-yellow-700 dark:bg-yellow-500/15 dark:text-yellow-400",
+
+//     PAID:
+//       "bg-green-50 text-green-700 dark:bg-green-500/15 dark:text-green-400",
+
+//     OVERDUE:
+//       "bg-red-50 text-red-700 dark:bg-red-500/15 dark:text-red-400",
+
+//     WAIVED:
+//       "bg-purple-50 text-purple-700 dark:bg-purple-500/15 dark:text-purple-400",
+
+//     CANCELLED:
+//       "bg-gray-100 text-gray-700 dark:bg-gray-500/15 dark:text-gray-400",
+//   };
+
+//   return (
+//     classes[status] ??
+//     "bg-gray-100 text-gray-700 dark:bg-gray-500/15 dark:text-gray-400"
+//   );
+// };
+
+// const formatAmountC = (
+//   amount: number | string | null | undefined,
+//   currency: string
+// ): string => {
+//   const numericAmount = Number(amount ?? 0);
+
+//   return `${currency} ${numericAmount.toLocaleString(undefined, {
+//     minimumFractionDigits: 2,
+//     maximumFractionDigits: 2,
+//   })}`;
+// };
+
+// const formatDateC = (date?: string | null): string => {
+//   if (!date) return "—";
+
+//   const parsedDate = new Date(date);
+
+//   if (Number.isNaN(parsedDate.getTime())) return "—";
+
+//   return parsedDate.toLocaleDateString();
+// };
+
+// const MemberContributionTable = ({
+//   onView,
+//   onPay,
+//   onWaive,
+// }: MemberContributionTableProps) => {
+//   const {
+//     contributions,
+//     loading,
+//     message,
+//     markContributionOverdue,
+//     cancelContribution,
+//   } = useMemberContributions();
+
+//   const handleMarkOverdue = async (contribution: MemberContribution) => {
+//     await markContributionOverdue(contribution.id);
+//   };
+
+//   const handleCancel = async (contribution: MemberContribution) => {
+//     await cancelContribution(contribution.id);
+//   };
+
+//   return (
+//     <div className="space-y-4">
+//       {message && (
+//         <div className="rounded-lg border border-gray-200 bg-gray-50 px-4 py-3 text-sm text-gray-700 dark:border-gray-800 dark:bg-gray-900 dark:text-gray-300">
+//           {message}
+//         </div>
+//       )}
+
+//       <div className="overflow-hidden rounded-xl border border-gray-200 bg-white dark:border-gray-800 dark:bg-white/[0.03]">
+//         <div className="max-w-full overflow-x-auto">
+//           <table className="min-w-full text-sm">
+//             <thead className="border-b border-gray-200 bg-gray-50 dark:border-gray-800 dark:bg-gray-900">
+//               <tr>
+//                 <th className="whitespace-nowrap px-4 py-3 text-left font-medium text-gray-600 dark:text-gray-300">
+//                   Member
+//                 </th>
+
+//                 <th className="whitespace-nowrap px-4 py-3 text-left font-medium text-gray-600 dark:text-gray-300">
+//                   Contribution Plan
+//                 </th>
+
+//                 <th className="whitespace-nowrap px-4 py-3 text-left font-medium text-gray-600 dark:text-gray-300">
+//                   Period
+//                 </th>
+
+//                 <th className="whitespace-nowrap px-4 py-3 text-right font-medium text-gray-600 dark:text-gray-300">
+//                   Amount Due
+//                 </th>
+
+//                 <th className="whitespace-nowrap px-4 py-3 text-right font-medium text-gray-600 dark:text-gray-300">
+//                   Amount Paid
+//                 </th>
+
+//                 <th className="whitespace-nowrap px-4 py-3 text-right font-medium text-gray-600 dark:text-gray-300">
+//                   Outstanding
+//                 </th>
+
+//                 <th className="whitespace-nowrap px-4 py-3 text-left font-medium text-gray-600 dark:text-gray-300">
+//                   Due Date
+//                 </th>
+
+//                 <th className="whitespace-nowrap px-4 py-3 text-left font-medium text-gray-600 dark:text-gray-300">
+//                   Status
+//                 </th>
+
+//                 <th className="whitespace-nowrap px-4 py-3 text-left font-medium text-gray-600 dark:text-gray-300">
+//                   Actions
+//                 </th>
+//               </tr>
+//             </thead>
+
+//             <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
+//               {loading && contributions.length === 0 ? (
+//                 <tr>
+//                   <td
+//                     colSpan={9}
+//                     className="px-4 py-10 text-center text-gray-500 dark:text-gray-400"
+//                   >
+//                     <div className="flex items-center justify-center gap-2">
+//                       <span className="h-5 w-5 animate-spin rounded-full border-2 border-gray-300 border-t-brand-500" />
+//                       Loading member contributions...
+//                     </div>
+//                   </td>
+//                 </tr>
+//               ) : contributions.length === 0 ? (
+//                 <tr>
+//                   <td
+//                     colSpan={9}
+//                     className="px-4 py-10 text-center text-gray-500 dark:text-gray-400"
+//                   >
+//                     No member contributions found.
+//                   </td>
+//                 </tr>
+//               ) : (
+//                 contributions.map((contribution) => (
+//                   <tr
+//                     key={contribution.id}
+//                     className="transition hover:bg-gray-50 dark:hover:bg-white/[0.02]"
+//                   >
+//                     <td className="px-4 py-4">
+//                       <div className="font-medium text-gray-800 dark:text-white/90">
+//                         {contribution.member?.membershipNumber ?? "—"}
+//                       </div>
+
+//                       <div className="mt-1 text-xs text-gray-500">
+//                         {contribution.memberId}
+//                       </div>
+//                     </td>
+
+//                     <td className="px-4 py-4">
+//                       <div className="font-medium text-gray-800 dark:text-white/90">
+//                         {contribution.plan?.name ?? "—"}
+//                       </div>
+
+//                       {contribution.plan?.code && (
+//                         <div className="mt-1 text-xs text-gray-500">
+//                           {contribution.plan.code}
+//                         </div>
+//                       )}
+//                     </td>
+
+//                     <td className="px-4 py-4">
+//                       <div className="font-medium text-gray-800 dark:text-white/90">
+//                         {contribution.period?.name ?? "—"}
+//                       </div>
+
+//                       <div className="mt-1 text-xs text-gray-500">
+//                         {contribution.periodId}
+//                       </div>
+//                     </td>
+
+//                     <td className="whitespace-nowrap px-4 py-4 text-right text-gray-600 dark:text-gray-300">
+//                       {formatAmountC(
+//                         contribution.amountDue,
+//                         contribution.currency
+//                       )}
+//                     </td>
+
+//                     <td className="whitespace-nowrap px-4 py-4 text-right text-gray-600 dark:text-gray-300">
+//                       {formatAmountC(
+//                         contribution.amountPaid,
+//                         contribution.currency
+//                       )}
+//                     </td>
+
+//                     <td className="whitespace-nowrap px-4 py-4 text-right font-medium text-gray-800 dark:text-white/90">
+//                       {formatAmountC(
+//                         contribution.outstandingAmount,
+//                         contribution.currency
+//                       )}
+//                     </td>
+
+//                     <td className="whitespace-nowrap px-4 py-4 text-gray-600 dark:text-gray-300">
+//                       {formatDateC(contribution.dueAt)}
+//                     </td>
+
+//                     <td className="whitespace-nowrap px-4 py-4">
+//                       <span
+//                         className={`inline-flex rounded-full px-2.5 py-1 text-xs font-medium ${getStatusClassesC(
+//                           contribution.status
+//                         )}`}
+//                       >
+//                         {formatStatusC(contribution.status)}
+//                       </span>
+//                     </td>
+
+//                     <td className="px-4 py-4">
+//                       <div className="flex min-w-[100px] flex-col items-start gap-2">
+//                         {onView && (
+//                           <button
+//                             type="button"
+//                             onClick={() => onView(contribution)}
+//                             className="text-xs font-medium text-brand-600 hover:text-brand-800 dark:text-brand-400"
+//                           >
+//                             View
+//                           </button>
+//                         )}
+
+//                         <MemberContributionActions
+//                           contribution={contribution}
+//                           loading={loading}
+//                           onPay={onPay}
+//                           onWaive={onWaive}
+//                           onMarkOverdue={handleMarkOverdue}
+//                           onCancel={handleCancel}
+//                         />
+//                       </div>
+//                     </td>
+//                   </tr>
+//                 ))
+//               )}
+//             </tbody>
+//           </table>
+//         </div>
+
+//         {loading && contributions.length > 0 && (
+//           <div className="border-t border-gray-100 px-4 py-2 text-center text-xs text-gray-500 dark:border-gray-800">
+//             Updating member contributions...
+//           </div>
+//         )}
+//       </div>
+//     </div>
+//   );
+// };
+
+
 interface MemberContributionTableProps {
   onView?: (contribution: MemberContribution) => void;
   onPay?: (contribution: MemberContribution) => void;
   onWaive?: (contribution: MemberContribution) => void;
+
+  showMember?: boolean;
+  showActions?: boolean;
 }
 
 const formatStatusC = (status: MemberContributionStatus): string => {
@@ -4813,6 +5094,8 @@ const MemberContributionTable = ({
   onView,
   onPay,
   onWaive,
+  showMember = true,
+  showActions = true,
 }: MemberContributionTableProps) => {
   const {
     contributions,
@@ -4821,6 +5104,9 @@ const MemberContributionTable = ({
     markContributionOverdue,
     cancelContribution,
   } = useMemberContributions();
+
+  const columnCount =
+    7 + (showMember ? 1 : 0) + (showActions ? 1 : 0);
 
   const handleMarkOverdue = async (contribution: MemberContribution) => {
     await markContributionOverdue(contribution.id);
@@ -4843,9 +5129,11 @@ const MemberContributionTable = ({
           <table className="min-w-full text-sm">
             <thead className="border-b border-gray-200 bg-gray-50 dark:border-gray-800 dark:bg-gray-900">
               <tr>
-                <th className="whitespace-nowrap px-4 py-3 text-left font-medium text-gray-600 dark:text-gray-300">
-                  Member
-                </th>
+                {showMember && (
+                  <th className="whitespace-nowrap px-4 py-3 text-left font-medium text-gray-600 dark:text-gray-300">
+                    Member
+                  </th>
+                )}
 
                 <th className="whitespace-nowrap px-4 py-3 text-left font-medium text-gray-600 dark:text-gray-300">
                   Contribution Plan
@@ -4875,9 +5163,11 @@ const MemberContributionTable = ({
                   Status
                 </th>
 
-                <th className="whitespace-nowrap px-4 py-3 text-left font-medium text-gray-600 dark:text-gray-300">
-                  Actions
-                </th>
+                {showActions && (
+                  <th className="whitespace-nowrap px-4 py-3 text-left font-medium text-gray-600 dark:text-gray-300">
+                    Actions
+                  </th>
+                )}
               </tr>
             </thead>
 
@@ -4885,7 +5175,7 @@ const MemberContributionTable = ({
               {loading && contributions.length === 0 ? (
                 <tr>
                   <td
-                    colSpan={9}
+                    colSpan={columnCount}
                     className="px-4 py-10 text-center text-gray-500 dark:text-gray-400"
                   >
                     <div className="flex items-center justify-center gap-2">
@@ -4897,7 +5187,7 @@ const MemberContributionTable = ({
               ) : contributions.length === 0 ? (
                 <tr>
                   <td
-                    colSpan={9}
+                    colSpan={columnCount}
                     className="px-4 py-10 text-center text-gray-500 dark:text-gray-400"
                   >
                     No member contributions found.
@@ -4909,15 +5199,17 @@ const MemberContributionTable = ({
                     key={contribution.id}
                     className="transition hover:bg-gray-50 dark:hover:bg-white/[0.02]"
                   >
-                    <td className="px-4 py-4">
-                      <div className="font-medium text-gray-800 dark:text-white/90">
-                        {contribution.member?.membershipNumber ?? "—"}
-                      </div>
+                    {showMember && (
+                      <td className="px-4 py-4">
+                        <div className="font-medium text-gray-800 dark:text-white/90">
+                          {contribution.member?.membershipNumber ?? "—"}
+                        </div>
 
-                      <div className="mt-1 text-xs text-gray-500">
-                        {contribution.memberId}
-                      </div>
-                    </td>
+                        <div className="mt-1 text-xs text-gray-500">
+                          {contribution.memberId}
+                        </div>
+                      </td>
+                    )}
 
                     <td className="px-4 py-4">
                       <div className="font-medium text-gray-800 dark:text-white/90">
@@ -4976,28 +5268,30 @@ const MemberContributionTable = ({
                       </span>
                     </td>
 
-                    <td className="px-4 py-4">
-                      <div className="flex min-w-[100px] flex-col items-start gap-2">
-                        {onView && (
-                          <button
-                            type="button"
-                            onClick={() => onView(contribution)}
-                            className="text-xs font-medium text-brand-600 hover:text-brand-800 dark:text-brand-400"
-                          >
-                            View
-                          </button>
-                        )}
+                    {showActions && (
+                      <td className="px-4 py-4">
+                        <div className="flex min-w-[100px] flex-col items-start gap-2">
+                          {onView && (
+                            <button
+                              type="button"
+                              onClick={() => onView(contribution)}
+                              className="text-xs font-medium text-brand-600 hover:text-brand-800 dark:text-brand-400"
+                            >
+                              View
+                            </button>
+                          )}
 
-                        <MemberContributionActions
-                          contribution={contribution}
-                          loading={loading}
-                          onPay={onPay}
-                          onWaive={onWaive}
-                          onMarkOverdue={handleMarkOverdue}
-                          onCancel={handleCancel}
-                        />
-                      </div>
-                    </td>
+                          <MemberContributionActions
+                            contribution={contribution}
+                            loading={loading}
+                            onPay={onPay}
+                            onWaive={onWaive}
+                            onMarkOverdue={handleMarkOverdue}
+                            onCancel={handleCancel}
+                          />
+                        </div>
+                      </td>
+                    )}
                   </tr>
                 ))
               )}
@@ -5014,6 +5308,9 @@ const MemberContributionTable = ({
     </div>
   );
 };
+
+
+
 
 
 interface PaymentProviderTableProps {

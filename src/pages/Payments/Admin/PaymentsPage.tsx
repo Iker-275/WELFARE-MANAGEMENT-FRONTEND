@@ -1,4 +1,6 @@
 
+
+
 import { useCallback, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
@@ -15,6 +17,13 @@ import {
   PaymentFilters as PaymentFiltersType,
 } from "../../../types/PaymentType";
 
+const DEFAULT_FILTERS: PaymentFiltersType = {
+  page: 1,
+  // limit: 10,
+  sortBy: "createdAt",
+  sortOrder: "desc",
+};
+
 const AdminPaymentsPage = () => {
   const navigate = useNavigate();
 
@@ -27,45 +36,74 @@ const AdminPaymentsPage = () => {
     clearMessage,
   } = usePayments();
 
-  const [filters, setFilters] = useState<PaymentFiltersType>({
-    page: 1,
-    // limit: 10,
-    sortBy: "createdAt",
-    sortOrder: "desc",
-  });
+  const [filters, setFilters] = useState<PaymentFiltersType>(
+    DEFAULT_FILTERS,
+  );
+
+  // ============================================================
+  // LOAD PAYMENTS
+  // ============================================================
 
   const loadPayments = useCallback(async () => {
     await fetchPayments(filters);
   }, [filters, fetchPayments]);
 
   useEffect(() => {
-    loadPayments();
+    void loadPayments();
   }, [loadPayments]);
 
-  const handleFilterChange = (updatedFilters: PaymentFiltersType) => {
+  // ============================================================
+  // FILTERS
+  // ============================================================
+
+  const handleFilterChange = (
+    updatedFilters: PaymentFiltersType,
+  ) => {
     setFilters({
       ...updatedFilters,
       page: 1,
+      // limit: filters.limit ?? 10,
     });
   };
 
   const handleResetFilters = () => {
-    setFilters({
-      page: 1,
-      limit: 10,
-      sortBy: "createdAt",
-      sortOrder: "desc",
-    });
-
+    setFilters(DEFAULT_FILTERS);
     clearMessage();
   };
 
+  // ============================================================
+  // PAGINATION
+  // ============================================================
+
+  const currentPage = filters.page ?? 1;
+  const totalPages = pagination?.totalPages ?? 0;
+
   const handlePageChange = (page: number) => {
+    if (
+      page < 1 ||
+      page > totalPages ||
+      page === currentPage
+    ) {
+      return;
+    }
+
     setFilters((current) => ({
       ...current,
       page,
     }));
   };
+
+  const handlePreviousPage = () => {
+    handlePageChange(currentPage - 1);
+  };
+
+  const handleNextPage = () => {
+    handlePageChange(currentPage + 1);
+  };
+
+  // ============================================================
+  // PAGE
+  // ============================================================
 
   return (
     <>
@@ -77,6 +115,9 @@ const AdminPaymentsPage = () => {
       <PageBreadcrumb pageTitle="Payments Management" />
 
       <div className="space-y-6">
+
+        {/* PAGE HEADER */}
+
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div>
             <h2 className="text-lg font-semibold text-gray-800 dark:text-white">
@@ -97,6 +138,8 @@ const AdminPaymentsPage = () => {
           </button>
         </div>
 
+        {/* FILTERS */}
+
         <ComponentCard title="Filter Payments">
           <PaymentFilters
             filters={filters}
@@ -104,6 +147,8 @@ const AdminPaymentsPage = () => {
             onReset={handleResetFilters}
           />
         </ComponentCard>
+
+        {/* PAYMENT TABLE */}
 
         <ComponentCard title="Payment Records">
           <PaymentTable
@@ -116,22 +161,25 @@ const AdminPaymentsPage = () => {
             }
           />
 
+          {/* PAGINATION */}
+
           {pagination && pagination.totalPages > 0 && (
             <div className="mt-5 flex flex-wrap items-center justify-between gap-4">
+
               <p className="text-sm text-gray-500 dark:text-gray-400">
-                Showing page {pagination.page} of {pagination.totalPages}
+                Showing page {currentPage} of {totalPages}
                 {" "}({pagination.total} payments)
               </p>
 
               <div className="flex items-center gap-2">
+
                 <button
                   type="button"
                   disabled={
-                    loading || !pagination.hasPreviousPage
+                    loading ||
+                    currentPage <= 1
                   }
-                  onClick={() =>
-                    handlePageChange(pagination.page - 1)
-                  }
+                  onClick={handlePreviousPage}
                   className="rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-50 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-gray-800"
                 >
                   Previous
@@ -140,15 +188,15 @@ const AdminPaymentsPage = () => {
                 <button
                   type="button"
                   disabled={
-                    loading || !pagination.hasNextPage
+                    loading ||
+                    currentPage >= totalPages
                   }
-                  onClick={() =>
-                    handlePageChange(pagination.page + 1)
-                  }
+                  onClick={handleNextPage}
                   className="rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-50 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-gray-800"
                 >
                   Next
                 </button>
+
               </div>
             </div>
           )}
@@ -159,3 +207,4 @@ const AdminPaymentsPage = () => {
 };
 
 export default AdminPaymentsPage;
+

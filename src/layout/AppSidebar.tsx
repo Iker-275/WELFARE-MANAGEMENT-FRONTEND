@@ -104,6 +104,12 @@ const navItems: NavItem[] = [
      path: "/member-contributions",
    
   },
+  {
+    icon: <BoxCubeIcon />,
+    name: "My Contributions",
+     path: "/my-contributions",
+   
+  },
 
   {
     icon: <BoxCubeIcon />,

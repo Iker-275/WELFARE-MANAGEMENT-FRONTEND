@@ -1,4 +1,5 @@
 
+
 import {
   useCallback,
   useEffect,
@@ -24,6 +25,13 @@ import {
   MemberPaymentFilters as MemberPaymentFiltersType,
 } from "../../../types/PaymentType";
 
+const DEFAULT_FILTERS: MemberPaymentFiltersType = {
+  page: 1,
+  // limit: 10,
+  sortBy: "createdAt",
+  sortOrder: "desc",
+};
+
 const MemberPaymentsPage = () => {
   const navigate = useNavigate();
 
@@ -48,12 +56,9 @@ const MemberPaymentsPage = () => {
   const [pageLoading, setPageLoading] = useState(true);
   const [error, setError] = useState("");
 
-  const [filters, setFilters] = useState<MemberPaymentFiltersType>({
-    page: 1,
-    // limit: 10,
-    sortBy: "createdAt",
-    sortOrder: "desc",
-  });
+  const [filters, setFilters] = useState<MemberPaymentFiltersType>(
+    DEFAULT_FILTERS,
+  );
 
   // ============================================================
   // LOAD MEMBER
@@ -66,6 +71,8 @@ const MemberPaymentsPage = () => {
       return;
     }
 
+    let active = true;
+
     const loadMember = async () => {
       setPageLoading(true);
       setError("");
@@ -73,17 +80,27 @@ const MemberPaymentsPage = () => {
       try {
         const member = await fetchMemberByUserId(user.id);
 
+        if (!active) return;
+
         if (!member) {
           setError("Your member profile could not be found.");
         }
       } catch {
-        setError("Failed to load your member profile.");
+        if (active) {
+          setError("Failed to load your member profile.");
+        }
       } finally {
-        setPageLoading(false);
+        if (active) {
+          setPageLoading(false);
+        }
       }
     };
 
     void loadMember();
+
+    return () => {
+      active = false;
+    };
   }, [user?.id, fetchMemberByUserId]);
 
   // ============================================================
@@ -94,7 +111,11 @@ const MemberPaymentsPage = () => {
     if (!selectedMember?.id) return;
 
     await fetchMemberPayments(selectedMember.id, filters);
-  }, [selectedMember?.id, filters, fetchMemberPayments]);
+  }, [
+    selectedMember?.id,
+    filters,
+    fetchMemberPayments,
+  ]);
 
   useEffect(() => {
     if (selectedMember?.id) {
@@ -112,17 +133,12 @@ const MemberPaymentsPage = () => {
     setFilters({
       ...updatedFilters,
       page: 1,
+      limit: filters.limit ?? 10,
     });
   };
 
   const handleResetFilters = () => {
-    setFilters({
-      page: 1,
-      limit: 10,
-      sortBy: "createdAt",
-      sortOrder: "desc",
-    });
-
+    setFilters(DEFAULT_FILTERS);
     clearMessage();
   };
 
@@ -130,11 +146,26 @@ const MemberPaymentsPage = () => {
   // PAGINATION
   // ============================================================
 
+  const currentPage = filters.page ?? 1;
+  const totalPages = pagination?.totalPages ?? 0;
+
   const handlePageChange = (page: number) => {
+    if (page < 1 || page > totalPages || page === currentPage) {
+      return;
+    }
+
     setFilters((current) => ({
       ...current,
       page,
     }));
+  };
+
+  const handlePreviousPage = () => {
+    handlePageChange(currentPage - 1);
+  };
+
+  const handleNextPage = () => {
+    handlePageChange(currentPage + 1);
   };
 
   // ============================================================
@@ -208,6 +239,7 @@ const MemberPaymentsPage = () => {
       <PageBreadcrumb pageTitle="Member Payments" />
 
       <div className="space-y-6">
+
         {/* PAGE HEADER */}
 
         <div className="flex flex-wrap items-center justify-between gap-3">
@@ -224,7 +256,9 @@ const MemberPaymentsPage = () => {
           <button
             type="button"
             onClick={() =>
-              navigate(`/member-payments/${selectedMember.id}/payments/create`)
+              navigate(
+                `/member-payments/${selectedMember.id}/payments/create`,
+              )
             }
             className="rounded-lg bg-brand-500 px-5 py-2.5 text-sm font-medium text-white transition hover:bg-brand-600"
           >
@@ -260,21 +294,21 @@ const MemberPaymentsPage = () => {
 
           {pagination && pagination.totalPages > 0 && (
             <div className="mt-5 flex flex-wrap items-center justify-between gap-4">
+
               <p className="text-sm text-gray-500 dark:text-gray-400">
-                Showing page {pagination.page} of {pagination.totalPages}
+                Showing page {currentPage} of {totalPages}
                 {" "}({pagination.total} payments)
               </p>
 
               <div className="flex items-center gap-2">
+
                 <button
                   type="button"
                   disabled={
                     paymentLoading ||
-                    !pagination.hasPreviousPage
+                    currentPage <= 1
                   }
-                  onClick={() =>
-                    handlePageChange(pagination.page - 1)
-                  }
+                  onClick={handlePreviousPage}
                   className="rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-50 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-gray-800"
                 >
                   Previous
@@ -284,15 +318,14 @@ const MemberPaymentsPage = () => {
                   type="button"
                   disabled={
                     paymentLoading ||
-                    !pagination.hasNextPage
+                    currentPage >= totalPages
                   }
-                  onClick={() =>
-                    handlePageChange(pagination.page + 1)
-                  }
+                  onClick={handleNextPage}
                   className="rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-50 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-gray-800"
                 >
                   Next
                 </button>
+
               </div>
             </div>
           )}
@@ -303,3 +336,4 @@ const MemberPaymentsPage = () => {
 };
 
 export default MemberPaymentsPage;
+

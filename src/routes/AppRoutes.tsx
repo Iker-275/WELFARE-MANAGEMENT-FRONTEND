@@ -77,6 +77,7 @@ import MemberPaymentDetailsPage from "../pages/Payments/Member/MemberPaymentDeta
 import AdminPaymentsPage from "../pages/Payments/Admin/PaymentsPage";
 import CreateAdminPaymentPage from "../pages/Payments/Admin/CreatePaymentPage";
 import AdminPaymentDetailsPage from "../pages/Payments/Admin/PaymentDetailsPage";
+import MyContributionsPage from "../pages/MemberContributionPages/MEMBER/MyContributionsPage";
 
 
 
@@ -203,6 +204,11 @@ const AppRoutes = () => {
             <Route
               path="/member-contributions"
               element={<MemberContributionsPage />}
+            />
+
+            <Route
+              path="/my-contributions"
+              element={<MyContributionsPage />}
             />
 
             <Route
