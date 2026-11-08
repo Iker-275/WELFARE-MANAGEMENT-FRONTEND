@@ -141,6 +141,19 @@ const navItems: NavItem[] = [
    
   },
 
+  {
+    icon: <BoxCubeIcon />,
+    name: "Member Statements",
+     path: "/member-statements",
+   
+  },
+   {
+    icon: <BoxCubeIcon />,
+    name: "My Statement",
+     path: "/my-statement",
+   
+  },
+
 
  
   {

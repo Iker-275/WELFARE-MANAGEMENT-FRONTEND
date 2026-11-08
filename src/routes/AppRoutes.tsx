@@ -90,6 +90,8 @@ import PenaltyAdjustmentPage from "../pages/PenaltyAdjustmentPages/PenaltyAdjust
 import PenaltyAdjustmentDetailsPage from "../pages/PenaltyAdjustmentPages/PenaltyAdjustmentDetailsPage";
 import ReceiptsPage from "../pages/ReceiptPages/ReceiptsPage";
 import ReceiptDetailPage from "../pages/ReceiptPages/ReceiptDetailPage";
+import AdminMemberStatementPage from "../pages/MemberStatementPages/AdminMemberStatementPage";
+import MyMemberStatementPage from "../pages/MemberStatementPages/MyMemberStatementPage";
 
 
 
@@ -327,6 +329,18 @@ const AppRoutes = () => {
 
             <Route path="/receipts" element={<ReceiptsPage />} />
             <Route path="/receipts/:id" element={<ReceiptDetailPage />} />
+
+            {/* statements */}
+
+            <Route
+              path="/member-statements"
+              element={<AdminMemberStatementPage />}
+            />
+
+            <Route
+              path="/my-statement"
+              element={<MyMemberStatementPage />}
+            />
 
             {/* <Route path="/notifications/create" element={<CreateNotification />} />
             <Route path="/notifications" element={<NotificationsPage />} /> */}
