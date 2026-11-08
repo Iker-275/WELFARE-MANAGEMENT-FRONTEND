@@ -6269,6 +6269,441 @@ const PenaltyTable = ({
 };
 
 
+import { PenaltyAdjustment } from "../../../types/PenaltyAdjustmentType";
+
+interface PenaltyAdjustmentTableProps {
+  adjustments: PenaltyAdjustment[];
+  loading?: boolean;
+  onView?: (adjustment: PenaltyAdjustment) => void;
+  onApprove?: (adjustment: PenaltyAdjustment) => void;
+  showPenalty?: boolean;
+  showActions?: boolean;
+}
+
+const formatAmountAd = (
+  amount: string | number,
+  currency?: string,
+) => {
+  const numericAmount = Number(amount);
+
+  if (!Number.isFinite(numericAmount)) {
+    return `${currency || ""} ${amount}`;
+  }
+
+  return `${currency ? `${currency} ` : ""}${numericAmount.toLocaleString(
+    undefined,
+    {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    },
+  )}`;
+};
+
+const formatDateAd = (date?: string | null) => {
+  if (!date) return "—";
+
+  const parsedDate = new Date(date);
+
+  if (Number.isNaN(parsedDate.getTime())) return "—";
+
+  return parsedDate.toLocaleDateString(undefined, {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+  });
+};
+
+const getUserName = (
+  user?: PenaltyAdjustment["createdBy"],
+) => {
+  if (!user) return "—";
+
+  return `${user.firstName} ${user.lastName}`.trim();
+};
+
+const getTypeLabel = (type: string) => {
+  switch (type) {
+    case "WAIVER":
+      return "Waiver";
+    case "REDUCTION":
+      return "Reduction";
+    case "INCREASE":
+      return "Increase";
+    default:
+      return type;
+  }
+};
+
+const PenaltyAdjustmentTable = ({
+  adjustments,
+  loading = false,
+  onView,
+  onApprove,
+  showPenalty = true,
+  showActions = true,
+}: PenaltyAdjustmentTableProps) => {
+  if (loading) {
+    return (
+      <div className="py-10 text-center text-sm text-gray-500 dark:text-gray-400">
+        Loading penalty adjustments...
+      </div>
+    );
+  }
+
+  if (!adjustments.length) {
+    return (
+      <div className="py-10 text-center text-sm text-gray-500 dark:text-gray-400">
+        No penalty adjustments found.
+      </div>
+    );
+  }
+
+  return (
+    <div className="max-w-full overflow-x-auto">
+      <table className="w-full min-w-[1000px]">
+        <thead>
+          <tr className="border-b border-gray-100 dark:border-gray-800">
+            <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400">
+              Adjustment
+            </th>
+
+            {showPenalty && (
+              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400">
+                Penalty
+              </th>
+            )}
+
+            <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400">
+              Type
+            </th>
+
+            <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400">
+              Amount
+            </th>
+
+            <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400">
+              Requested By
+            </th>
+
+            <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400">
+              Approval
+            </th>
+
+            <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400">
+              Created
+            </th>
+
+            {showActions && (
+              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400">
+                Actions
+              </th>
+            )}
+          </tr>
+        </thead>
+
+        <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
+          {adjustments.map((adjustment) => {
+            const approved = Boolean(adjustment.approvedById);
+
+            return (
+              <tr
+                key={adjustment.id}
+                className="hover:bg-gray-50 dark:hover:bg-gray-900"
+              >
+                <td className="px-4 py-4">
+                  <div className="max-w-[220px]">
+                    <p className="text-sm font-medium text-gray-800 dark:text-white/90">
+                      {adjustment.id}
+                    </p>
+
+                    <p className="mt-1 truncate text-xs text-gray-500 dark:text-gray-400">
+                      {adjustment.reason}
+                    </p>
+                  </div>
+                </td>
+
+                {showPenalty && (
+                  <td className="px-4 py-4">
+                    <div className="text-sm text-gray-700 dark:text-gray-300">
+                      {adjustment.penaltyId}
+                    </div>
+
+                    {adjustment.penalty && (
+                      <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                        {adjustment.penalty.currency}{" "}
+                        {formatAmountAd(
+                          adjustment.penalty.amount,
+                        )}
+                      </p>
+                    )}
+                  </td>
+                )}
+
+                <td className="px-4 py-4">
+                  <span className="inline-flex rounded-full bg-gray-100 px-2.5 py-1 text-xs font-medium text-gray-700 dark:bg-gray-800 dark:text-gray-300">
+                    {getTypeLabel(adjustment.type)}
+                  </span>
+                </td>
+
+                <td className="px-4 py-4 text-sm font-medium text-gray-800 dark:text-white/90">
+                  {formatAmountAd(
+                    adjustment.amount,
+                    adjustment.penalty?.currency,
+                  )}
+                </td>
+
+                <td className="px-4 py-4">
+                  <p className="text-sm text-gray-700 dark:text-gray-300">
+                    {getUserName(adjustment.createdBy)}
+                  </p>
+
+                  <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                    {adjustment.createdBy?.email || "—"}
+                  </p>
+                </td>
+
+                <td className="px-4 py-4">
+                  {approved ? (
+                    <>
+                      <span className="inline-flex rounded-full bg-success-50 px-2.5 py-1 text-xs font-medium text-success-700 dark:bg-success-500/10 dark:text-success-400">
+                        Approved
+                      </span>
+
+                      <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                        {getUserName(adjustment.approvedBy)}
+                      </p>
+                    </>
+                  ) : (
+                    <span className="inline-flex rounded-full bg-warning-50 px-2.5 py-1 text-xs font-medium text-warning-700 dark:bg-warning-500/10 dark:text-warning-400">
+                      Pending
+                    </span>
+                  )}
+                </td>
+
+                <td className="px-4 py-4 text-sm text-gray-600 dark:text-gray-400">
+                  {formatDate(adjustment.createdAt)}
+                </td>
+
+                {showActions && (
+                  <td className="px-4 py-4">
+                    <div className="flex items-center gap-3">
+                      {onView && (
+                        <button
+                          type="button"
+                          onClick={() => onView(adjustment)}
+                          className="text-sm font-medium text-brand-500 hover:text-brand-600"
+                        >
+                          View
+                        </button>
+                      )}
+
+                      {!approved && onApprove && (
+                        <button
+                          type="button"
+                          onClick={() => onApprove(adjustment)}
+                          className="text-sm font-medium text-success-600 hover:text-success-700"
+                        >
+                          Approve
+                        </button>
+                      )}
+                    </div>
+                  </td>
+                )}
+              </tr>
+            );
+          })}
+        </tbody>
+      </table>
+    </div>
+  );
+};
+
+
+import { Receipt } from "../../../types/ReceiptType";
+
+interface ReceiptTableProps {
+  receipts: Receipt[];
+  loading?: boolean;
+  onView: (receipt: Receipt) => void;
+  onPreviewPdf: (receipt: Receipt) => void;
+  onVoid: (receipt: Receipt) => void;
+}
+
+const formatAmountR = (amount: string | number, currency: string) => {
+  const numericAmount = Number(amount);
+
+  if (!Number.isFinite(numericAmount)) {
+    return `${currency} ${amount}`;
+  }
+
+  return `${currency} ${numericAmount.toLocaleString()}`;
+};
+
+const formatDateR = (date: string) => {
+  const parsedDate = new Date(date);
+
+  if (Number.isNaN(parsedDate.getTime())) {
+    return "—";
+  }
+
+  return parsedDate.toLocaleDateString();
+};
+
+const getStatusStyles = (status: string) => {
+  switch (status) {
+    case "GENERATED":
+      return "bg-green-100 text-green-700";
+
+    case "VOIDED":
+      return "bg-red-100 text-red-700";
+
+    default:
+      return "bg-gray-100 text-gray-700";
+  }
+};
+
+const ReceiptTable = ({
+  receipts,
+  loading = false,
+  onView,
+  onPreviewPdf,
+  onVoid,
+}: ReceiptTableProps) => {
+  if (loading) {
+    return (
+      <div className="py-10 text-center text-gray-500 dark:text-gray-400">
+        Loading receipts...
+      </div>
+    );
+  }
+
+  if (!receipts.length) {
+    return (
+      <div className="py-10 text-center text-gray-500 dark:text-gray-400">
+        No receipts found.
+      </div>
+    );
+  }
+
+  return (
+    <div className="overflow-x-auto">
+      <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+        <thead className="bg-gray-50 dark:bg-gray-800">
+          <tr>
+            <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
+              Receipt Number
+            </th>
+
+            <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
+              Member
+            </th>
+
+            <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
+              Payment Reference
+            </th>
+
+            <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
+              Amount
+            </th>
+
+            <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
+              Status
+            </th>
+
+            <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
+              Issued Date
+            </th>
+
+            <th className="px-4 py-3 text-right text-xs font-medium uppercase tracking-wider text-gray-500">
+              Actions
+            </th>
+          </tr>
+        </thead>
+
+        <tbody className="divide-y divide-gray-200 bg-white dark:divide-gray-700 dark:bg-gray-900">
+          {receipts.map((receipt) => {
+            const member = receipt.payment?.member;
+            const memberName = member?.user
+              ? `${member.user.firstName} ${member.user.lastName}`
+              : "—";
+
+            return (
+              <tr
+                key={receipt.id}
+                className="hover:bg-gray-50 dark:hover:bg-gray-800"
+              >
+                <td className="whitespace-nowrap px-4 py-4 text-sm font-medium text-gray-800 dark:text-white">
+                  {receipt.receiptNumber}
+                </td>
+
+                <td className="px-4 py-4 text-sm text-gray-600 dark:text-gray-300">
+                  <div>{member?.membershipNumber || "—"}</div>
+                  {memberName !== "—" && (
+                    <div className="text-xs text-gray-400">
+                      {memberName}
+                    </div>
+                  )}
+                </td>
+
+                <td className="whitespace-nowrap px-4 py-4 text-sm text-gray-600 dark:text-gray-300">
+                  {receipt.payment?.internalReference || receipt.paymentId}
+                </td>
+
+                <td className="whitespace-nowrap px-4 py-4 text-sm text-gray-800 dark:text-white">
+                  {formatAmountR(receipt.amount, receipt.currency)}
+                </td>
+
+                <td className="whitespace-nowrap px-4 py-4">
+                  <span
+                    className={`inline-flex rounded-full px-2.5 py-1 text-xs font-medium ${getStatusStyles(
+                      receipt.status
+                    )}`}
+                  >
+                    {receipt.status}
+                  </span>
+                </td>
+
+                <td className="whitespace-nowrap px-4 py-4 text-sm text-gray-600 dark:text-gray-300">
+                  {formatDateR(receipt.issuedAt)}
+                </td>
+
+                <td className="whitespace-nowrap px-4 py-4 text-right">
+                  <div className="flex items-center justify-end gap-2">
+                    <button
+                      type="button"
+                      onClick={() => onView(receipt)}
+                      className="text-sm font-medium text-brand-500 hover:text-brand-600"
+                    >
+                      View
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => onPreviewPdf(receipt)}
+                      className="text-sm font-medium text-blue-600 hover:text-blue-700"
+                    >
+                      PDF
+                    </button>
+
+                    {receipt.status === "GENERATED" && (
+                      <button
+                        type="button"
+                        onClick={() => onVoid(receipt)}
+                        className="text-sm font-medium text-red-600 hover:text-red-700"
+                      >
+                        Void
+                      </button>
+                    )}
+                  </div>
+                </td>
+              </tr>
+            );
+          })}
+        </tbody>
+      </table>
+    </div>
+  );
+};
 
 
 
@@ -6280,4 +6715,10 @@ const PenaltyTable = ({
 
 
 
-export {PenaltyTable,PenaltyRuleTable,PaymentTable, PaymentProviderTable , RolesTable,  MenuTable, StatusTable, OrdersTable,CustomersTable, PermissionsTable,RegionsTable ,RegionMembersTable,MembersTable,UsersTable,ImportsTable, ContributionPlansTable,ContributionRuleTable,ContributionPeriodTable,MemberContributionTable}; 
+
+
+
+
+
+
+export { ReceiptTable,PenaltyAdjustmentTable,PenaltyTable,PenaltyRuleTable,PaymentTable, PaymentProviderTable , RolesTable,  MenuTable, StatusTable, OrdersTable,CustomersTable, PermissionsTable,RegionsTable ,RegionMembersTable,MembersTable,UsersTable,ImportsTable, ContributionPlansTable,ContributionRuleTable,ContributionPeriodTable,MemberContributionTable}; 

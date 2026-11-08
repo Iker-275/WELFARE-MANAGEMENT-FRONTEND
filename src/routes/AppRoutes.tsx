@@ -85,6 +85,11 @@ import AdminPenaltiesPage from "../pages/PenaltiesPages/ADMIN/PenaltiesPage";
 import MyPenaltiesPage from "../pages/PenaltiesPages/MEMBER/MyPenaltiesPage";
 import CreatePenaltyPage from "../pages/PenaltiesPages/ADMIN/CreatePenaltyPage";
 import PenaltyDetailsPage from "../pages/PenaltiesPages/ADMIN/PenaltyDetailsPage";
+import CreatePenaltyAdjustmentPage from "../pages/PenaltyAdjustmentPages/CreatePenaltyAdjustmentPage";
+import PenaltyAdjustmentPage from "../pages/PenaltyAdjustmentPages/PenaltyAdjustmentPage";
+import PenaltyAdjustmentDetailsPage from "../pages/PenaltyAdjustmentPages/PenaltyAdjustmentDetailsPage";
+import ReceiptsPage from "../pages/ReceiptPages/ReceiptsPage";
+import ReceiptDetailPage from "../pages/ReceiptPages/ReceiptDetailPage";
 
 
 
@@ -300,6 +305,28 @@ const AppRoutes = () => {
             <Route path="/penalties/create" element={<CreatePenaltyPage />} />
             <Route path="/my-penalties" element={<MyPenaltiesPage />} />
             <Route path="/penalties/:id" element={<PenaltyDetailsPage />} />
+
+
+            {/* penalty adjustment */}
+            <Route
+              path="/penalty-adjustments/create"
+              element={<CreatePenaltyAdjustmentPage />}
+            />
+
+            <Route
+              path="/penalty-adjustments"
+              element={<PenaltyAdjustmentPage />}
+            />
+
+            <Route
+              path="/penalty-adjustments/:id"
+              element={<PenaltyAdjustmentDetailsPage />}
+            />
+
+            {/* receipt pages */}
+
+            <Route path="/receipts" element={<ReceiptsPage />} />
+            <Route path="/receipts/:id" element={<ReceiptDetailPage />} />
 
             {/* <Route path="/notifications/create" element={<CreateNotification />} />
             <Route path="/notifications" element={<NotificationsPage />} /> */}

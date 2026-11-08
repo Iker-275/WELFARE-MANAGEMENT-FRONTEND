@@ -1,4 +1,5 @@
 
+
 import { FormEvent, useCallback, useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 
@@ -7,8 +8,10 @@ import PageBreadcrumb from "../../../components/common/PageBreadCrumb";
 import ComponentCard from "../../../components/common/ComponentCard";
 
 import PaymentStatusTracker from "../../../components/customComponents/PaymentStatusTracker";
+import PdfPreviewModal from "../../../components/customComponents/PDFPreview";
 
 import { usePayments } from "../../../hooks/usePayments";
+import { useReceiptContext } from "../../../hooks/useReceipts";
 
 import {
   Payment,
@@ -61,6 +64,7 @@ const DetailItem = ({
 }) => (
   <div>
     <p className="text-sm text-gray-500 dark:text-gray-400">{label}</p>
+
     <p className="mt-1 break-words font-medium text-gray-800 dark:text-white">
       {value === null || value === undefined || value === ""
         ? "—"
@@ -82,6 +86,8 @@ const AdminPaymentDetailsPage = () => {
     clearMessage,
   } = usePayments();
 
+  const { fetchReceiptPdf } = useReceiptContext();
+
   const [payment, setPayment] = useState<Payment | null>(null);
   const [paymentStatus, setPaymentStatus] = useState<PaymentStatus | null>(
     null,
@@ -90,6 +96,11 @@ const AdminPaymentDetailsPage = () => {
   const [externalReference, setExternalReference] = useState("");
   const [notes, setNotes] = useState("");
   const [showManualCompletion, setShowManualCompletion] = useState(false);
+
+  // Receipt PDF preview state
+  const [receiptPdfUrl, setReceiptPdfUrl] = useState<string | null>(null);
+  const [receiptPdfOpen, setReceiptPdfOpen] = useState(false);
+  const [receiptPdfLoading, setReceiptPdfLoading] = useState(false);
 
   const loadPayment = useCallback(async () => {
     if (!paymentId) return;
@@ -115,6 +126,41 @@ const AdminPaymentDetailsPage = () => {
     }
   }, [selectedPayment, paymentId]);
 
+  // Revoke the generated PDF URL when it changes or the page unmounts.
+  useEffect(() => {
+    return () => {
+      if (receiptPdfUrl) {
+        URL.revokeObjectURL(receiptPdfUrl);
+      }
+    };
+  }, [receiptPdfUrl]);
+
+  const handlePreviewReceiptPdf = async () => {
+    const receiptId = payment?.receipt?.id;
+
+    if (!receiptId) return;
+
+    setReceiptPdfLoading(true);
+
+    try {
+      const blob = await fetchReceiptPdf(receiptId);
+
+      if (!blob) return;
+
+      const url = URL.createObjectURL(blob);
+
+      setReceiptPdfUrl(url);
+      setReceiptPdfOpen(true);
+    } finally {
+      setReceiptPdfLoading(false);
+    }
+  };
+
+  const handleCloseReceiptPdf = () => {
+    setReceiptPdfOpen(false);
+    setReceiptPdfUrl(null);
+  };
+
   const handleStatusChange = useCallback(
     async (status: PaymentStatus) => {
       setPaymentStatus(status);
@@ -130,13 +176,16 @@ const AdminPaymentDetailsPage = () => {
 
         if (latestPayment) {
           setPayment(latestPayment);
+          setPaymentStatus(latestPayment.status);
         }
       }
     },
     [paymentId, fetchPayment],
   );
 
-  const handleManualCompletion = async (event: FormEvent<HTMLFormElement>) => {
+  const handleManualCompletion = async (
+    event: FormEvent<HTMLFormElement>,
+  ) => {
     event.preventDefault();
 
     if (!payment) return;
@@ -153,6 +202,7 @@ const AdminPaymentDetailsPage = () => {
       setExternalReference("");
       setNotes("");
 
+      // Reload payment so the newly issued receipt is included.
       const latestPayment = await fetchPayment(payment.id);
 
       if (latestPayment) {
@@ -169,6 +219,7 @@ const AdminPaymentDetailsPage = () => {
           title="Payment Details"
           description="View payment information"
         />
+
         <PageBreadcrumb pageTitle="Payment Details" />
 
         <ComponentCard title="Payment Details">
@@ -187,6 +238,7 @@ const AdminPaymentDetailsPage = () => {
           title="Payment Details"
           description="View payment information"
         />
+
         <PageBreadcrumb pageTitle="Payment Details" />
 
         <ComponentCard title="Payment Not Found">
@@ -564,44 +616,90 @@ const AdminPaymentDetailsPage = () => {
 
         <ComponentCard title="Payment Receipt">
           {payment.receipt ? (
-            <div className="grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-3">
-              <DetailItem
-                label="Receipt Number"
-                value={payment.receipt.receiptNumber}
-              />
+            <div className="space-y-5">
+              <div className="grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-3">
+                <DetailItem
+                  label="Receipt Number"
+                  value={payment.receipt.receiptNumber}
+                />
 
-              <DetailItem
-                label="Amount"
-                value={formatAmount(
-                  payment.receipt.amount,
-                  payment.receipt.currency,
-                )}
-              />
+                <DetailItem
+                  label="Amount"
+                  value={formatAmount(
+                    payment.receipt.amount,
+                    payment.receipt.currency,
+                  )}
+                />
 
-              <DetailItem
-                label="Receipt Status"
-                value={formatStatus(payment.receipt.status)}
-              />
+                <DetailItem
+                  label="Receipt Status"
+                  value={formatStatus(payment.receipt.status)}
+                />
 
-              <DetailItem
-                label="Issued At"
-                value={formatDate(payment.receipt.issuedAt)}
-              />
+                <DetailItem
+                  label="Issued At"
+                  value={formatDate(payment.receipt.issuedAt)}
+                />
 
-              <DetailItem
-                label="Voided At"
-                value={formatDate(payment.receipt.voidedAt)}
-              />
+                <DetailItem
+                  label="Voided At"
+                  value={formatDate(payment.receipt.voidedAt)}
+                />
 
-              <DetailItem
-                label="Void Reason"
-                value={payment.receipt.voidReason}
-              />
+                <DetailItem
+                  label="Void Reason"
+                  value={payment.receipt.voidReason}
+                />
+              </div>
+
+              {payment.receipt.id && (
+                <div className="flex justify-end border-t border-gray-200 pt-4 dark:border-gray-700">
+                  <button
+                    type="button"
+                    onClick={handlePreviewReceiptPdf}
+                    disabled={receiptPdfLoading}
+                    className="inline-flex items-center gap-2 rounded-lg bg-brand-500 px-5 py-2.5 text-sm font-medium text-white hover:bg-brand-600 disabled:cursor-not-allowed disabled:opacity-50"
+                  >
+                    {receiptPdfLoading ? (
+                      <>
+                        <span className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
+                        Loading Receipt...
+                      </>
+                    ) : (
+                      <>
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="1.8"
+                          className="h-5 w-5"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            d="M2.25 12s3.5-7.5 9.75-7.5 9.75 7.5 9.75 7.5-3.5 7.5-9.75 7.5S2.25 12 2.25 12Z"
+                          />
+                          <circle cx="12" cy="12" r="3" />
+                        </svg>
+                        Preview Receipt PDF
+                      </>
+                    )}
+                  </button>
+                </div>
+              )}
             </div>
           ) : (
-            <p className="text-sm text-gray-500 dark:text-gray-400">
-              No receipt has been issued for this payment.
-            </p>
+            <div className="rounded-lg border border-dashed border-gray-300 p-5 text-center dark:border-gray-700">
+              <p className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                No receipt has been issued for this payment.
+              </p>
+
+              <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                A receipt will appear here after the payment has been
+                successfully completed and a receipt has been issued.
+              </p>
+            </div>
           )}
         </ComponentCard>
 
@@ -616,6 +714,13 @@ const AdminPaymentDetailsPage = () => {
           </button>
         </div>
       </div>
+
+      {/* Receipt PDF Preview Modal */}
+      <PdfPreviewModal
+        open={receiptPdfOpen}
+        url={receiptPdfUrl}
+        onClose={handleCloseReceiptPdf}
+      />
     </>
   );
 };

@@ -80,29 +80,39 @@ const navItems: NavItem[] = [
    
   },
   {
-    icon: <BoxCubeIcon />,
-    name: "Contribution Plans",
-     path: "/contribution-plans",
-   
-  },
-  {
-    icon: <BoxCubeIcon />,
-    name: "Contribution Rules",
-     path: "/contribution-rules",
-   
-  },
-  {
-    icon: <BoxCubeIcon />,
-    name: "Contribution Periods",
-     path: "/contribution-periods",
-   
-  },
+    icon: <GridIcon />,
+    name: "Contributions",
+     path: "/",
 
+     subItems: [
+      { name: "Contribution Plans", path: "/contribution-plans", pro: false },
+      { name: "Contribution Rules", path: "/contribution-rules", pro: false },
+       { name: "Contribution Periods", path: "/contribution-periods", pro: false },
+       { name: "Member Contributions", path: "/member-contributions", pro: false },
+
+    ],
+  },
+  
   {
-    icon: <BoxCubeIcon />,
-    name: "Member Contributions",
-     path: "/member-contributions",
-   
+    icon: <GridIcon />,
+    name: "Payments",
+     path: "/",
+
+     subItems: [
+      { name: "Payment Providers", path: "/payment-providers", pro: false },
+      { name: "Payments", path: "/payments", pro: false },
+    ],
+  },
+  {
+    icon: <GridIcon />,
+    name: "Penalty",
+     path: "/",
+
+     subItems: [
+      { name: "Penalty Rules", path: "/penalty-rules", pro: false },
+      { name: "Penalties", path: "/penalties", pro: false },
+      { name: "Penalty Adjustments", path: "/penalty-adjustments", pro: false },
+    ],
   },
   {
     icon: <BoxCubeIcon />,
@@ -110,62 +120,28 @@ const navItems: NavItem[] = [
      path: "/my-contributions",
    
   },
-
-  {
-    icon: <BoxCubeIcon />,
-    name: "Payment Providers",
-     path: "/payment-providers",
-   
-  },
-
    {
     icon: <BoxCubeIcon />,
-    name: "Member Payments",
+    name: "My Payments",
      path: "/member-payments",
    
   },
-   {
-    icon: <BoxCubeIcon />,
-    name: "Payments",
-     path: "/payments",
-   
-  },
-  {
-    icon: <BoxCubeIcon />,
-    name: "Penalty Rules",
-     path: "/penalty-rules",
-   
-  },
-  {
-    icon: <BoxCubeIcon />,
-    name: "Penalties",
-     path: "/penalties",
-   
-  },
+ 
    {
     icon: <BoxCubeIcon />,
     name: "My Penalties",
      path: "/my-penalties",
    
   },
+  
+  {
+    icon: <BoxCubeIcon />,
+    name: "Receipts",
+     path: "/receipts",
+   
+  },
 
 
- 
-  
-  
-  // {
-  //   icon: <BoxCubeIcon />,
-  //   name: "Orders",
-  //    path: "/orders",
-   
-  // },
-  //  {
-  //   icon: <BoxCubeIcon />,
-  //   name: "Order Status",
-  //    path: "/order-status",
-   
-  // },
- 
  
   {
     icon: <MailIcon />,
