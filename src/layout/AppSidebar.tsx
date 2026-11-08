@@ -130,6 +130,24 @@ const navItems: NavItem[] = [
      path: "/payments",
    
   },
+  {
+    icon: <BoxCubeIcon />,
+    name: "Penalty Rules",
+     path: "/penalty-rules",
+   
+  },
+  {
+    icon: <BoxCubeIcon />,
+    name: "Penalties",
+     path: "/penalties",
+   
+  },
+   {
+    icon: <BoxCubeIcon />,
+    name: "My Penalties",
+     path: "/my-penalties",
+   
+  },
 
 
  

@@ -78,6 +78,13 @@ import AdminPaymentsPage from "../pages/Payments/Admin/PaymentsPage";
 import CreateAdminPaymentPage from "../pages/Payments/Admin/CreatePaymentPage";
 import AdminPaymentDetailsPage from "../pages/Payments/Admin/PaymentDetailsPage";
 import MyContributionsPage from "../pages/MemberContributionPages/MEMBER/MyContributionsPage";
+import PenaltyRulePage from "../pages/PenaltyRulePages/PenaltyRulePage";
+import PenaltyRuleCreate from "../pages/PenaltyRulePages/PenaltyRuleCreate";
+import PenaltyRuleDetails from "../pages/PenaltyRulePages/PenaltyRuleDetails";
+import AdminPenaltiesPage from "../pages/PenaltiesPages/ADMIN/PenaltiesPage";
+import MyPenaltiesPage from "../pages/PenaltiesPages/MEMBER/MyPenaltiesPage";
+import CreatePenaltyPage from "../pages/PenaltiesPages/ADMIN/CreatePenaltyPage";
+import PenaltyDetailsPage from "../pages/PenaltiesPages/ADMIN/PenaltyDetailsPage";
 
 
 
@@ -268,6 +275,32 @@ const AppRoutes = () => {
               path="/payments/:paymentId"
               element={<AdminPaymentDetailsPage />}
             />
+            {/* penalty rule */}
+
+
+            {/* // Penalty Rules */}
+            <Route
+              path="/penalty-rules"
+              element={<PenaltyRulePage />}
+            />
+
+            <Route
+              path="/penalty-rules/create"
+              element={<PenaltyRuleCreate />}
+            />
+
+            <Route
+              path="/penalty-rules/:penaltyRuleId"
+              element={<PenaltyRuleDetails />}
+            />
+
+            {/* penalty pages */}
+            {/* Penalties */}
+            <Route path="/penalties" element={<AdminPenaltiesPage />} />
+            <Route path="/penalties/create" element={<CreatePenaltyPage />} />
+            <Route path="/my-penalties" element={<MyPenaltiesPage />} />
+            <Route path="/penalties/:id" element={<PenaltyDetailsPage />} />
+
             {/* <Route path="/notifications/create" element={<CreateNotification />} />
             <Route path="/notifications" element={<NotificationsPage />} /> */}
 

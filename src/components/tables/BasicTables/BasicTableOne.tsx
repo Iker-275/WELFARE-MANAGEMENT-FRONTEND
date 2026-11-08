@@ -5708,6 +5708,565 @@ const PaymentTable = ({
 };
 
 
+import type { PenaltyRule } from "../../../types/PenaltyRuleType";
+
+interface PenaltyRuleTableProps {
+  penaltyRules: PenaltyRule[];
+  loading?: boolean;
+  message?: string | null;
+  onView?: (penaltyRule: PenaltyRule) => void;
+  onActivate?: (penaltyRule: PenaltyRule) => void;
+  onDeactivate?: (penaltyRule: PenaltyRule) => void;
+}
+
+const formatLabel = (value?: string | null): string => {
+  if (!value) return "—";
+
+  return value
+    .replace(/_/g, " ")
+    .toLowerCase()
+    .replace(/\b\w/g, (character) => character.toUpperCase());
+};
+
+const formatAmountP = (
+  value: string | number | null | undefined
+): string => {
+  if (value === null || value === undefined || value === "") {
+    return "—";
+  }
+
+  const amount = Number(value);
+
+  return Number.isNaN(amount)
+    ? String(value)
+    : amount.toLocaleString();
+};
+
+
+
+const getPenaltyValue = (penaltyRule: PenaltyRule): string => {
+  switch (penaltyRule.penaltyType) {
+    case "FIXED":
+      return formatAmountP(penaltyRule.fixedAmount);
+
+    case "PERCENTAGE":
+      return penaltyRule.percentage !== null &&
+        penaltyRule.percentage !== undefined
+        ? `${formatAmountP(penaltyRule.percentage)}%`
+        : "—";
+
+    case "TIERED":
+      return `${penaltyRule.tiers?.length ?? 0} tier(s)`;
+
+    default:
+      return "—";
+  }
+};
+
+const getScopeNameP = (penaltyRule: PenaltyRule): string => {
+  switch (penaltyRule.scopeType) {
+    case "GLOBAL":
+      return "Global";
+
+    case "REGION":
+      return penaltyRule.region?.name || "Region";
+
+    case "BRANCH":
+      return penaltyRule.branch?.name || "Branch";
+
+    case "CHAPTER":
+      return penaltyRule.chapter?.name || "Chapter";
+
+    case "GROUP":
+      return penaltyRule.group?.name || "Group";
+
+    case "MEMBER":
+      return (
+        penaltyRule.member?.membershipNumber || "Individual Member"
+      );
+
+    default:
+      return formatLabel(penaltyRule.scopeType);
+  }
+};
+
+const PenaltyRuleTable = ({
+  penaltyRules,
+  loading = false,
+  message,
+  onView,
+  onActivate,
+  onDeactivate,
+}: PenaltyRuleTableProps) => {
+  const hasActions = Boolean(
+    onView || onActivate || onDeactivate
+  );
+
+  return (
+    <div className="overflow-hidden rounded-xl border border-gray-200 bg-white dark:border-gray-800 dark:bg-white/[0.03]">
+      <div className="max-w-full overflow-x-auto">
+        <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-800">
+          <thead className="bg-gray-50 dark:bg-white/[0.02]">
+            <tr>
+              <th className="px-5 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">
+                Penalty Rule
+              </th>
+
+              <th className="px-5 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">
+                Contribution Plan
+              </th>
+
+              <th className="px-5 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">
+                Type
+              </th>
+
+              <th className="px-5 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">
+                Value
+              </th>
+
+              <th className="px-5 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">
+                Scope
+              </th>
+
+              <th className="px-5 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">
+                Grace Period
+              </th>
+
+              <th className="px-5 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">
+                Effective From
+              </th>
+
+              <th className="px-5 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">
+                Status
+              </th>
+
+              {hasActions && (
+                <th className="px-5 py-3 text-right text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">
+                  Actions
+                </th>
+              )}
+            </tr>
+          </thead>
+
+          <tbody className="divide-y divide-gray-200 dark:divide-gray-800">
+            {loading ? (
+              <tr>
+                <td
+                  colSpan={hasActions ? 9 : 8}
+                  className="px-5 py-10 text-center text-sm text-gray-500 dark:text-gray-400"
+                >
+                  Loading penalty rules...
+                </td>
+              </tr>
+            ) : penaltyRules.length === 0 ? (
+              <tr>
+                <td
+                  colSpan={hasActions ? 9 : 8}
+                  className="px-5 py-10 text-center"
+                >
+                  <p className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                    No penalty rules found.
+                  </p>
+
+                  {message && (
+                    <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                      {message}
+                    </p>
+                  )}
+                </td>
+              </tr>
+            ) : (
+              penaltyRules.map((penaltyRule) => (
+                <tr
+                  key={penaltyRule.id}
+                  className="hover:bg-gray-50 dark:hover:bg-white/[0.02]"
+                >
+                  {/* Rule */}
+                  <td className="whitespace-nowrap px-5 py-4">
+                    <div>
+                      <p className="text-sm font-medium text-gray-800 dark:text-white">
+                        {penaltyRule.name}
+                      </p>
+
+                      <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                        {penaltyRule.code}
+                      </p>
+                    </div>
+                  </td>
+
+                  {/* Contribution Plan */}
+                  <td className="whitespace-nowrap px-5 py-4">
+                    <div>
+                      <p className="text-sm text-gray-800 dark:text-white">
+                        {penaltyRule.contributionPlan?.name || "—"}
+                      </p>
+
+                      {penaltyRule.contributionPlan?.code && (
+                        <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                          {penaltyRule.contributionPlan.code}
+                        </p>
+                      )}
+                    </div>
+                  </td>
+
+                  {/* Penalty Type */}
+                  <td className="whitespace-nowrap px-5 py-4 text-sm text-gray-700 dark:text-gray-300">
+                    {formatLabel(penaltyRule.penaltyType)}
+                  </td>
+
+                  {/* Penalty Value */}
+                  <td className="whitespace-nowrap px-5 py-4 text-sm text-gray-700 dark:text-gray-300">
+                    {getPenaltyValue(penaltyRule)}
+                  </td>
+
+                  {/* Scope */}
+                  <td className="whitespace-nowrap px-5 py-4">
+                    <div>
+                      <p className="text-sm text-gray-800 dark:text-white">
+                        {formatLabel(penaltyRule.scopeType)}
+                      </p>
+
+                      <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                        {getScopeNameP(penaltyRule)}
+                      </p>
+                    </div>
+                  </td>
+
+                  {/* Grace Period */}
+                  <td className="whitespace-nowrap px-5 py-4 text-sm text-gray-700 dark:text-gray-300">
+                    {penaltyRule.gracePeriodDays} day(s)
+                  </td>
+
+                  {/* Effective From */}
+                  <td className="whitespace-nowrap px-5 py-4 text-sm text-gray-700 dark:text-gray-300">
+                    {formatDate(penaltyRule.effectiveFrom)}
+                  </td>
+
+                  {/* Status */}
+                  <td className="whitespace-nowrap px-5 py-4">
+                    <span
+                      className={`inline-flex rounded-full px-2.5 py-1 text-xs font-medium ${
+                        penaltyRule.isActive
+                          ? "bg-green-50 text-green-700 dark:bg-green-500/10 dark:text-green-400"
+                          : "bg-gray-100 text-gray-600 dark:bg-gray-500/10 dark:text-gray-400"
+                      }`}
+                    >
+                      {penaltyRule.isActive ? "Active" : "Inactive"}
+                    </span>
+                  </td>
+
+                  {/* Actions */}
+                  {hasActions && (
+                    <td className="whitespace-nowrap px-5 py-4">
+                      <div className="flex items-center justify-end gap-3">
+                        {onView && (
+                          <button
+                            type="button"
+                            onClick={() => onView(penaltyRule)}
+                            className="text-sm font-medium text-brand-500 hover:text-brand-600"
+                          >
+                            View
+                          </button>
+                        )}
+
+                        {penaltyRule.isActive && onDeactivate && (
+                          <button
+                            type="button"
+                            onClick={() => onDeactivate(penaltyRule)}
+                            className="text-sm font-medium text-red-500 hover:text-red-600"
+                          >
+                            Deactivate
+                          </button>
+                        )}
+
+                        {!penaltyRule.isActive && onActivate && (
+                          <button
+                            type="button"
+                            onClick={() => onActivate(penaltyRule)}
+                            className="text-sm font-medium text-green-600 hover:text-green-700"
+                          >
+                            Activate
+                          </button>
+                        )}
+                      </div>
+                    </td>
+                  )}
+                </tr>
+              ))
+            )}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+};
+
+
+import type { Penalty } from "../../../types/PenaltyType";
+
+interface PenaltyTableProps {
+    penalties: Penalty[];
+    loading?: boolean;
+    message?: string | null;
+    showMember?: boolean;
+    onView?: (penalty: Penalty) => void;
+    onEdit?: (penalty: Penalty) => void;
+    onActivate?: (penalty: Penalty) => void;
+    onPay?: (penalty: Penalty) => void;
+    onCancel?: (penalty: Penalty) => void;
+    onWaive?: (penalty: Penalty) => void;
+}
+
+const formatLabelPT = (value?: string | null) => {
+    if (!value) return "—";
+
+    return value
+        .replace(/_/g, " ")
+        .toLowerCase()
+        .replace(/\b\w/g, (char) => char.toUpperCase());
+};
+
+
+
+const getStatusClassPT = (status: string) => {
+    switch (status) {
+        case "PENDING":
+            return "bg-yellow-100 text-yellow-700 dark:bg-yellow-500/15 dark:text-yellow-400";
+        case "ACTIVE":
+            return "bg-blue-100 text-blue-700 dark:bg-blue-500/15 dark:text-blue-400";
+        case "PAID":
+            return "bg-green-100 text-green-700 dark:bg-green-500/15 dark:text-green-400";
+        case "WAIVED":
+            return "bg-purple-100 text-purple-700 dark:bg-purple-500/15 dark:text-purple-400";
+        case "CANCELLED":
+            return "bg-gray-100 text-gray-700 dark:bg-gray-500/15 dark:text-gray-400";
+        default:
+            return "bg-gray-100 text-gray-700 dark:bg-gray-500/15 dark:text-gray-400";
+    }
+};
+
+const PenaltyTable = ({
+    penalties,
+    loading = false,
+    message,
+    showMember = true,
+    onView,
+    onEdit,
+    onActivate,
+    onPay,
+    onCancel,
+    onWaive,
+}: PenaltyTableProps) => {
+    const hasActions =
+        onView ||
+        onEdit ||
+        onActivate ||
+        onPay ||
+        onCancel ||
+        onWaive;
+
+    if (loading) {
+        return (
+            <div className="py-10 text-center text-gray-500">
+                Loading penalties...
+            </div>
+        );
+    }
+
+    if (message && penalties.length === 0) {
+        return (
+            <div className="py-10 text-center text-red-500">
+                {message}
+            </div>
+        );
+    }
+
+    if (penalties.length === 0) {
+        return (
+            <div className="py-10 text-center text-gray-500">
+                No penalties found.
+            </div>
+        );
+    }
+
+    return (
+        <div className="overflow-x-auto">
+            {message && (
+                <div className="mb-4 rounded-lg bg-blue-50 px-4 py-3 text-sm text-blue-700 dark:bg-blue-500/10 dark:text-blue-400">
+                    {message}
+                </div>
+            )}
+
+            <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-800">
+                <thead className="bg-gray-50 dark:bg-gray-900">
+                    <tr>
+                        <th className="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500">
+                            Penalty
+                        </th>
+
+                        {showMember && (
+                            <th className="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500">
+                                Member
+                            </th>
+                        )}
+
+                        <th className="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500">
+                            Rule
+                        </th>
+
+                        <th className="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500">
+                            Type
+                        </th>
+
+                        <th className="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500">
+                            Source
+                        </th>
+
+                        <th className="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500">
+                            Amount
+                        </th>
+
+                        <th className="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500">
+                            Status
+                        </th>
+
+                        <th className="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500">
+                            Created
+                        </th>
+
+                        {hasActions && (
+                            <th className="px-4 py-3 text-right text-xs font-medium uppercase text-gray-500">
+                                Actions
+                            </th>
+                        )}
+                    </tr>
+                </thead>
+
+                <tbody className="divide-y divide-gray-200 bg-white dark:divide-gray-800 dark:bg-gray-950">
+                    {penalties.map((penalty) => (
+                        <tr key={penalty.id}>
+                            <td className="px-4 py-4">
+                                <div className="font-medium text-gray-800 dark:text-white">
+                                    {penalty.reason || "Penalty"}
+                                </div>
+                                <div className="mt-1 text-xs text-gray-500">
+                                    {penalty.id}
+                                </div>
+                            </td>
+
+                            {showMember && (
+                                <td className="px-4 py-4">
+                                    <div className="text-sm font-medium text-gray-800 dark:text-white">
+                                        {penalty.member?.membershipNumber || "—"}
+                                    </div>
+                                    <div className="text-xs text-gray-500">
+                                        {penalty.memberId}
+                                    </div>
+                                </td>
+                            )}
+
+                            <td className="px-4 py-4 text-sm text-gray-600 dark:text-gray-300">
+                                {penalty.penaltyRule?.name || "—"}
+                            </td>
+
+                            <td className="px-4 py-4 text-sm text-gray-600 dark:text-gray-300">
+                                {formatLabelPT(penalty.type)}
+                            </td>
+
+                            <td className="px-4 py-4 text-sm text-gray-600 dark:text-gray-300">
+                                {formatLabelPT(penalty.source)}
+                            </td>
+
+                            <td className="px-4 py-4 text-sm font-medium text-gray-800 dark:text-white">
+                                {formatAmount(penalty.amount, penalty.currency)}
+                            </td>
+
+                            <td className="px-4 py-4">
+                                <span
+                                    className={`inline-flex rounded-full px-2.5 py-1 text-xs font-medium ${getStatusClassPT(
+                                        penalty.status,
+                                    )}`}
+                                >
+                                    {formatLabel(penalty.status)}
+                                </span>
+                            </td>
+
+                            <td className="px-4 py-4 text-sm text-gray-600 dark:text-gray-300">
+                                {formatDate(penalty.createdAt)}
+                            </td>
+
+                            {hasActions && (
+                                <td className="px-4 py-4">
+                                    <div className="flex flex-wrap justify-end gap-2">
+                                        {onView && (
+                                            <button
+                                                type="button"
+                                                onClick={() => onView(penalty)}
+                                                className="text-sm font-medium text-blue-600 hover:text-blue-800"
+                                            >
+                                                View
+                                            </button>
+                                        )}
+
+                                        {onEdit && (
+                                            <button
+                                                type="button"
+                                                onClick={() => onEdit(penalty)}
+                                                className="text-sm font-medium text-indigo-600 hover:text-indigo-800"
+                                            >
+                                                Edit
+                                            </button>
+                                        )}
+
+                                        {onActivate && penalty.status === "PENDING" && (
+                                            <button
+                                                type="button"
+                                                onClick={() => onActivate(penalty)}
+                                                className="text-sm font-medium text-green-600 hover:text-green-800"
+                                            >
+                                                Activate
+                                            </button>
+                                        )}
+
+                                        {onPay && penalty.status === "ACTIVE" && (
+                                            <button
+                                                type="button"
+                                                onClick={() => onPay(penalty)}
+                                                className="text-sm font-medium text-green-600 hover:text-green-800"
+                                            >
+                                                Pay
+                                            </button>
+                                        )}
+
+                                        {onCancel && ["PENDING", "ACTIVE"].includes(penalty.status) && (
+                                            <button
+                                                type="button"
+                                                onClick={() => onCancel(penalty)}
+                                                className="text-sm font-medium text-red-600 hover:text-red-800"
+                                            >
+                                                Cancel
+                                            </button>
+                                        )}
+
+                                        {onWaive && ["PENDING", "ACTIVE"].includes(penalty.status) && (
+                                            <button
+                                                type="button"
+                                                onClick={() => onWaive(penalty)}
+                                                className="text-sm font-medium text-purple-600 hover:text-purple-800"
+                                            >
+                                                Waive
+                                            </button>
+                                        )}
+                                    </div>
+                                </td>
+                            )}
+                        </tr>
+                    ))}
+                </tbody>
+            </table>
+        </div>
+    );
+};
 
 
 
@@ -5715,4 +6274,10 @@ const PaymentTable = ({
 
 
 
-export {PaymentTable, PaymentProviderTable , RolesTable,  MenuTable, StatusTable, OrdersTable,CustomersTable, PermissionsTable,RegionsTable ,RegionMembersTable,MembersTable,UsersTable,ImportsTable, ContributionPlansTable,ContributionRuleTable,ContributionPeriodTable,MemberContributionTable}; 
+
+
+
+
+
+
+export {PenaltyTable,PenaltyRuleTable,PaymentTable, PaymentProviderTable , RolesTable,  MenuTable, StatusTable, OrdersTable,CustomersTable, PermissionsTable,RegionsTable ,RegionMembersTable,MembersTable,UsersTable,ImportsTable, ContributionPlansTable,ContributionRuleTable,ContributionPeriodTable,MemberContributionTable}; 
