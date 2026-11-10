@@ -3,7 +3,10 @@ export type ImportType =
   | "USERS"
   | "EMPLOYMENT"
   | "DEPENDANTS"
-  | "NEXT_OF_KIN";
+  | "NEXT_OF_KIN"
+  | "PAYMENTS"
+  | "CONTRIBUTIONS"
+  ;
 
 export type ImportStatus =
   | "UPLOADED"
